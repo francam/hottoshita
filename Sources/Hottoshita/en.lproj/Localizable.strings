@@ -1,0 +1,102 @@
+// Onboarding
+"Welcome to Hottoshita" = "Welcome to Hottoshita";
+"Let us know who should receive\nyour daily wellness reports." = "Let us know who should receive\nyour daily wellness reports.";
+"Trusted Contact Name" = "Trusted Contact Name";
+"e.g. Sarah" = "e.g. Sarah";
+"Email Address" = "Email Address";
+"e.g. sarah@example.com" = "e.g. sarah@example.com";
+"Get Started" = "Get Started";
+
+// Onboarding — user name
+"Your Name" = "Your Name";
+"e.g. John" = "e.g. John";
+"Let's get you set up." = "Let's get you set up.";
+"About you" = "About you";
+"Who should receive your reports?" = "Who should receive your reports?";
+
+// Home
+"greeting.morning" = "Good morning, %@!";
+"greeting.afternoon" = "Good afternoon, %@!";
+"greeting.evening" = "Good evening, %@!";
+"Start Today's Check-in" = "Start Today's Check-in";
+
+// Settings sections
+"About You" = "About You";
+"Your name" = "Your name";
+
+// Check-in navigation
+"Back" = "Back";
+"Cancel" = "Cancel";
+"Question %lld of %lld" = "Question %lld of %lld";
+
+// Sleep question
+"How was your sleep?" = "How was your sleep?";
+"Slept deeply" = "Slept deeply";
+"Slept OK" = "Slept OK";
+"Barely slept" = "Barely slept";
+"Didn't sleep" = "Didn't sleep";
+
+// Feeling question
+"How are you feeling now?" = "How are you feeling now?";
+"Select all that apply" = "Select all that apply";
+"Good" = "Good";
+"Tired" = "Tired";
+"Dizzy" = "Dizzy";
+"Heavy" = "Heavy";
+"Anxious" = "Anxious";
+"Happy" = "Happy";
+"Sad" = "Sad";
+"Calm" = "Calm";
+"Skip" = "Skip";
+"Continue" = "Continue";
+
+// Blood pressure question
+"Can you take your blood pressure?" = "Can you take your blood pressure?";
+"Yes" = "Yes";
+"No" = "No";
+"Enter your blood pressure" = "Enter your blood pressure";
+"Systolic\n(top)" = "Systolic\n(top)";
+"Diastolic\n(bottom)" = "Diastolic\n(bottom)";
+
+// Summary
+"Check-in Complete" = "Check-in Complete";
+"Sleep" = "Sleep";
+"Feeling" = "Feeling";
+"Blood Pressure" = "Blood Pressure";
+"Not specified" = "Not specified";
+"Not taken" = "Not taken";
+"Will be sent to: %@" = "Will be sent to: %@";
+"Send Report" = "Send Report";
+"Done" = "Done";
+"Start Over" = "Start Over";
+"Cannot Send Email" = "Cannot Send Email";
+"Please configure an email account on this iPad to send reports." = "Please configure an email account on this iPad to send reports.";
+
+// Home — already submitted
+"Already submitted today!" = "Already submitted today!";
+"Come back tomorrow." = "Come back tomorrow.";
+"Submit again anyway" = "Submit again anyway";
+
+// History
+"No Check-ins Yet" = "No Check-ins Yet";
+"Your completed check-ins will appear here." = "Your completed check-ins will appear here.";
+"History" = "History";
+"Done" = "Done";
+
+// Settings
+"Settings" = "Settings";
+"Trusted Contact" = "Trusted Contact";
+"Name" = "Name";
+"Email" = "Email";
+"Contact name" = "Contact name";
+"Contact email" = "Contact email";
+"Save" = "Save";
+
+// Report body
+"report.greeting" = "Hello %@,";
+"report.intro" = "Here is %@'s wellness check-in for today:";
+"report.sleep" = "Sleep";
+"report.feeling" = "Feeling";
+"report.bp" = "Blood Pressure";
+"report.footer" = "Sent via Hottoshita";
+"report.subject" = "Daily Check-in – %@";

@@ -1,0 +1,57 @@
+name: Hottoshita
+options:
+  bundleIdPrefix: com.hottoshita
+  deploymentTarget:
+    iOS: "16.0"
+  defaultConfig: Debug
+
+settings:
+  base:
+    TARGETED_DEVICE_FAMILY: "2"  # iPad only
+    SUPPORTS_MACCATALYST: "NO"
+    SWIFT_VERSION: "5.9"
+
+targets:
+  Hottoshita:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources/Hottoshita
+    info:
+      path: Hottoshita/Info.plist
+      properties:
+        CFBundleLocalizations:
+          - en
+          - ja
+        UILaunchScreen:
+          UIColorName: ""
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    dependencies:
+      - sdk: MessageUI.framework
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hottoshita.app
+        INFOPLIST_FILE: Hottoshita/Info.plist
+
+  HottoshitaTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests/HottoshitaTests
+    dependencies:
+      - target: Hottoshita
+    settings:
+      base:
+        BUNDLE_LOADER: $(BUILT_PRODUCTS_DIR)/Hottoshita.app/Hottoshita
+        TEST_HOST: $(BUILT_PRODUCTS_DIR)/Hottoshita.app/Hottoshita
+
+  HottoshitaUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: Tests/HottoshitaUITests
+    dependencies:
+      - target: Hottoshita
