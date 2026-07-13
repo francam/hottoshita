@@ -35,6 +35,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hottoshita.app
         INFOPLIST_FILE: Hottoshita/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
 
   HottoshitaTests:
     type: bundle.unit-test

@@ -26,6 +26,9 @@ struct HottoshitaApp: App {
             RootView()
                 .environmentObject(store)
                 .environmentObject(appTheme)
+                // Pastel themes assume dark text on a light background; only the
+                // system "Default" theme should follow the device's light/dark setting.
+                .preferredColorScheme(appTheme.theme == .default ? nil : .light)
         }
     }
 }

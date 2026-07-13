@@ -20,10 +20,10 @@ enum ColorTheme: String, CaseIterable {
         case .default:  return .teal
         case .pink:     return Color(red: 0.76, green: 0.25, blue: 0.42)
         case .lavender: return Color(red: 0.48, green: 0.30, blue: 0.75)
-        case .mint:     return Color(red: 0.18, green: 0.60, blue: 0.40)
+        case .mint:     return Color(red: 0.10, green: 0.50, blue: 0.32)
         case .sky:      return Color(red: 0.18, green: 0.45, blue: 0.78)
-        case .peach:    return Color(red: 0.78, green: 0.38, blue: 0.18)
-        case .lemon:    return Color(red: 0.70, green: 0.52, blue: 0.08)
+        case .peach:    return Color(red: 0.65, green: 0.30, blue: 0.12)
+        case .lemon:    return Color(red: 0.58, green: 0.42, blue: 0.03)
         }
     }
 

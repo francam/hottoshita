@@ -9,6 +9,9 @@ struct HomeView: View {
     @State private var showSettings = false
     @State private var showHistory = false
 
+    @ScaledMetric(relativeTo: .largeTitle) private var greetingSize: CGFloat = 44
+    @ScaledMetric(relativeTo: .title2) private var dateSize: CGFloat = 26
+
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
         let key = hour < 12 ? "greeting.morning" : hour < 17 ? "greeting.afternoon" : "greeting.evening"
@@ -17,16 +20,16 @@ struct HomeView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 48) {
+            VStack(spacing: 40) {
                 Spacer()
 
                 VStack(spacing: 12) {
                     Text(greeting)
-                        .font(.largeTitle.bold())
+                        .font(.system(size: greetingSize, weight: .bold, design: .rounded))
                         .minimumScaleFactor(0.7)
                         .multilineTextAlignment(.center)
                     Text(Date().formatted(.dateTime.weekday(.wide).month(.wide).day()))
-                        .font(.title2)
+                        .font(.system(size: dateSize))
                         .foregroundStyle(.secondary)
                 }
 
@@ -37,21 +40,11 @@ struct HomeView: View {
                 }
 
                 Spacer()
+
+                bottomActions
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(appTheme.background)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button { showHistory = true } label: {
-                        Image(systemName: "clock.arrow.circlepath").font(.title2)
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button { showSettings = true } label: {
-                        Image(systemName: "gear").font(.title2)
-                    }
-                }
-            }
         }
         .background(appTheme.background.ignoresSafeArea())
         .fullScreenCover(isPresented: $showCheckIn) {
@@ -67,20 +60,42 @@ struct HomeView: View {
 
     private var startButton: some View {
         Button { showCheckIn = true } label: {
-            VStack(spacing: 12) {
+            VStack(spacing: 16) {
                 Image(systemName: "heart.text.clipboard.fill")
-                    .font(.system(size: 48))
+                    .font(.system(size: 56))
                 Text("Start Today's Check-in")
-                    .font(.title2.bold())
+                    .font(.title.bold())
                     .minimumScaleFactor(0.7)
             }
-            .frame(maxWidth: 400)
-            .padding(.vertical, 28)
+            .frame(maxWidth: 420)
+            .padding(.vertical, 32)
             .padding(.horizontal)
         }
         .buttonStyle(.borderedProminent)
         .tint(appTheme.accent)
         .padding(.horizontal, 32)
+    }
+
+    private var bottomActions: some View {
+        HStack(spacing: 20) {
+            homeActionButton(icon: "clock.arrow.circlepath", title: "History") { showHistory = true }
+            homeActionButton(icon: "gear", title: "Settings") { showSettings = true }
+        }
+        .padding(.horizontal, 32)
+        .padding(.bottom, 16)
+    }
+
+    private func homeActionButton(icon: String, title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: icon).font(.title2)
+                Text(title).font(.title3.weight(.semibold))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+        }
+        .buttonStyle(.bordered)
+        .tint(appTheme.accent)
     }
 
     private var alreadySubmittedBanner: some View {

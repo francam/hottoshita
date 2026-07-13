@@ -22,13 +22,11 @@ final class HomeUITests: XCTestCase {
     }
 
     func testHistoryButtonExists() {
-        XCTAssertTrue(app.buttons["clock.arrow.circlepath"].exists ||
-                      app.navigationBars.buttons.element(boundBy: 0).exists)
+        XCTAssertTrue(app.buttons["History"].exists)
     }
 
     func testSettingsButtonExists() {
-        XCTAssertTrue(app.buttons["gear"].exists ||
-                      app.navigationBars.buttons["gear"].exists)
+        XCTAssertTrue(app.buttons["Settings"].exists)
     }
 
     func testAlreadySubmittedBannerAppearsAfterCheckIn() {
@@ -45,12 +43,12 @@ final class HomeUITests: XCTestCase {
     }
 
     func testHistoryViewOpens() {
-        app.navigationBars.buttons.element(boundBy: 0).tap()
+        app.buttons["History"].tap()
         XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 3))
     }
 
     func testSettingsViewOpens() {
-        app.navigationBars.buttons["gear"].tap()
+        app.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
     }
 }
