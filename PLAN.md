@@ -74,7 +74,15 @@ Sent via Hottoshita
 
 ### 7. Settings Screen
 - "About You" section: edit user's own name
-- "Trusted Contact" section: edit contact name and email
+- "Trusted Contact" section: edit contact name and email, or fill both via "Choose from Contacts"
+
+### 8. Contacts Integration
+- "Choose from Contacts" buttons in Onboarding (contact step) and Settings
+- Uses `CNContactPickerViewController` (`Utilities/ContactPickerView.swift`) — runs out-of-process, so **no Contacts permission or Info.plist key is needed** and the user never sees a permission prompt
+- Contacts without an email address are greyed out; contacts with several emails drill in so the user picks one
+- Picker fills the name + email fields; the user can still edit before continuing
+- Presented via UIKit from an invisible host controller (embedding the picker directly in a SwiftUI sheet can render blank)
+- `--debug-contact-picker` launch arg (DEBUG only) jumps to the contact step and auto-opens the picker, for manual testing
 
 ---
 
@@ -189,13 +197,116 @@ Hottoshita/
 
 ## Next / To Do
 
-### Polish — pick up next session
-- [ ] **Home screen buttons** — History and Settings toolbar buttons are too small for elderly users; make them larger and move/group them so they're easier to find and tap (e.g. a bottom toolbar, or large labelled buttons below the check-in button)
-- [ ] **Colour review** — revisit pastel background colours and their accent colours; check contrast and overall feel on a real device
-- [ ] **Home screen typography & buttons** — greeting font, date font, and Start Check-in button should all be larger to match the accessibility-first goal
+### Polish — done
+- [x] **Home screen buttons** — replaced the small toolbar icons with large labelled "History" / "Settings" buttons grouped at the bottom of the Home screen
+- [x] **Colour review** — checked white-text-on-accent contrast for every pastel theme (WCAG ~4.5:1); darkened `mint`, `peach`, and `lemon` accent colours, which were previously below threshold
+- [x] **Home screen typography & buttons** — greeting, date, and Start Check-in button all sized up (using `@ScaledMetric` so they still respect Dynamic Type)
+- [x] **Dark mode bug fix** — pastel themes are designed for dark text on a light background; the app now forces light appearance whenever a non-default theme is selected (`HottoshitaApp.swift`), so text doesn't render white-on-white when the device is in system dark mode
+- [x] App icon — real Icon Composer icon (`icon.icon`, Hottoshita artwork on a light-blue gradient) wired up via `ASSETCATALOG_COMPILER_APPICON_NAME: icon`; the old placeholder appiconset was removed.
+- [x] **Contacts integration** — "Choose from Contacts" in Onboarding + Settings (see Screens §8)
+- [x] **All orientations declared** — Info.plist now lists all four orientations for both device families, fixing the runtime warning "Support for all orientations will soon be required" and satisfying iPad multitasking requirements
+- [x] **Onboarding keyboard fix** — step content is now scrollable, so the Continue button can't be trapped behind the keyboard on iPhone (found via UI test failure: the button was literally unreachable while typing the email)
+
+### Round 2 improvements — done (2026-07-14)
+- [x] **"Hi {name}!" splash** — transient greeting step after name entry in onboarding; auto-advances after ~2s
+- [x] **Dark mode for all themes** — every pastel theme now has a dark variant: near-black background tinted with the theme hue, buttons in a vivid mid-tone of the selected colour with black text (light mode unchanged: dark accents + white text). `AppTheme` exposes `background` / `accent` / `onAccent` as dynamic colours.
+- [x] **Check-in Back/Cancel styled** — bordered, accent-tinted, larger tap targets (Cancel gained an ✕ icon)
+- [x] **Daily reminder** — Settings toggle + time picker schedules a repeating local notification (`ReminderScheduler`); asks permission on enable, alert links to system Settings if denied; localized en/ja
+- [x] **Reminder opt-in during onboarding** — new step between contact and colour: "Yes, remind me" (reveals wheel time picker + Set Reminder, permission requested only then) or "Not now" (continues with reminders off; can enable later in Settings). Onboarding is now 5 steps: name → splash → contact → reminder → colour.
+- [x] **Email flow decision** — keeping the pre-filled Mail compose sheet (no silent-send backend for v1); the compose screen is the user's consent step and iOS requires it
+- [x] **iPhone landscape fixed** — Home and question steps scroll when height is tight (was: buttons unreachable)
+- [x] **Done / Start Over / "Submit again anyway" are real buttons** — bordered, large; Done now also saves the check-in (previously an entry only existed if you emailed it)
+- [x] **Email-draft outcome handled** — if the user cancels/deletes the draft, an alert warns the report was NOT sent, with Try Again; on success the summary shows "Report sent!" and the button becomes "Send Again"
+
+### v2 backlog — planned features (post-MVP, added 2026-07-14)
+
+- [ ] **Contact sync — know who the user is from first boot.** Prefill the user's own name at onboarding instead of asking for it cold. Note: iOS has no public API for the "me" card (`unifiedMeContact` is macOS-only), so the likely flow is: on the name step, offer "This is me" via the permissionless `CNContactPickerViewController` (same approach as the trusted-contact picker) with the device owner's suggested card surfaced; if the user is not the person the device belongs to, they tap "I'm someone else" and enter their name manually (today's text field remains as the fallback path).
+- [ ] **Calendar sync — surface important events in the report.** Read the user's calendar with EventKit (needs calendar permission + purpose string; iOS 17+ read-only `NSCalendarsFullAccessUsageDescription` / `.fullAccess` request). Include in the emailed report anything notable the person attended today or has coming up (e.g. doctor's appointment) — likely a keyword/calendar-selection filter ("Doctor", "病院", or user-picked calendars in Settings) so routine events don't clutter the email. Show the matched events on the Summary screen before sending so the user sees exactly what the contact will read.
+- [ ] **Optional dictated memos, summarised by Apple Intelligence.** New optional step in the check-in flow: a big microphone button lets the user dictate a free-form memo (system keyboard dictation, or the Speech framework for a guided elderly-friendly UI). Summarise it on-device with the Foundation Models framework and include the summary in the email. Must degrade gracefully: on devices without Apple Intelligence, include the raw transcribed memo instead. Memo is skippable in one tap.
+- [x] **App icons matching the theme colours.** Shipped in v1 (2026-07-15): six alternate Icon Composer bundles (`icon-<theme>.icon`, same artwork on a per-theme gradient derived from the pastel + light accent) registered via `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES`; `AppTheme.updateAppIcon()` calls `setAlternateIconName`. The system confirmation alert fires only when a choice is committed — onboarding "Get Started" and settings-sheet dismissal — never while browsing swatches, never at launch. Verified end-to-end on the simulator (pink icon on the home screen).
 
 ### Remaining
-- [ ] Test on iPad simulator — verify layout at all supported orientations
-- [ ] Test Japanese locale — switch device language to Japanese and verify all strings
-- [ ] App icon
-- [ ] Consider daily reminder notifications
+- [x] Real app icon design (`icon.icon`, Icon Composer)
+- [x] Test on iPad simulator — portrait and landscape verified (2026-07-15): feelings grid is 4-across on iPad, blood-pressure step goes side-by-side while the keyboard is up, whole check-in flow fits landscape without scrolling. Keyboard-up layout still needs a real-iPad glance (beta iPad simulators never show the software keyboard).
+- [ ] Test Japanese locale — settings/colour strings verified in ja (2026-07-15); a full proofread of every screen by a fluent speaker is part of the pre-release audit below
+- [ ] **Verify contact picker on a real device** — the picker presents but renders blank on the iOS beta simulator (a known simulator limitation with out-of-process pickers; the service launches and the sheet presents, content just doesn't draw). The UI test `testContactPickerPresents` auto-skips in that case. Use the `--debug-contact-picker` launch arg to jump straight to it.
+- [x] Consider daily reminder notifications — implemented (`ReminderScheduler`, onboarding opt-in step + Settings toggle/time picker, local notifications only)
+- [x] **Decide device family** — resolved: the app is now universal (`TARGETED_DEVICE_FAMILY: "1,2"`), matching the plan's "iPad + iPhone" goal. iPhone is portrait-only (deliberate — simpler for elderly users); iPad keeps all orientations. Verified the layout on an iPhone 17 simulator.
+- [ ] **Mac availability** — decided against shipping on Mac for v1. There is no separate Mac build to make: iPad apps are automatically offered to Apple Silicon Macs as "Mac (Designed for iPad)" unless you opt out. Opt out for now (App Store Connect → Pricing and Availability → uncheck "Make this app available on Mac"), because the core "Send Report" flow depends on `MFMailComposeViewController`, whose behaviour on Mac is unverified — and the target audience is iPad/iPhone users anyway. It can be re-enabled later with a single checkbox after testing on a Mac, no code changes required.
+
+---
+
+### Round 3 improvements — done (2026-07-14/15)
+
+- [x] Blood-pressure step overflow fixed (fields flexed instead of `minWidth`, header icon hides while the keyboard is up so fields + Skip fit above it)
+- [x] iPad landscape fits without vertical scrolling (feelings grid 4-across on iPad; BP step side-by-side when the keyboard is up)
+- [x] Background-colour strings localized in Japanese (settings section, onboarding step, all seven theme names)
+- [x] Real app icon (`icon.icon`) + six per-theme alternate icons with commit-point switching
+- [x] Display name lowercased to "hottoshita" (`CFBundleDisplayName`)
+- [x] Repo cleaned for publishing (.gitignore, generated xcodeproj untracked, duplicate artwork removed) + `PRIVACY.md` (en/ja)
+
+## Pre-release audit — planned (added 2026-07-15, to run before publishing)
+
+A full pass over the application before the App Store submission. Nothing here is started; each area should produce a list of findings that get fixed (or explicitly waived) before archiving the release build.
+
+### 1. Accessibility
+- [ ] Dynamic Type sweep: every screen at the largest accessibility text sizes (AX1–AX5) — nothing clipped, truncated to meaninglessness, or pushed off-screen; check `minimumScaleFactor` uses don't shrink text below readable for elderly users
+- [ ] VoiceOver walk-through of every flow (onboarding → check-in → send → history/settings): labels, traits, focus order, decorative images hidden, the progress bar announces sensibly
+- [ ] Contrast audit: every theme × light/dark × every text/background pairing ≥ 4.5:1 (the accent work is done; audit secondary text, `.quaternary` banner, swatch labels)
+- [ ] Tap targets ≥ 44pt everywhere (check the swatch circles and toolbar buttons)
+- [ ] Reduce Motion / Bold Text / Button Shapes system settings don't break layouts
+
+### 2. Localization (Japanese)
+- [ ] Script an audit comparing every user-facing string in code against both `.strings` files (catches silent English fallbacks like the background-colour bug)
+- [ ] Full ja proofread on-device by a fluent speaker — tone should be consistently polite (です/ます), natural for elderly readers; check the generated email body reads well
+- [ ] Dates/times: ja formatting on Home, History, the report subject/body
+- [ ] Text-length stress: ja strings that run longer/shorter than English don't break buttons or grids
+
+### 3. Layout matrix
+- [ ] Devices: smallest supported iPhone, a Max iPhone, iPad mini, 11" and 13" iPads × portrait/landscape × light/dark — no clipping, no scrolling where the design forbids it
+- [ ] Keyboard-up states on a **real iPad** (beta simulators never show the software keyboard): BP step and settings/onboarding text fields
+- [ ] iPad multitasking: Split View / Slide Over / Stage Manager narrow sizes (compact width on iPad) don't break the check-in flow
+
+### 4. Functionality & edge cases
+- [ ] Check-in branches: BP yes/no, partial BP input (one field), non-numeric paste, absurd values (e.g. 999/2) — decide on validation/clamping
+- [ ] Mail: no mail account configured (alert path), compose cancelled, compose failed, sent — history/submittedToday state correct in each case
+- [ ] `submittedToday` across midnight while the app is open, timezone changes, DST, and device date set backwards
+- [ ] History: large history (hundreds of entries) — performance and layout; year boundaries; delete-and-reinstall starts clean
+- [ ] Reminders: permission granted→revoked in Settings.app, time change, reminder fires while app foregrounded, notification tap routing
+- [ ] Onboarding interrupted (app killed mid-flow) resumes sanely; re-onboarding after reset
+- [ ] Contact picker on real device (known blank-render on beta sims); contacts with no email; names with emoji/long names
+
+### 5. Data & privacy
+- [ ] Verify zero network traffic (proxy or Instruments Network template) — matches PRIVACY.md claims
+- [ ] Inspect everything written to UserDefaults / the JSON history file — nothing unexpected or stale
+- [ ] Delete-app removes all data (fresh install is truly fresh)
+- [ ] App Privacy questionnaire answers drafted and consistent with PRIVACY.md ("Data Not Collected")
+
+### 6. Code & release hygiene
+- [ ] Warning sweep on a clean build; remove dead code; audit force-unwraps and silent `try?` failure paths (especially `CheckInStore` persistence — corrupt/unwritable JSON shouldn't crash or silently lose data)
+- [ ] Confirm test-only launch args (`--reset-for-testing` etc.) are acceptable in release or gate them `#if DEBUG`
+- [ ] Version/build numbers set; release build from a **stable** Xcode/SDK (beta-built binaries can't be submitted); all 7 icon variants render correctly on-device (light/dark/tinted home-screen modes)
+- [ ] Run the full UI test suite + a manual smoke test on the release configuration, not just Debug
+
+## Publishing to the App Store
+
+### One-time setup
+- [ ] Enroll in the Apple Developer Program ($99/year) at developer.apple.com, if not already enrolled
+- [ ] In App Store Connect, register the bundle ID `com.hottoshita.app` and create a new app record
+- [ ] In Xcode, under the target's "Signing & Capabilities" tab, set your Team and let automatic signing generate the provisioning profile
+
+### Before submitting
+- [ ] Opt out of Mac availability (see "Mac availability" above) unless the mail flow has been tested on a Mac
+- [x] Finalize the real app icon (replace the placeholder) — done, `icon.icon`
+- [x] Write a privacy policy — done: `PRIVACY.md` (English + Japanese). Still needs to be hosted somewhere public (a GitHub Pages page or even the file's GitHub URL is fine) so the URL can be entered in App Store Connect
+- [ ] Fill in the App Privacy questionnaire in App Store Connect — likely "Data Not Collected" since nothing is sent to a server, but the health-adjacent nature of blood pressure/sleep answers may still warrant care in how this is described
+- [ ] Take App Store screenshots for each required size (13" iPad and 6.9"/6.5" iPhone, since the app is universal) — capture Home, a check-in step, and the Summary screen in both English and Japanese
+- [ ] Write the App Store listing copy (name, subtitle, description, keywords) in English and Japanese, matching the app's localizations
+- [ ] Set an age rating (likely 4+) and a support URL/contact email in App Store Connect
+- [ ] Confirm the Info.plist orientation list matches what you actually test (see device-family TODO)
+
+### Archive & upload
+- [ ] `Product > Archive` in Xcode (or `xcodebuild archive`) with a Release build
+- [ ] Use Xcode's Organizer ("Distribute App" → App Store Connect) to validate and upload the build — this is the simplest path and handles signing/upload automatically
+- [ ] In App Store Connect, attach the uploaded build to the app version, complete the remaining metadata, and submit for review
+- [ ] Consider a short TestFlight beta (even just yourself + one family member) before public release, since the target audience is elderly users who won't tolerate rough edges — TestFlight builds upload the same way, just skip "Submit for Review" and instead invite testers

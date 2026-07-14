@@ -68,6 +68,14 @@ final class CheckInFlowUITests: XCTestCase {
         app.buttons["Yes"].tap()
 
         XCTAssertTrue(app.staticTexts["Question 4 of 4"].waitForExistence(timeout: 3))
+
+        // Both fields and the Skip button must be fully on-screen while the
+        // keyboard is up — the fields row used to overflow in portrait and
+        // push the diastolic field off the right edge.
+        XCTAssertEqual(app.textFields.count, 2)
+        XCTAssertTrue(app.textFields.element(boundBy: 0).isHittable)
+        XCTAssertTrue(app.textFields.element(boundBy: 1).isHittable)
+        XCTAssertTrue(app.buttons["Skip"].isHittable)
     }
 
     func testSummaryShowsSelectedSleepValue() {
@@ -78,6 +86,33 @@ final class CheckInFlowUITests: XCTestCase {
         app.buttons["No"].tap()
 
         XCTAssertTrue(app.staticTexts["Barely slept"].waitForExistence(timeout: 3))
+    }
+
+    func testLandscapeFlowFitsWithoutScrolling() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+
+        app.buttons["Start Today's Check-in"].tap()
+
+        // Every step's controls must be tappable without scrolling —
+        // including the last choice at the bottom of the list.
+        XCTAssertTrue(app.buttons["Didn't sleep"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Didn't sleep"].isHittable)
+        app.buttons["Slept OK"].tap()
+
+        XCTAssertTrue(app.buttons["Skip"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Skip"].isHittable)
+        app.buttons["Skip"].tap()
+
+        XCTAssertTrue(app.buttons["No"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["No"].isHittable)
+        app.buttons["No"].tap()
+
+        // Summary: all three actions reachable without scrolling.
+        XCTAssertTrue(app.buttons["Send Report"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Send Report"].isHittable)
+        XCTAssertTrue(app.buttons["Done"].isHittable)
+        XCTAssertTrue(app.buttons["Start Over"].isHittable)
     }
 
     func testStartOverResetsFlow() {

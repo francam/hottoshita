@@ -6,10 +6,34 @@ struct SettingsView: View {
     @AppStorage("contactEmail") private var contactEmail = ""
     @EnvironmentObject private var appTheme: AppTheme
 
+    @AppStorage("reminderEnabled") private var reminderEnabled = false
+    @AppStorage("reminderMinutes") private var reminderMinutes = 9 * 60  // 09:00
+
     @State private var userNameInput = ""
     @State private var contactNameInput = ""
     @State private var emailInput = ""
+    @State private var showContactPicker = false
+    @State private var showNotificationsDenied = false
     @Environment(\.dismiss) private var dismiss
+
+    private var reminderTime: Binding<Date> {
+        Binding(
+            get: {
+                Calendar.current.date(
+                    bySettingHour: reminderMinutes / 60,
+                    minute: reminderMinutes % 60,
+                    second: 0, of: Date()
+                ) ?? Date()
+            },
+            set: { newDate in
+                let c = Calendar.current.dateComponents([.hour, .minute], from: newDate)
+                reminderMinutes = (c.hour ?? 9) * 60 + (c.minute ?? 0)
+                if reminderEnabled {
+                    ReminderScheduler.schedule(hour: c.hour ?? 9, minute: c.minute ?? 0)
+                }
+            }
+        )
+    }
 
     private var canSave: Bool {
         !userNameInput.trimmingCharacters(in: .whitespaces).isEmpty &&
@@ -40,6 +64,23 @@ struct SettingsView: View {
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                     }
+                    Button {
+                        showContactPicker = true
+                    } label: {
+                        Label("Choose from Contacts", systemImage: "person.crop.circle.badge.plus")
+                            .font(.title3)
+                    }
+                    .foregroundStyle(appTheme.accent)
+                }
+
+                Section("Daily Reminder") {
+                    Toggle("Remind me every day", isOn: $reminderEnabled)
+                        .font(.title3)
+                        .tint(appTheme.accent)
+                    if reminderEnabled {
+                        DatePicker("Time", selection: reminderTime, displayedComponents: .hourAndMinute)
+                            .font(.title3)
+                    }
                 }
 
                 Section("Background Colour") {
@@ -57,12 +98,25 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Cancel") { dismiss() }
+                    Button { dismiss() } label: {
+                        Text("Cancel")
+                            .font(.title3.weight(.semibold))
+                            .padding(.horizontal, 2)
+                            .fixedSize()
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(appTheme.accent)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Save", action: save)
-                        .bold()
-                        .disabled(!canSave)
+                    Button(action: save) {
+                        Text("Save")
+                            .font(.title3.weight(.semibold))
+                            .foregroundStyle(canSave ? appTheme.onAccent : Color.secondary)
+                            .padding(.horizontal, 2)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(appTheme.accent)
+                    .disabled(!canSave)
                 }
             }
             .onAppear {
@@ -70,6 +124,39 @@ struct SettingsView: View {
                 contactNameInput = contactName
                 emailInput = contactEmail
             }
+            .onChange(of: reminderEnabled) { enabled in
+                if enabled {
+                    Task {
+                        if await ReminderScheduler.requestAuthorization() {
+                            ReminderScheduler.schedule(
+                                hour: reminderMinutes / 60,
+                                minute: reminderMinutes % 60
+                            )
+                        } else {
+                            reminderEnabled = false
+                            showNotificationsDenied = true
+                        }
+                    }
+                } else {
+                    ReminderScheduler.cancel()
+                }
+            }
+            .alert("Notifications Disabled", isPresented: $showNotificationsDenied) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please allow notifications for Hottoshita in the Settings app.")
+            }
+            .background(
+                ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
+                    contactNameInput = pickedName
+                    emailInput = pickedEmail
+                }
+            )
         }
         .background(appTheme.background.ignoresSafeArea())
     }

@@ -6,6 +6,34 @@
 "Email Address" = "メールアドレス";
 "e.g. sarah@example.com" = "例：hanako@example.com";
 "Get Started" = "はじめる";
+"Choose from Contacts" = "連絡先から選ぶ";
+"or enter the details yourself:" = "または直接入力してください：";
+"greeting.hi" = "%@さん、こんにちは！";
+"Let's get you set up." = "これから一緒に設定していきましょう。";
+
+// Daily reminder
+"Would you like a daily reminder?" = "毎日のリマインダーを設定しますか？";
+"We'll remind you to send your check-in." = "チェックインの送信を毎日お知らせします。";
+"Yes, remind me" = "はい、通知して";
+"Not now" = "今はしない";
+"Set Reminder" = "リマインダーを設定";
+"You can turn reminders on later in Settings." = "リマインダーは後から設定画面でオンにできます。";
+"Daily Reminder" = "毎日のリマインダー";
+"Remind me every day" = "毎日通知する";
+"Time" = "時刻";
+"reminder.title" = "チェックインの時間です";
+"reminder.body" = "今日の体調はいかがですか？健康レポートを送りましょう。";
+"Notifications Disabled" = "通知がオフになっています";
+"Please allow notifications for Hottoshita in the Settings app." = "設定アプリでHottoshitaの通知を許可してください。";
+"Open Settings" = "設定を開く";
+"OK" = "OK";
+
+// Mail result
+"Report sent!" = "レポートを送信しました！";
+"Send Again" = "もう一度送信";
+"Report Not Sent" = "レポートは送信されていません";
+"Try Again" = "もう一度試す";
+"Your report was not sent to %@." = "%@さんへのレポートは送信されませんでした。";
 
 // Onboarding — user name
 "Your Name" = "あなたのお名前";
@@ -100,3 +128,15 @@
 "report.bp" = "血圧";
 "report.footer" = "Hottoshitaより送信";
 "report.subject" = "毎日の健康チェックイン – %@";
+
+// Background colour
+"Background Colour" = "背景の色";
+"Choose your background" = "背景の色を選んでください";
+"Pick a colour that feels right for you." = "お好みの色をお選びください。";
+"Default" = "標準";
+"Pink" = "ピンク";
+"Lavender" = "ラベンダー";
+"Mint" = "ミント";
+"Sky" = "空色";
+"Peach" = "ピーチ";
+"Lemon" = "レモン";

@@ -12,6 +12,12 @@ struct HottoshitaApp: App {
             if let domain = Bundle.main.bundleIdentifier {
                 UserDefaults.standard.removePersistentDomain(forName: domain)
             }
+            // Also clear persisted check-in history, or submittedToday leaks
+            // between test runs.
+            let storeURL = FileManager.default
+                .urls(for: .documentDirectory, in: .userDomainMask)[0]
+                .appendingPathComponent("checkins.json")
+            try? FileManager.default.removeItem(at: storeURL)
         }
         if args.contains("--skip-onboarding") {
             UserDefaults.standard.set("Test User", forKey: "userName")
@@ -26,9 +32,6 @@ struct HottoshitaApp: App {
             RootView()
                 .environmentObject(store)
                 .environmentObject(appTheme)
-                // Pastel themes assume dark text on a light background; only the
-                // system "Default" theme should follow the device's light/dark setting.
-                .preferredColorScheme(appTheme.theme == .default ? nil : .light)
         }
     }
 }

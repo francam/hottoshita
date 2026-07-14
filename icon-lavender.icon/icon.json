@@ -1,0 +1,45 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.75950,0.67700,0.91250,1.00000",
+      "srgb:0.93250,0.91000,1.00000,1.00000"
+    ],
+    "orientation": {
+      "start": {
+        "x": 0.5,
+        "y": 1
+      },
+      "stop": {
+        "x": 0.5,
+        "y": 0
+      }
+    }
+  },
+  "groups": [
+    {
+      "layers": [
+        {
+          "fill": {
+            "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
+          },
+          "image-name": "Hottoshita 01 Artboard 1 2.svg",
+          "name": "Hottoshita 01 Artboard 1 2"
+        }
+      ],
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.6
+      },
+      "translucency": {
+        "enabled": true,
+        "value": 0.2
+      }
+    }
+  ],
+  "supported-platforms": {
+    "circles": [
+      "watchOS"
+    ],
+    "squares": "shared"
+  }
+}

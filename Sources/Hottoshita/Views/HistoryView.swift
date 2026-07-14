@@ -43,8 +43,13 @@ struct HistoryView: View {
             .background(appTheme.background)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                        .font(.body.bold())
+                    Button { dismiss() } label: {
+                        Text("Done")
+                            .font(.title3.weight(.semibold))
+                            .padding(.horizontal, 2)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(appTheme.accent)
                 }
             }
         }

@@ -12,13 +12,17 @@ final class HomeUITests: XCTestCase {
     }
 
     func testHomeShowsGreetingAndDate() {
-        // Greeting exists (one of the three time-based variants)
-        let greetings = ["Good morning!", "Good afternoon!", "Good evening!"]
-        let greetingExists = greetings.contains { app.staticTexts[$0].exists }
-        XCTAssertTrue(greetingExists)
+        // Greeting includes the user's name, e.g. "Good evening, Test User!"
+        let greeting = app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS[c] 'Good' AND label CONTAINS 'Test User'")
+        ).firstMatch
+        XCTAssertTrue(greeting.waitForExistence(timeout: 3))
 
-        // Date text exists (non-empty)
-        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'June'")).allElementsBoundByIndex.isEmpty)
+        // Date text shows the current month
+        let month = Date().formatted(.dateTime.month(.wide))
+        XCTAssertTrue(app.staticTexts.matching(
+            NSPredicate(format: "label CONTAINS[c] %@", month)
+        ).firstMatch.exists)
     }
 
     func testHistoryButtonExists() {
@@ -40,6 +44,22 @@ final class HomeUITests: XCTestCase {
         app.buttons["Done"].tap()
 
         XCTAssertTrue(app.staticTexts["Already submitted today!"].waitForExistence(timeout: 3))
+
+        // The banner must not push the bottom actions off-screen.
+        XCTAssertTrue(app.buttons["History"].isHittable)
+        XCTAssertTrue(app.buttons["Settings"].isHittable)
+    }
+
+    func testLandscapeShowsAllButtons() {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        defer { XCUIDevice.shared.orientation = .portrait }
+
+        // Landscape uses a side-by-side layout; every control must be
+        // tappable without scrolling.
+        XCTAssertTrue(app.buttons["Start Today's Check-in"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Start Today's Check-in"].isHittable)
+        XCTAssertTrue(app.buttons["History"].isHittable)
+        XCTAssertTrue(app.buttons["Settings"].isHittable)
     }
 
     func testHistoryViewOpens() {

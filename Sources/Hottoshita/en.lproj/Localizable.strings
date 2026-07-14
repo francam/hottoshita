@@ -6,6 +6,34 @@
 "Email Address" = "Email Address";
 "e.g. sarah@example.com" = "e.g. sarah@example.com";
 "Get Started" = "Get Started";
+"Choose from Contacts" = "Choose from Contacts";
+"or enter the details yourself:" = "or enter the details yourself:";
+"greeting.hi" = "Hi %@!";
+"Let's get you set up." = "Let's get you set up.";
+
+// Daily reminder
+"Would you like a daily reminder?" = "Would you like a daily reminder?";
+"We'll remind you to send your check-in." = "We'll remind you to send your check-in.";
+"Yes, remind me" = "Yes, remind me";
+"Not now" = "Not now";
+"Set Reminder" = "Set Reminder";
+"You can turn reminders on later in Settings." = "You can turn reminders on later in Settings.";
+"Daily Reminder" = "Daily Reminder";
+"Remind me every day" = "Remind me every day";
+"Time" = "Time";
+"reminder.title" = "Time for your check-in";
+"reminder.body" = "How are you today? Take a minute to send your wellness report.";
+"Notifications Disabled" = "Notifications Disabled";
+"Please allow notifications for Hottoshita in the Settings app." = "Please allow notifications for Hottoshita in the Settings app.";
+"Open Settings" = "Open Settings";
+"OK" = "OK";
+
+// Mail result
+"Report sent!" = "Report sent!";
+"Send Again" = "Send Again";
+"Report Not Sent" = "Report Not Sent";
+"Try Again" = "Try Again";
+"Your report was not sent to %@." = "Your report was not sent to %@.";
 
 // Onboarding — user name
 "Your Name" = "Your Name";
@@ -100,3 +128,15 @@
 "report.bp" = "Blood Pressure";
 "report.footer" = "Sent via Hottoshita";
 "report.subject" = "Daily Check-in – %@";
+
+// Background colour
+"Background Colour" = "Background Colour";
+"Choose your background" = "Choose your background";
+"Pick a colour that feels right for you." = "Pick a colour that feels right for you.";
+"Default" = "Default";
+"Pink" = "Pink";
+"Lavender" = "Lavender";
+"Mint" = "Mint";
+"Sky" = "Sky";
+"Peach" = "Peach";
+"Lemon" = "Lemon";

@@ -4,6 +4,7 @@ struct CheckInFlowView: View {
     @State private var answers = CheckInAnswers()
     @State private var step = 0
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.isCompactHeight) private var isCompactHeight
     @EnvironmentObject private var appTheme: AppTheme
 
     // Steps: 0=sleep, 1=feeling, 2=bp-yn, 3=bp-input (conditional), summary
@@ -17,13 +18,28 @@ struct CheckInFlowView: View {
                     Button {
                         withAnimation(.easeInOut(duration: 0.25)) { step -= 1 }
                     } label: {
-                        Label("Back", systemImage: "chevron.left").font(.title3)
+                        Label("Back", systemImage: "chevron.left")
+                            .font(.title3.weight(.semibold))
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 6)
                     }
+                    .buttonStyle(.bordered)
+                    .tint(appTheme.accent)
                 }
                 Spacer()
-                Button("Cancel") { dismiss() }.font(.title3)
+                Button {
+                    dismiss()
+                } label: {
+                    Label("Cancel", systemImage: "xmark")
+                        .font(.title3.weight(.semibold))
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 6)
+                }
+                .buttonStyle(.bordered)
+                .tint(appTheme.accent)
             }
-            .padding()
+            .padding(.horizontal)
+            .padding(.vertical, isCompactHeight ? 6 : 16)
 
             if step < summaryStep {
                 ProgressView(value: Double(step + 1), total: Double(totalSteps))
@@ -34,15 +50,40 @@ struct CheckInFlowView: View {
                 Text("Question \(step + 1) of \(totalSteps)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .padding(.bottom, 24)
+                    .padding(.bottom, isCompactHeight ? 8 : 24)
             }
 
-            stepContent
-                .id(step)
-                .transition(.asymmetric(
-                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                    removal: .move(edge: .leading).combined(with: .opacity)
-                ))
+            // Portrait: scrollable as a safety net for very large text sizes;
+            // content centres itself when there's room. Compact height pins
+            // the step to the screen instead — steps are laid out to fit, and
+            // the feelings grid scrolls internally.
+            // The summary step brings its own ScrollView, so don't nest it.
+            if step < summaryStep, isCompactHeight {
+                stepContent
+                    .id(step)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+                    .padding(.vertical, 8)
+            } else if step < summaryStep {
+                GeometryReader { geo in
+                    ScrollView {
+                        stepContent
+                            .id(step)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .trailing).combined(with: .opacity),
+                                removal: .move(edge: .leading).combined(with: .opacity)
+                            ))
+                            .padding(.vertical, 16)
+                            .frame(maxWidth: .infinity, minHeight: geo.size.height)
+                    }
+                }
+            } else {
+                stepContent
+                    .id(step)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(appTheme.background.ignoresSafeArea())
@@ -97,6 +138,7 @@ struct CheckInFlowView: View {
 // MARK: - Single Choice
 
 private struct SingleChoiceStepView: View {
+    @Environment(\.isCompactHeight) private var isCompactHeight
     @EnvironmentObject private var appTheme: AppTheme
     let question: LocalizedStringKey
     let icon: String
@@ -105,19 +147,10 @@ private struct SingleChoiceStepView: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 48) {
-            VStack(spacing: 16) {
-                Image(systemName: icon)
-                    .font(.system(size: 64))
-                    .foregroundStyle(appTheme.accent)
-                Text(question)
-                    .font(.largeTitle.bold())
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.6)
-                    .padding(.horizontal)
-            }
-
-            VStack(spacing: 18) {
+        AdaptiveStepLayout(spacing: 48) {
+            StepHeader(icon: icon, question: question)
+        } controls: {
+            VStack(spacing: isCompactHeight ? 12 : 18) {
                 ForEach(choices, id: \.self) { choice in
                     Button {
                         selection = choice
@@ -130,25 +163,26 @@ private struct SingleChoiceStepView: View {
                             .font(.title2.bold())
                             .minimumScaleFactor(0.7)
                             .frame(maxWidth: 420)
-                            .padding(.vertical, 24)
+                            .padding(.vertical, isCompactHeight ? 12 : 24)
                             .background(
                                 selection == choice ? appTheme.accent : Color(.systemGroupedBackground),
                                 in: RoundedRectangle(cornerRadius: 18)
                             )
-                            .foregroundStyle(selection == choice ? .white : .primary)
+                            .foregroundStyle(selection == choice ? appTheme.onAccent : .primary)
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 48)
+            .padding(.horizontal, isCompactHeight ? 0 : 48)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
 // MARK: - Multi Select
 
 private struct MultiSelectStepView: View {
+    @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var appTheme: AppTheme
     let question: LocalizedStringKey
     let icon: String
@@ -157,63 +191,79 @@ private struct MultiSelectStepView: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 40) {
-            VStack(spacing: 16) {
-                Image(systemName: icon)
-                    .font(.system(size: 64))
-                    .foregroundStyle(appTheme.accent)
-                Text(question)
-                    .font(.largeTitle.bold())
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.6)
-                    .padding(.horizontal)
-                Text("Select all that apply")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-            }
-
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                ForEach(options, id: \.self) { option in
-                    Button {
-                        if selections.contains(option) {
-                            selections.removeAll { $0 == option }
-                        } else {
-                            selections.append(option)
-                        }
-                    } label: {
-                        Text(LocalizedStringKey(option))
-                            .font(.title3.bold())
-                            .minimumScaleFactor(0.7)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 26)
-                            .background(
-                                selections.contains(option) ? appTheme.accent : Color(.systemGroupedBackground),
-                                in: RoundedRectangle(cornerRadius: 16)
-                            )
-                            .foregroundStyle(selections.contains(option) ? .white : .primary)
+        AdaptiveStepLayout {
+            StepHeader(icon: icon, question: question, subtitle: "Select all that apply")
+        } controls: {
+            if isCompactHeight {
+                // Only the options may scroll; the Skip/Continue button
+                // stays fixed below them.
+                VStack(spacing: 12) {
+                    ScrollView {
+                        optionsGrid
                     }
-                    .buttonStyle(.plain)
+                    nextButton
                 }
+            } else {
+                VStack(spacing: 40) {
+                    optionsGrid
+                    nextButton
+                        .padding(.bottom, 16)
+                }
+                .padding(.horizontal, 48)
             }
-            .padding(.horizontal, 48)
-
-            Button(action: onNext) {
-                Text(selections.isEmpty ? "Skip" : "Continue")
-                    .font(.title3.bold())
-                    .frame(maxWidth: 300)
-                    .padding(.vertical, 18)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(appTheme.accent)
-            .padding(.bottom)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// iPad is wide enough for 4 across, which halves the grid's height so
+    /// the step fits landscape without scrolling. iPhone keeps 2 columns.
+    private var gridColumns: [GridItem] {
+        let count = horizontalSizeClass == .regular && !isCompactHeight ? 4 : 2
+        return Array(repeating: GridItem(.flexible()), count: count)
+    }
+
+    private var optionsGrid: some View {
+        LazyVGrid(columns: gridColumns, spacing: isCompactHeight ? 10 : 16) {
+            ForEach(options, id: \.self) { option in
+                Button {
+                    if selections.contains(option) {
+                        selections.removeAll { $0 == option }
+                    } else {
+                        selections.append(option)
+                    }
+                } label: {
+                    Text(LocalizedStringKey(option))
+                        .font(.title3.bold())
+                        .minimumScaleFactor(0.7)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, isCompactHeight ? 12 : 26)
+                        .background(
+                            selections.contains(option) ? appTheme.accent : Color(.systemGroupedBackground),
+                            in: RoundedRectangle(cornerRadius: 16)
+                        )
+                        .foregroundStyle(selections.contains(option) ? appTheme.onAccent : .primary)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private var nextButton: some View {
+        Button(action: onNext) {
+            Text(selections.isEmpty ? "Skip" : "Continue")
+                .font(.title3.bold())
+                .foregroundStyle(appTheme.onAccent)
+                .frame(maxWidth: 300)
+                .padding(.vertical, isCompactHeight ? 12 : 18)
+        }
+        .buttonStyle(.borderedProminent)
+        .tint(appTheme.accent)
     }
 }
 
 // MARK: - Yes / No
 
 private struct YesNoStepView: View {
+    @Environment(\.isCompactHeight) private var isCompactHeight
     @EnvironmentObject private var appTheme: AppTheme
     let question: LocalizedStringKey
     let icon: String
@@ -221,25 +271,15 @@ private struct YesNoStepView: View {
     let onNext: () -> Void
 
     var body: some View {
-        VStack(spacing: 48) {
-            VStack(spacing: 16) {
-                Image(systemName: icon)
-                    .font(.system(size: 64))
-                    .foregroundStyle(appTheme.accent)
-                Text(question)
-                    .font(.largeTitle.bold())
-                    .multilineTextAlignment(.center)
-                    .minimumScaleFactor(0.6)
-                    .padding(.horizontal)
-            }
-
+        AdaptiveStepLayout(spacing: 48) {
+            StepHeader(icon: icon, question: question)
+        } controls: {
             HStack(spacing: 16) {
                 yesNoButton(key: "Yes", answer: true)
                 yesNoButton(key: "No", answer: false)
             }
-            .padding(.horizontal, 32)
+            .padding(.horizontal, isCompactHeight ? 0 : 32)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func yesNoButton(key: LocalizedStringKey, answer: Bool) -> some View {
@@ -254,12 +294,12 @@ private struct YesNoStepView: View {
                 .font(.title.bold())
                 .minimumScaleFactor(0.6)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 32)
+                .padding(.vertical, isCompactHeight ? 20 : 32)
                 .background(
                     value == answer ? appTheme.accent : Color(.systemGroupedBackground),
                     in: RoundedRectangle(cornerRadius: 22)
                 )
-                .foregroundStyle(value == answer ? .white : .primary)
+                .foregroundStyle(value == answer ? appTheme.onAccent : .primary)
         }
         .buttonStyle(.plain)
     }
@@ -268,6 +308,8 @@ private struct YesNoStepView: View {
 // MARK: - Blood Pressure Input
 
 private struct BloodPressureStepView: View {
+    @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var appTheme: AppTheme
     @Binding var bp: BloodPressure
     let onNext: () -> Void
@@ -275,37 +317,42 @@ private struct BloodPressureStepView: View {
     @FocusState private var focusedField: Field?
     enum Field { case systolic, diastolic }
 
+    /// The number pad has no dismiss key, so it stays up for this whole
+    /// step — shrink the header so the fields and button fit above it.
+    private var keyboardUp: Bool { focusedField != nil }
+
     var body: some View {
-        VStack(spacing: 48) {
-            VStack(spacing: 16) {
-                Image(systemName: "waveform.path.ecg")
-                    .font(.system(size: 64))
-                    .foregroundStyle(appTheme.accent)
-                Text("Enter your blood pressure")
-                    .font(.system(size: 36, weight: .bold))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            }
+        // iPad keyboards are tall enough (especially landscape) that the
+        // stacked layout can't fit above them — go side-by-side instead.
+        AdaptiveStepLayout(spacing: keyboardUp ? 24 : 48,
+                           forceSideBySide: keyboardUp && horizontalSizeClass == .regular) {
+            StepHeader(icon: "waveform.path.ecg", question: "Enter your blood pressure",
+                       showIcon: isCompactHeight || !keyboardUp)
+        } controls: {
+            VStack(spacing: isCompactHeight ? 16 : keyboardUp ? 24 : 48) {
+                // Fields flex to share the width; a hard minimum here would
+                // overflow an iPhone screen in portrait and clip the step.
+                HStack(spacing: 16) {
+                    BPField(label: "Systolic\n(top)", value: $bp.systolic, focus: $focusedField, field: .systolic)
+                    Text("/")
+                        .font(.largeTitle.weight(.light))
+                        .foregroundStyle(.secondary)
+                    BPField(label: "Diastolic\n(bottom)", value: $bp.diastolic, focus: $focusedField, field: .diastolic)
+                }
+                .frame(maxWidth: 420)
+                .padding(.horizontal, isCompactHeight ? 0 : 24)
 
-            HStack(spacing: 24) {
-                BPField(label: "Systolic\n(top)", value: $bp.systolic, focus: $focusedField, field: .systolic)
-                Text("/")
-                    .font(.largeTitle.weight(.light))
-                    .foregroundStyle(.secondary)
-                BPField(label: "Diastolic\n(bottom)", value: $bp.diastolic, focus: $focusedField, field: .diastolic)
+                Button(action: onNext) {
+                    Text(bp.isValid ? "Continue" : "Skip")
+                        .font(.title3.bold())
+                        .foregroundStyle(appTheme.onAccent)
+                        .frame(maxWidth: 300)
+                        .padding(.vertical, isCompactHeight ? 12 : 18)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(appTheme.accent)
             }
-            .padding(.horizontal, 48)
-
-            Button(action: onNext) {
-                Text(bp.isValid ? "Continue" : "Skip")
-                    .font(.title3.bold())
-                    .frame(maxWidth: 300)
-                    .padding(.vertical, 18)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(appTheme.accent)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear { focusedField = .systolic }
     }
 }
@@ -323,7 +370,7 @@ private struct BPField: View {
                 .keyboardType(.numberPad)
                 .multilineTextAlignment(.center)
                 .focused($focus, equals: field)
-                .frame(minWidth: 120)
+                .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
             Text(label)

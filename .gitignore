@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+
+# Xcode project is generated from project.yml — run `xcodegen generate`
+Hottoshita.xcodeproj/
+
+# Xcode build artifacts & user state
+DerivedData/
+build/
+*.xcresult
+xcuserdata/
+*.xcuserstate
+
+# Claude Code local settings
+.claude/settings.local.json

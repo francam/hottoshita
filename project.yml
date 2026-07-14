@@ -7,7 +7,7 @@ options:
 
 settings:
   base:
-    TARGETED_DEVICE_FAMILY: "2"  # iPad only
+    TARGETED_DEVICE_FAMILY: "1,2"  # iPhone + iPad
     SUPPORTS_MACCATALYST: "NO"
     SWIFT_VERSION: "5.9"
 
@@ -17,25 +17,38 @@ targets:
     platform: iOS
     sources:
       - path: Sources/Hottoshita
+      - path: icon.icon
+      - path: icon-pink.icon
+      - path: icon-lavender.icon
+      - path: icon-mint.icon
+      - path: icon-sky.icon
+      - path: icon-peach.icon
+      - path: icon-lemon.icon
     info:
       path: Hottoshita/Info.plist
       properties:
+        CFBundleDisplayName: hottoshita
         CFBundleLocalizations:
           - en
           - ja
         UILaunchScreen:
           UIColorName: ""
-        UISupportedInterfaceOrientations~ipad:
+        UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
     dependencies:
       - sdk: MessageUI.framework
+      - sdk: ContactsUI.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hottoshita.app
         INFOPLIST_FILE: Hottoshita/Info.plist
-        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_APPICON_NAME: icon
+        ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: icon-pink icon-lavender icon-mint icon-sky icon-peach icon-lemon
+        DEVELOPMENT_TEAM: 7G685PLH5A
+        CODE_SIGN_STYLE: Automatic
 
   HottoshitaTests:
     type: bundle.unit-test
@@ -46,6 +59,7 @@ targets:
       - target: Hottoshita
     settings:
       base:
+        GENERATE_INFOPLIST_FILE: YES
         BUNDLE_LOADER: $(BUILT_PRODUCTS_DIR)/Hottoshita.app/Hottoshita
         TEST_HOST: $(BUILT_PRODUCTS_DIR)/Hottoshita.app/Hottoshita
 
@@ -56,3 +70,6 @@ targets:
       - path: Tests/HottoshitaUITests
     dependencies:
       - target: Hottoshita
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
