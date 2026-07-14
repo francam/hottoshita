@@ -1,8 +1,8 @@
 {
   "fill" : {
     "linear-gradient" : [
-      "display-p3:0.47396,0.99015,1.00000,1.00000",
-      "display-p3:0.63311,0.87285,1.00000,1.00000"
+      "display-p3:0.76111,0.92896,0.91779,1.00000",
+      "extended-srgb:0.00000,0.75294,0.90980,1.00000"
     ],
     "orientation" : {
       "start" : {
@@ -19,9 +19,19 @@
     {
       "layers" : [
         {
-          "fill" : {
-            "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
-          },
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "srgb:1.00000,1.00000,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "extended-srgb:0.00000,0.75294,0.90980,1.00000"
+              }
+            }
+          ],
           "image-name" : "Hottoshita 01 Artboard 1 2.svg",
           "name" : "Hottoshita 01 Artboard 1 2"
         }

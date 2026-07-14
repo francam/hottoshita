@@ -1,45 +1,56 @@
 {
-  "fill": {
-    "linear-gradient": [
-      "srgb:0.75950,0.67700,0.91250,1.00000",
-      "srgb:0.93250,0.91000,1.00000,1.00000"
+  "fill" : {
+    "linear-gradient" : [
+      "display-p3:0.77734,0.45850,0.88428,1.00000",
+      "display-p3:0.47843,0.30196,0.74902,1.00000"
     ],
-    "orientation": {
-      "start": {
-        "x": 0.5,
-        "y": 1
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 1
       },
-      "stop": {
-        "x": 0.5,
-        "y": 0
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0
       }
     }
   },
-  "groups": [
+  "groups" : [
     {
-      "layers": [
+      "layers" : [
         {
-          "fill": {
-            "solid": "srgb:1.00000,1.00000,1.00000,1.00000"
-          },
-          "image-name": "Hottoshita 01 Artboard 1 2.svg",
-          "name": "Hottoshita 01 Artboard 1 2"
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "srgb:0.90980,0.87843,1.00000,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "srgb:0.90980,0.87843,1.00000,1.00000"
+              }
+            }
+          ],
+          "glass" : true,
+          "image-name" : "Hottoshita 01 Artboard 1 2.svg",
+          "name" : "Hottoshita 01 Artboard 1 2"
         }
       ],
-      "shadow": {
-        "kind": "neutral",
-        "opacity": 0.6
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.6
       },
-      "translucency": {
-        "enabled": true,
-        "value": 0.2
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.2
       }
     }
   ],
-  "supported-platforms": {
-    "circles": [
+  "supported-platforms" : {
+    "circles" : [
       "watchOS"
     ],
-    "squares": "shared"
+    "squares" : "shared"
   }
 }
