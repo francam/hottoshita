@@ -21,7 +21,11 @@ struct HomeView: View {
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
-        let key = hour < 12 ? "greeting.morning" : hour < 17 ? "greeting.afternoon" : "greeting.evening"
+        // The small hours (0–4) are still "evening", not "morning".
+        let key = hour < 5 ? "greeting.evening"
+                : hour < 12 ? "greeting.morning"
+                : hour < 17 ? "greeting.afternoon"
+                : "greeting.evening"
         return String(format: NSLocalizedString(key, comment: ""), userName)
     }
 

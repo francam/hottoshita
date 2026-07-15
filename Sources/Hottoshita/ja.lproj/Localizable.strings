@@ -43,9 +43,9 @@
 "Who should receive your reports?" = "レポートを受け取る方は？";
 
 // Home
-"greeting.morning" = "おはようございます、%@！";
-"greeting.afternoon" = "こんにちは、%@！";
-"greeting.evening" = "こんばんは、%@！";
+"greeting.morning" = "おはようございます\n%@さん！";
+"greeting.afternoon" = "こんにちは\n%@さん！";
+"greeting.evening" = "こんばんは\n%@さん！";
 "Start Today's Check-in" = "今日のチェックインを始める";
 
 // Settings sections

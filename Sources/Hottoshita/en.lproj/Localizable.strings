@@ -43,9 +43,9 @@
 "Who should receive your reports?" = "Who should receive your reports?";
 
 // Home
-"greeting.morning" = "Good morning, %@!";
-"greeting.afternoon" = "Good afternoon, %@!";
-"greeting.evening" = "Good evening, %@!";
+"greeting.morning" = "Good morning,\n%@!";
+"greeting.afternoon" = "Good afternoon,\n%@!";
+"greeting.evening" = "Good evening,\n%@!";
 "Start Today's Check-in" = "Start Today's Check-in";
 
 // Settings sections
