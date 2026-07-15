@@ -188,7 +188,7 @@ struct SummaryView: View {
                     .frame(maxWidth: 420)
                     .padding(.vertical, isCompactHeight ? 14 : 22)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.glassProminent)
             .tint(appTheme.accent)
 
             Button {
@@ -205,7 +205,7 @@ struct SummaryView: View {
                     .frame(maxWidth: 420)
                     .padding(.vertical, isCompactHeight ? 10 : 16)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.glass)
             .tint(appTheme.accent)
 
             Button(action: onStartOver) {
@@ -214,7 +214,7 @@ struct SummaryView: View {
                     .frame(maxWidth: 420)
                     .padding(.vertical, isCompactHeight ? 8 : 12)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.glass)
             .tint(.gray)
         }
     }
@@ -234,6 +234,6 @@ struct SummaryView: View {
         }
         .padding(.vertical, isCompactHeight ? 8 : 16)
         .padding(.horizontal, 16)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 14))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 14))
     }
 }

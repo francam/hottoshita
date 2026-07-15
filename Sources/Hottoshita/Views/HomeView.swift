@@ -115,7 +115,7 @@ struct HomeView: View {
             .padding(.vertical, isCompactHeight ? 20 : 32)
             .padding(.horizontal)
         }
-        .buttonStyle(.borderedProminent)
+        .buttonStyle(.glassProminent)
         // Squircle on iPhone; the default capsule-like shape suits iPad better.
         .buttonBorderShape(UIDevice.current.userInterfaceIdiom == .phone
                            ? .roundedRectangle(radius: 36) : .automatic)
@@ -141,7 +141,7 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, 20)
         }
-        .buttonStyle(.bordered)
+        .buttonStyle(.glass)
         .tint(appTheme.accent)
     }
 
@@ -165,13 +165,13 @@ struct HomeView: View {
                     .padding(.vertical, 10)
                     .padding(.horizontal, 8)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.glass)
             .tint(appTheme.accent)
             .padding(.top, 8)
         }
         .padding(isCompactHeight ? 16 : 24)
         .frame(maxWidth: 420)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 24))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24))
         .padding(.horizontal, isCompactHeight ? 0 : 24)
     }
 }

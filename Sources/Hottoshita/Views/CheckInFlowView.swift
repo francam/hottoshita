@@ -23,7 +23,7 @@ struct CheckInFlowView: View {
                             .padding(.vertical, 8)
                             .padding(.horizontal, 6)
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.glass)
                     .tint(appTheme.accent)
                 }
                 Spacer()
@@ -35,7 +35,7 @@ struct CheckInFlowView: View {
                         .padding(.vertical, 8)
                         .padding(.horizontal, 6)
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.glass)
                 .tint(appTheme.accent)
             }
             .padding(.horizontal)
@@ -164,10 +164,10 @@ private struct SingleChoiceStepView: View {
                             .minimumScaleFactor(0.7)
                             .frame(maxWidth: 420)
                             .padding(.vertical, isCompactHeight ? 12 : 24)
-                            .background(
-                                selection == choice ? appTheme.accent : Color(.systemGroupedBackground),
-                                in: RoundedRectangle(cornerRadius: 18)
-                            )
+                            .glassEffect(selection == choice
+                                         ? .regular.tint(appTheme.accent).interactive()
+                                         : .regular.interactive(),
+                                         in: RoundedRectangle(cornerRadius: 18))
                             .foregroundStyle(selection == choice ? appTheme.onAccent : .primary)
                     }
                     .buttonStyle(.plain)
@@ -236,10 +236,10 @@ private struct MultiSelectStepView: View {
                         .minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, isCompactHeight ? 12 : 26)
-                        .background(
-                            selections.contains(option) ? appTheme.accent : Color(.systemGroupedBackground),
-                            in: RoundedRectangle(cornerRadius: 16)
-                        )
+                        .glassEffect(selections.contains(option)
+                                     ? .regular.tint(appTheme.accent).interactive()
+                                     : .regular.interactive(),
+                                     in: RoundedRectangle(cornerRadius: 16))
                         .foregroundStyle(selections.contains(option) ? appTheme.onAccent : .primary)
                 }
                 .buttonStyle(.plain)
@@ -255,7 +255,7 @@ private struct MultiSelectStepView: View {
                 .frame(maxWidth: 300)
                 .padding(.vertical, isCompactHeight ? 12 : 18)
         }
-        .buttonStyle(.borderedProminent)
+        .buttonStyle(.glassProminent)
         .tint(appTheme.accent)
     }
 }
@@ -295,10 +295,10 @@ private struct YesNoStepView: View {
                 .minimumScaleFactor(0.6)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, isCompactHeight ? 20 : 32)
-                .background(
-                    value == answer ? appTheme.accent : Color(.systemGroupedBackground),
-                    in: RoundedRectangle(cornerRadius: 22)
-                )
+                .glassEffect(value == answer
+                             ? .regular.tint(appTheme.accent).interactive()
+                             : .regular.interactive(),
+                             in: RoundedRectangle(cornerRadius: 22))
                 .foregroundStyle(value == answer ? appTheme.onAccent : .primary)
         }
         .buttonStyle(.plain)
@@ -349,7 +349,7 @@ private struct BloodPressureStepView: View {
                         .frame(maxWidth: 300)
                         .padding(.vertical, isCompactHeight ? 12 : 18)
                 }
-                .buttonStyle(.borderedProminent)
+                .buttonStyle(.glassProminent)
                 .tint(appTheme.accent)
             }
         }

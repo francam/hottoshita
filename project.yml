@@ -2,7 +2,7 @@ name: Hottoshita
 options:
   bundleIdPrefix: com.hottoshita
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "26.0"  # liquid-glass experiment branch: glassEffect APIs need iOS 26
   defaultConfig: Debug
 
 settings:

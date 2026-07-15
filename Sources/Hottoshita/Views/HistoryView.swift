@@ -70,7 +70,7 @@ struct HistoryView: View {
                             .foregroundStyle(appTheme.onAccent)
                             .padding(.horizontal, 2)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                     .tint(appTheme.accent)
                 }
             }
@@ -95,7 +95,7 @@ struct HistoryView: View {
                             .frame(maxWidth: 420)
                             .padding(.vertical, 14)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                     .tint(appTheme.accent)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 8)
