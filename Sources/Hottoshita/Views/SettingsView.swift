@@ -101,10 +101,11 @@ struct SettingsView: View {
                     Button { dismiss() } label: {
                         Text("Cancel")
                             .font(.title3.weight(.semibold))
+                            .foregroundStyle(appTheme.onAccent)
                             .padding(.horizontal, 2)
                             .fixedSize()
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.borderedProminent)
                     .tint(appTheme.accent)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
