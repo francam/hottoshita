@@ -11,7 +11,14 @@ struct BloodPressure: Codable {
     var systolic: String = ""
     var diastolic: String = ""
 
-    var isValid: Bool { Int(systolic) != nil && Int(diastolic) != nil }
+    /// Both readings entered and within a physiologically plausible range —
+    /// generous bounds; the point is to reject typos like 999 or 2, not to
+    /// second-guess unusual but real readings.
+    var isValid: Bool {
+        guard let s = Int(systolic), let d = Int(diastolic) else { return false }
+        return (40...300).contains(s) && (20...200).contains(d)
+    }
+
     var formatted: String { "\(systolic)/\(diastolic) mmHg" }
 }
 

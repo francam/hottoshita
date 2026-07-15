@@ -20,7 +20,8 @@ enum ColorTheme: String, CaseIterable {
     /// Accent used in light mode: dark enough for white button text (≥ 4.5:1).
     private var lightAccent: UIColor {
         switch self {
-        case .default:  return .systemTeal
+        // Deep teal, not .systemTeal — white button text needs ≥ 4.5:1.
+        case .default:  return UIColor(red: 0.00, green: 0.50, blue: 0.58, alpha: 1)
         case .pink:     return UIColor(red: 0.76, green: 0.25, blue: 0.42, alpha: 1)
         case .lavender: return UIColor(red: 0.48, green: 0.30, blue: 0.75, alpha: 1)
         case .mint:     return UIColor(red: 0.10, green: 0.50, blue: 0.32, alpha: 1)

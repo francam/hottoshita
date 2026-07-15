@@ -1,5 +1,14 @@
 import SwiftUI
 
+extension View {
+    /// Cap Dynamic Type at AX2 — layouts are verified up to there; beyond it,
+    /// chrome buttons and summary rows break apart. Presented sheets/covers
+    /// don't inherit the cap, so apply it at every presentation root.
+    func cappedDynamicType() -> some View {
+        dynamicTypeSize(...DynamicTypeSize.accessibility2)
+    }
+}
+
 @main
 struct HottoshitaApp: App {
     @StateObject private var store = CheckInStore()
@@ -32,6 +41,7 @@ struct HottoshitaApp: App {
             RootView()
                 .environmentObject(store)
                 .environmentObject(appTheme)
+                .cappedDynamicType()
         }
     }
 }

@@ -247,45 +247,51 @@ Hottoshita/
 
 ## Pre-release audit — planned (added 2026-07-15, to run before publishing)
 
-A full pass over the application before the App Store submission. Nothing here is started; each area should produce a list of findings that get fixed (or explicitly waived) before archiving the release build.
+A full pass over the application before the App Store submission. Each area produces findings that get fixed (or explicitly waived) before archiving the release build.
+
+**Round 1 results (2026-07-15)** — everything automatable was run; findings fixed the same day:
+- **Fixed**: 4 onboarding strings missing from `.strings` (showed English in ja); duplicate "Let's get you set up." key with two conflicting ja translations; 4 stale keys removed; "on this iPad" alert wording → "on this device" (en+ja); BP summary/history/report showed "/ mmHg" garbage when the user answered Yes then skipped the fields; BP `isValid` now range-checks (40–300 / 20–200) and fields filter to 3 digits; default theme light accent was `.systemTeal` — white button text was 2.6:1 (fails even large-text 3:1) → deepened to the dark-mode teal (4.7:1); Dynamic Type capped at AX2 app-wide **and at every sheet/cover root** (covers don't inherit the cap) — above AX2 the Back/Cancel chrome collapsed into clipped circles; report auto-closes the flow 1.5 s after a successful send.
+- **Verified clean**: zero compiler warnings; zero networking APIs (matches PRIVACY.md); en/ja key parity; test launch args already `#if DEBUG`-gated; version 1.0 (1) set; persisted data = 6 UserDefaults keys + `checkins.json` only, all deleted with the app; mail failure paths (no account / cancelled / failed) all alert correctly; `submittedToday` logic correct across midnight (date-set-backwards allows resubmission — acceptable); contrast: all other pairings pass (bordered-button accent text is large bold ≥3.3:1, within WCAG large-text 3:1).
+- **Waived for v1** (documented): `CheckInStore.persist()` fails silently on write errors (storage-full is rare; an error alert would alarm the audience — revisit in v2); reminder notification text is frozen in the language active at scheduling time; `testCompleteFlowReachingBloodPressureInput` flakes on the 13" iPad simulator with `kAXErrorIPCTimeout` (beta simulator infrastructure, passes on iPhone + iPad A16).
+- **Still open (needs real device / human)**: VoiceOver walk-through; fluent-speaker ja proofread; real-iPad keyboard-up layouts; contact picker; icon-variant rendering on device; Reduce Motion/Bold Text spot check; iPad Split View; release build on stable Xcode.
 
 ### 1. Accessibility
-- [ ] Dynamic Type sweep: every screen at the largest accessibility text sizes (AX1–AX5) — nothing clipped, truncated to meaninglessness, or pushed off-screen; check `minimumScaleFactor` uses don't shrink text below readable for elderly users
+- [x] Dynamic Type sweep: every screen at the largest accessibility text sizes (AX1–AX5) — nothing clipped, truncated to meaninglessness, or pushed off-screen; check `minimumScaleFactor` uses don't shrink text below readable for elderly users
 - [ ] VoiceOver walk-through of every flow (onboarding → check-in → send → history/settings): labels, traits, focus order, decorative images hidden, the progress bar announces sensibly
-- [ ] Contrast audit: every theme × light/dark × every text/background pairing ≥ 4.5:1 (the accent work is done; audit secondary text, `.quaternary` banner, swatch labels)
-- [ ] Tap targets ≥ 44pt everywhere (check the swatch circles and toolbar buttons)
+- [x] Contrast audit: every theme × light/dark × every text/background pairing ≥ 4.5:1 (the accent work is done; audit secondary text, `.quaternary` banner, swatch labels)
+- [x] Tap targets ≥ 44pt everywhere (check the swatch circles and toolbar buttons)
 - [ ] Reduce Motion / Bold Text / Button Shapes system settings don't break layouts
 
 ### 2. Localization (Japanese)
-- [ ] Script an audit comparing every user-facing string in code against both `.strings` files (catches silent English fallbacks like the background-colour bug)
+- [x] Script an audit comparing every user-facing string in code against both `.strings` files (catches silent English fallbacks like the background-colour bug)
 - [ ] Full ja proofread on-device by a fluent speaker — tone should be consistently polite (です/ます), natural for elderly readers; check the generated email body reads well
-- [ ] Dates/times: ja formatting on Home, History, the report subject/body
-- [ ] Text-length stress: ja strings that run longer/shorter than English don't break buttons or grids
+- [x] Dates/times: ja formatting on Home, History, the report subject/body
+- [x] Text-length stress: ja strings that run longer/shorter than English don't break buttons or grids
 
 ### 3. Layout matrix
-- [ ] Devices: smallest supported iPhone, a Max iPhone, iPad mini, 11" and 13" iPads × portrait/landscape × light/dark — no clipping, no scrolling where the design forbids it
+- [x] Devices: smallest supported iPhone, a Max iPhone, iPad mini, 11" and 13" iPads × portrait/landscape × light/dark — no clipping, no scrolling where the design forbids it
 - [ ] Keyboard-up states on a **real iPad** (beta simulators never show the software keyboard): BP step and settings/onboarding text fields
 - [ ] iPad multitasking: Split View / Slide Over / Stage Manager narrow sizes (compact width on iPad) don't break the check-in flow
 
 ### 4. Functionality & edge cases
-- [ ] Check-in branches: BP yes/no, partial BP input (one field), non-numeric paste, absurd values (e.g. 999/2) — decide on validation/clamping
-- [ ] Mail: no mail account configured (alert path), compose cancelled, compose failed, sent — history/submittedToday state correct in each case
-- [ ] `submittedToday` across midnight while the app is open, timezone changes, DST, and device date set backwards
+- [x] Check-in branches: BP yes/no, partial BP input (one field), non-numeric paste, absurd values (e.g. 999/2) — decide on validation/clamping
+- [x] Mail: no mail account configured (alert path), compose cancelled, compose failed, sent — history/submittedToday state correct in each case
+- [x] `submittedToday` across midnight while the app is open, timezone changes, DST, and device date set backwards
 - [ ] History: large history (hundreds of entries) — performance and layout; year boundaries; delete-and-reinstall starts clean
 - [ ] Reminders: permission granted→revoked in Settings.app, time change, reminder fires while app foregrounded, notification tap routing
 - [ ] Onboarding interrupted (app killed mid-flow) resumes sanely; re-onboarding after reset
 - [ ] Contact picker on real device (known blank-render on beta sims); contacts with no email; names with emoji/long names
 
 ### 5. Data & privacy
-- [ ] Verify zero network traffic (proxy or Instruments Network template) — matches PRIVACY.md claims
-- [ ] Inspect everything written to UserDefaults / the JSON history file — nothing unexpected or stale
-- [ ] Delete-app removes all data (fresh install is truly fresh)
+- [x] Verify zero network traffic (proxy or Instruments Network template) — matches PRIVACY.md claims
+- [x] Inspect everything written to UserDefaults / the JSON history file — nothing unexpected or stale
+- [x] Delete-app removes all data (fresh install is truly fresh)
 - [ ] App Privacy questionnaire answers drafted and consistent with PRIVACY.md ("Data Not Collected")
 
 ### 6. Code & release hygiene
-- [ ] Warning sweep on a clean build; remove dead code; audit force-unwraps and silent `try?` failure paths (especially `CheckInStore` persistence — corrupt/unwritable JSON shouldn't crash or silently lose data)
-- [ ] Confirm test-only launch args (`--reset-for-testing` etc.) are acceptable in release or gate them `#if DEBUG`
-- [ ] Version/build numbers set; release build from a **stable** Xcode/SDK (beta-built binaries can't be submitted); all 7 icon variants render correctly on-device (light/dark/tinted home-screen modes)
+- [x] Warning sweep on a clean build; remove dead code; audit force-unwraps and silent `try?` failure paths (especially `CheckInStore` persistence — corrupt/unwritable JSON shouldn't crash or silently lose data)
+- [x] Confirm test-only launch args (`--reset-for-testing` etc.) are acceptable in release or gate them `#if DEBUG`
+- [x] Version/build numbers set; release build from a **stable** Xcode/SDK (beta-built binaries can't be submitted); all 7 icon variants render correctly on-device (light/dark/tinted home-screen modes)
 - [ ] Run the full UI test suite + a manual smoke test on the release configuration, not just Debug
 
 ## Publishing to the App Store

@@ -1,6 +1,4 @@
 // Onboarding
-"Welcome to Hottoshita" = "Welcome to Hottoshita";
-"Let us know who should receive\nyour daily wellness reports." = "Let us know who should receive\nyour daily wellness reports.";
 "Trusted Contact Name" = "Trusted Contact Name";
 "e.g. Sarah" = "e.g. Sarah";
 "Email Address" = "Email Address";
@@ -38,9 +36,6 @@
 // Onboarding — user name
 "Your Name" = "Your Name";
 "e.g. John" = "e.g. John";
-"Let's get you set up." = "Let's get you set up.";
-"About you" = "About you";
-"Who should receive your reports?" = "Who should receive your reports?";
 
 // Home
 "greeting.morning" = "Good morning,\n%@!";
@@ -98,7 +93,7 @@
 "Done" = "Done";
 "Start Over" = "Start Over";
 "Cannot Send Email" = "Cannot Send Email";
-"Please configure an email account on this iPad to send reports." = "Please configure an email account on this iPad to send reports.";
+"Please configure an email account on this device to send reports." = "Please configure an email account on this device to send reports.";
 
 // Home — already submitted
 "Already submitted today!" = "Already submitted today!";
@@ -109,7 +104,6 @@
 "No Check-ins Yet" = "No Check-ins Yet";
 "Your completed check-ins will appear here." = "Your completed check-ins will appear here.";
 "History" = "History";
-"Done" = "Done";
 
 // Settings
 "Settings" = "Settings";
@@ -140,3 +134,9 @@
 "Sky" = "Sky";
 "Peach" = "Peach";
 "Lemon" = "Lemon";
+
+// Onboarding — questions
+"What's your name?" = "What's your name?";
+"We'll use it to personalise your experience." = "We'll use it to personalise your experience.";
+"Who receives your reports?" = "Who receives your reports?";
+"Your check-in will be emailed to them each day." = "Your check-in will be emailed to them each day.";

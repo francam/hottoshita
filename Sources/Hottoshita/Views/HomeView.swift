@@ -77,12 +77,15 @@ struct HomeView: View {
         .background(appTheme.background.ignoresSafeArea())
         .fullScreenCover(isPresented: $showCheckIn) {
             CheckInFlowView().environmentObject(appTheme).environmentObject(store)
+                .cappedDynamicType()
         }
         .sheet(isPresented: $showSettings, onDismiss: { appTheme.updateAppIcon() }) {
             SettingsView().environmentObject(appTheme)
+                .cappedDynamicType()
         }
         .sheet(isPresented: $showHistory) {
             HistoryView().environmentObject(store).environmentObject(appTheme)
+                .cappedDynamicType()
         }
     }
 

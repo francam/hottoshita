@@ -371,6 +371,11 @@ private struct BPField: View {
                 .multilineTextAlignment(.center)
                 .focused($focus, equals: field)
                 .frame(maxWidth: .infinity)
+                .onChange(of: value) { newValue in
+                    // Digits only (hardware keyboards / paste), max 3.
+                    let cleaned = String(newValue.filter(\.isNumber).prefix(3))
+                    if cleaned != newValue { value = cleaned }
+                }
                 .padding()
                 .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
             Text(label)

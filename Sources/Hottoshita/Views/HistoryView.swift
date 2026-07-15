@@ -82,7 +82,9 @@ private struct HistoryRowView: View {
                 historyGridRow(
                     icon: "heart.fill",
                     label: "Blood Pressure",
-                    value: entry.tookBloodPressure ? entry.bloodPressure.formatted : String(localized: "Not taken")
+                    value: entry.tookBloodPressure && entry.bloodPressure.isValid
+                        ? entry.bloodPressure.formatted
+                        : String(localized: "Not taken")
                 )
             }
         }

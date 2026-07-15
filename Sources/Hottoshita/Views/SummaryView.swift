@@ -70,6 +70,12 @@ struct SummaryView: View {
             ) { result in
                 if result == .sent {
                     reportSent = true
+                    // Report delivered — show the confirmation briefly, then
+                    // return home on the user's behalf.
+                    Task {
+                        try? await Task.sleep(for: .seconds(1.5))
+                        dismiss()
+                    }
                 } else {
                     // Cancelled, saved as draft, or failed — the contact did
                     // NOT receive the report; make sure the user knows.
@@ -86,7 +92,7 @@ struct SummaryView: View {
         .alert("Cannot Send Email", isPresented: $showMailError) {
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Please configure an email account on this iPad to send reports.")
+            Text("Please configure an email account on this device to send reports.")
         }
     }
 
@@ -120,7 +126,7 @@ struct SummaryView: View {
             summaryRow(
                 icon: "heart.fill",
                 label: "Blood Pressure",
-                value: answers.tookBloodPressure
+                value: answers.tookBloodPressure && answers.bloodPressure.isValid
                     ? answers.bloodPressure.formatted
                     : String(localized: "Not taken")
             )

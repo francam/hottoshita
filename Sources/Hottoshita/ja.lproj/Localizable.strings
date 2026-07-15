@@ -1,6 +1,4 @@
 // Onboarding
-"Welcome to Hottoshita" = "Hottoshitaへようこそ";
-"Let us know who should receive\nyour daily wellness reports." = "毎日の健康レポートを送る\n信頼できる方をご登録ください。";
 "Trusted Contact Name" = "連絡先の名前";
 "e.g. Sarah" = "例：田中花子";
 "Email Address" = "メールアドレス";
@@ -38,9 +36,6 @@
 // Onboarding — user name
 "Your Name" = "あなたのお名前";
 "e.g. John" = "例：田中太郎";
-"Let's get you set up." = "まず設定を行いましょう。";
-"About you" = "あなたについて";
-"Who should receive your reports?" = "レポートを受け取る方は？";
 
 // Home
 "greeting.morning" = "おはようございます\n%@さん！";
@@ -98,7 +93,7 @@
 "Done" = "完了";
 "Start Over" = "最初からやり直す";
 "Cannot Send Email" = "メールを送信できません";
-"Please configure an email account on this iPad to send reports." = "レポートを送信するには、このiPadでメールアカウントを設定してください。";
+"Please configure an email account on this device to send reports." = "レポートを送信するには、この端末でメールアカウントを設定してください。";
 
 // Home — already submitted
 "Already submitted today!" = "今日はもう提出済みです！";
@@ -109,7 +104,6 @@
 "No Check-ins Yet" = "チェックイン履歴なし";
 "Your completed check-ins will appear here." = "完了したチェックインがここに表示されます。";
 "History" = "履歴";
-"Done" = "完了";
 
 // Settings
 "Settings" = "設定";
@@ -140,3 +134,9 @@
 "Sky" = "空色";
 "Peach" = "ピーチ";
 "Lemon" = "レモン";
+
+// Onboarding — questions
+"What's your name?" = "お名前を教えてください";
+"We'll use it to personalise your experience." = "あいさつやレポートの表示に使わせていただきます。";
+"Who receives your reports?" = "レポートを受け取る方は？";
+"Your check-in will be emailed to them each day." = "毎日のチェックインがこの方にメールで届きます。";
