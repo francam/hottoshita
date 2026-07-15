@@ -140,3 +140,19 @@
 "We'll use it to personalise your experience." = "あいさつやレポートの表示に使わせていただきます。";
 "Who receives your reports?" = "レポートを受け取る方は？";
 "Your check-in will be emailed to them each day." = "毎日のチェックインがこの方にメールで届きます。";
+
+// History — deletion
+"Delete this check-in?" = "このチェックインを削除しますか？";
+"Delete" = "削除";
+
+// Unsent check-in tracking
+"report.previous" = "これまで未送信だったチェックイン：";
+"Not sent yet" = "未送信";
+"Earlier unsent check-ins will be included." = "未送信のチェックインも一緒に送信されます。";
+
+// Backlog sending
+"Send earlier check-ins too?" = "以前のチェックインも一緒に送りますか？";
+"Some earlier check-ins have not been sent yet." = "まだ送信されていないチェックインがあります。";
+"Send everything" = "すべて送る";
+"Only today's" = "今日の分だけ";
+"Send Unsent Check-ins" = "未送信のチェックインを送る";

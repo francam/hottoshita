@@ -140,3 +140,19 @@
 "We'll use it to personalise your experience." = "We'll use it to personalise your experience.";
 "Who receives your reports?" = "Who receives your reports?";
 "Your check-in will be emailed to them each day." = "Your check-in will be emailed to them each day.";
+
+// History — deletion
+"Delete this check-in?" = "Delete this check-in?";
+"Delete" = "Delete";
+
+// Unsent check-in tracking
+"report.previous" = "Earlier check-ins that were not sent before:";
+"Not sent yet" = "Not sent yet";
+"Earlier unsent check-ins will be included." = "Earlier unsent check-ins will be included.";
+
+// Backlog sending
+"Send earlier check-ins too?" = "Send earlier check-ins too?";
+"Some earlier check-ins have not been sent yet." = "Some earlier check-ins have not been sent yet.";
+"Send everything" = "Send everything";
+"Only today's" = "Only today's";
+"Send Unsent Check-ins" = "Send Unsent Check-ins";

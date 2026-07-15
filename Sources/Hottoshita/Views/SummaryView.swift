@@ -18,6 +18,8 @@ struct SummaryView: View {
     @State private var saved = false
     @State private var reportSent = false
     @State private var showNotSentAlert = false
+    @State private var showBacklogChoice = false
+    @State private var includeBacklog = false
 
     private var localizedFeelings: String {
         guard !answers.feelings.isEmpty else { return String(localized: "Not specified") }
@@ -66,10 +68,16 @@ struct SummaryView: View {
             MailComposeView(
                 recipient: contactEmail,
                 subject: ReportGenerator.subject(for: answers),
-                body: ReportGenerator.generate(answers: answers, contactName: contactName, userName: userName)
+                body: ReportGenerator.generate(answers: answers, contactName: contactName, userName: userName,
+                                               previousUnsent: includeBacklog ? store.unsentEntries(excluding: answers.id) : [])
             ) { result in
                 if result == .sent {
                     reportSent = true
+                    if includeBacklog {
+                        store.markAllUnsentAsSent()
+                    } else {
+                        store.markSent(id: answers.id)
+                    }
                     // Report delivered — show the confirmation briefly, then
                     // return home on the user's behalf.
                     Task {
@@ -82,6 +90,13 @@ struct SummaryView: View {
                     showNotSentAlert = true
                 }
             }
+        }
+        .alert("Send earlier check-ins too?", isPresented: $showBacklogChoice) {
+            Button("Send everything") { includeBacklog = true; showMail = true }
+            Button("Only today's") { includeBacklog = false; showMail = true }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Some earlier check-ins have not been sent yet.")
         }
         .alert("Report Not Sent", isPresented: $showNotSentAlert) {
             Button("Try Again") { showMail = true }
@@ -143,6 +158,12 @@ struct SummaryView: View {
                 Text("Will be sent to: \(contactName)")
                     .font(.title3)
                     .foregroundStyle(.secondary)
+                if !store.unsentEntries(excluding: answers.id).isEmpty {
+                    Text("Some earlier check-ins have not been sent yet.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                }
             }
 
             Button {
@@ -150,10 +171,15 @@ struct SummaryView: View {
                     store.save(answers)
                     saved = true
                 }
-                if MFMailComposeViewController.canSendMail() {
-                    showMail = true
-                } else {
+                if !MFMailComposeViewController.canSendMail() {
                     showMailError = true
+                } else if !store.unsentEntries(excluding: answers.id).isEmpty {
+                    // Pending check-ins — let the user decide what this
+                    // email should contain.
+                    showBacklogChoice = true
+                } else {
+                    includeBacklog = false
+                    showMail = true
                 }
             } label: {
                 Label(reportSent ? "Send Again" : "Send Report", systemImage: "envelope.fill")

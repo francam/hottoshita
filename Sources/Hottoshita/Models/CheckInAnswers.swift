@@ -29,6 +29,20 @@ struct CheckInAnswers: Codable, Identifiable {
     var tookBloodPressure: Bool = false
     var bloodPressure: BloodPressure = BloodPressure()
     var date: Date = Date()
+
+    /// Whether this check-in has been emailed to the contact. Stored as an
+    /// optional so history files written before the flag existed still decode
+    /// (missing key → nil → treated as not sent).
+    private var sentFlag: Bool?
+    var sent: Bool {
+        get { sentFlag ?? false }
+        set { sentFlag = newValue }
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case id, sleep, feelings, tookBloodPressure, bloodPressure, date
+        case sentFlag = "sent"
+    }
 }
 
 let feelingOptions: [String] = ["Good", "Tired", "Dizzy", "Heavy", "Anxious", "Happy", "Sad", "Calm"]

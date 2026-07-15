@@ -62,6 +62,31 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Settings"].isHittable)
     }
 
+    func testHistoryRowCanBeDeleted() {
+        app.buttons["Start Today's Check-in"].tap()
+        app.buttons["Slept OK"].tap()
+        app.buttons["Skip"].tap()
+        app.buttons["No"].tap()
+        XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout: 3))
+        app.buttons["Done"].tap()
+
+        app.buttons["History"].tap()
+        let row = app.cells.firstMatch
+        XCTAssertTrue(row.waitForExistence(timeout: 3))
+        row.swipeLeft()
+        XCTAssertTrue(app.buttons["Delete"].waitForExistence(timeout: 3))
+        app.buttons["Delete"].tap()
+
+        // Deleting asks for confirmation first.
+        XCTAssertTrue(app.alerts.firstMatch.waitForExistence(timeout: 3))
+        app.alerts.buttons["Delete"].tap()
+        XCTAssertTrue(app.staticTexts["No Check-ins Yet"].waitForExistence(timeout: 3))
+
+        // The deleted entry was today's — the home screen offers a fresh start.
+        app.buttons["Done"].tap()
+        XCTAssertTrue(app.buttons["Start Today's Check-in"].waitForExistence(timeout: 3))
+    }
+
     func testHistoryViewOpens() {
         app.buttons["History"].tap()
         XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 3))

@@ -115,6 +115,31 @@ final class CheckInFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Start Over"].isHittable)
     }
 
+    func testUnsentCheckInsAreTrackedAndIncludedInNextSend() {
+        // Finish a check-in with "Done" — recorded, but never emailed.
+        app.buttons["Start Today's Check-in"].tap()
+        app.buttons["Slept OK"].tap()
+        app.buttons["Skip"].tap()
+        app.buttons["No"].tap()
+        XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout: 3))
+        app.buttons["Done"].tap()
+
+        // History flags it and offers to send the backlog directly.
+        app.buttons["History"].tap()
+        XCTAssertTrue(app.staticTexts["Not sent yet"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Send Unsent Check-ins"].exists)
+        app.buttons["Done"].tap()
+
+        // The next check-in's summary points out the pending ones.
+        XCTAssertTrue(app.buttons["Submit again anyway"].waitForExistence(timeout: 3))
+        app.buttons["Submit again anyway"].tap()
+        app.buttons["Slept deeply"].tap()
+        app.buttons["Skip"].tap()
+        app.buttons["No"].tap()
+        XCTAssertTrue(app.staticTexts["Some earlier check-ins have not been sent yet."]
+            .waitForExistence(timeout: 3))
+    }
+
     func testStartOverResetsFlow() {
         app.buttons["Start Today's Check-in"].tap()
 

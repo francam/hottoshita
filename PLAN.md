@@ -225,6 +225,9 @@ Hottoshita/
 - [ ] **Optional dictated memos, summarised by Apple Intelligence.** New optional step in the check-in flow: a big microphone button lets the user dictate a free-form memo (system keyboard dictation, or the Speech framework for a guided elderly-friendly UI). Summarise it on-device with the Foundation Models framework and include the summary in the email. Must degrade gracefully: on devices without Apple Intelligence, include the raw transcribed memo instead. Memo is skippable in one tap.
 - [x] **App icons matching the theme colours.** Shipped in v1 (2026-07-15): six alternate Icon Composer bundles (`icon-<theme>.icon`, same artwork on a per-theme gradient derived from the pastel + light accent) registered via `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES`; `AppTheme.updateAppIcon()` calls `setAlternateIconName`. The system confirmation alert fires only when a choice is committed — onboarding "Get Started" and settings-sheet dismissal — never while browsing swatches, never at launch. Verified end-to-end on the simulator (pink icon on the home screen).
 
+- [ ] **Multiple trusted contacts** (added 2026-07-15). Replace the single `contactName`/`contactEmail` pair with a list. Onboarding keeps collecting exactly one contact (setup stays simple); Settings' Trusted Contact section becomes an add/remove list, each row fillable via the contact picker. `MFMailComposeViewController.setToRecipients` already accepts multiple addresses, so one email goes to everyone — decide To vs BCC (family usually fine with To; BCC if contacts shouldn't see each other). Wrinkles: the report greeting "Hello %@," needs a multi-name form (or a generic 皆様/"Hello,"), and the summary's "Will be sent to: %@" should list or count recipients. Migrate the existing two UserDefaults keys into the list on first launch.
+- **"Erase All Data" / reset button in Settings — decided against (2026-07-15).** Everything setup collects is already editable in Settings, so its only unique power would be wiping history — an accident risk for elderly users that outweighs the rare hand-me-down-device scenario (covered by delete + reinstall, which PRIVACY.md documents).
+
 ### Remaining
 - [x] Real app icon design (`icon.icon`, Icon Composer)
 - [x] Test on iPad simulator — portrait and landscape verified (2026-07-15): feelings grid is 4-across on iPad, blood-pressure step goes side-by-side while the keyboard is up, whole check-in flow fits landscape without scrolling. Keyboard-up layout still needs a real-iPad glance (beta iPad simulators never show the software keyboard).
@@ -297,7 +300,7 @@ A full pass over the application before the App Store submission. Each area prod
 ## Publishing to the App Store
 
 ### One-time setup
-- [ ] Enroll in the Apple Developer Program ($99/year) at developer.apple.com, if not already enrolled
+- [x] Enroll in the Apple Developer Program ($99/year) — confirmed 2026-07-14: membership already active
 - [ ] In App Store Connect, register the bundle ID `com.hottoshita.app` and create a new app record
 - [ ] In Xcode, under the target's "Signing & Capabilities" tab, set your Team and let automatic signing generate the provisioning profile
 
@@ -309,10 +312,10 @@ A full pass over the application before the App Store submission. Each area prod
 - [ ] Take App Store screenshots for each required size (13" iPad and 6.9"/6.5" iPhone, since the app is universal) — capture Home, a check-in step, and the Summary screen in both English and Japanese
 - [ ] Write the App Store listing copy (name, subtitle, description, keywords) in English and Japanese, matching the app's localizations
 - [ ] Set an age rating (likely 4+) and a support URL/contact email in App Store Connect
-- [ ] Confirm the Info.plist orientation list matches what you actually test (see device-family TODO)
+- [x] Confirm the Info.plist orientation list matches what you actually test — all four orientations tested on iPhone + iPad simulators (2026-07-15); portrait-upside-down only matters on iPad (Face ID iPhones don't rotate there anyway)
 
 ### Archive & upload
-- [ ] `Product > Archive` in Xcode (or `xcodebuild archive`) with a Release build
+- [ ] `Product > Archive` in Xcode (or `xcodebuild archive`) with a Release build — **blocked until a stable (non-beta) Xcode is installed**; beta-built binaries can't be submitted
 - [ ] Use Xcode's Organizer ("Distribute App" → App Store Connect) to validate and upload the build — this is the simplest path and handles signing/upload automatically
 - [ ] In App Store Connect, attach the uploaded build to the app version, complete the remaining metadata, and submit for review
 - [ ] Consider a short TestFlight beta (even just yourself + one family member) before public release, since the target audience is elderly users who won't tolerate rough edges — TestFlight builds upload the same way, just skip "Submit for Review" and instead invite testers
