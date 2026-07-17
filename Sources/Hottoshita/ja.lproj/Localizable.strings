@@ -12,7 +12,7 @@
 // Daily reminder
 "Would you like a daily reminder?" = "毎日のリマインダーを設定しますか？";
 "We'll remind you to send your check-in." = "チェックインの送信を毎日お知らせします。";
-"Yes, remind me" = "はい、通知して";
+"Yes, remind me" = "はい、通知してください";
 "Not now" = "今はしない";
 "Set Reminder" = "リマインダーを設定";
 "You can turn reminders on later in Settings." = "リマインダーは後から設定画面でオンにできます。";

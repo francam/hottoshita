@@ -158,13 +158,13 @@ private struct HistoryRowView: View {
                 historyGridRow(
                     icon: "moon.zzz.fill",
                     label: "Sleep",
-                    value: String(localized: String.LocalizationValue(entry.sleep.rawValue))
+                    value: String(localized: String.LocalizationValue(entry.sleep?.rawValue ?? ""))
                 )
                 historyGridRow(icon: "face.smiling", label: "Feeling", value: feelingsText)
                 historyGridRow(
                     icon: "heart.fill",
                     label: "Blood Pressure",
-                    value: entry.tookBloodPressure && entry.bloodPressure.isValid
+                    value: (entry.tookBloodPressure ?? false) && entry.bloodPressure.isValid
                         ? entry.bloodPressure.formatted
                         : String(localized: "Not taken")
                 )

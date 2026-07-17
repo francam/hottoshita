@@ -8,8 +8,8 @@ struct CheckInFlowView: View {
     @EnvironmentObject private var appTheme: AppTheme
 
     // Steps: 0=sleep, 1=feeling, 2=bp-yn, 3=bp-input (conditional), summary
-    private var totalSteps: Int { answers.tookBloodPressure ? 4 : 3 }
-    private var summaryStep: Int { answers.tookBloodPressure ? 4 : 3 }
+    private var totalSteps: Int { (answers.tookBloodPressure ?? false) ? 4 : 3 }
+    private var summaryStep: Int { (answers.tookBloodPressure ?? false) ? 4 : 3 }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -98,8 +98,8 @@ struct CheckInFlowView: View {
                 icon: "moon.zzz.fill",
                 choices: SleepRating.allCases.map(\.rawValue),
                 selection: Binding(
-                    get: { answers.sleep.rawValue },
-                    set: { answers.sleep = SleepRating(rawValue: $0) ?? .ok }
+                    get: { answers.sleep?.rawValue ?? "" },
+                    set: { answers.sleep = SleepRating(rawValue: $0) }
                 )
             ) {
                 withAnimation(.easeInOut(duration: 0.3)) { step = 1 }
@@ -120,10 +120,10 @@ struct CheckInFlowView: View {
                 value: $answers.tookBloodPressure
             ) {
                 withAnimation(.easeInOut(duration: 0.3)) {
-                    step = answers.tookBloodPressure ? 3 : summaryStep
+                    step = (answers.tookBloodPressure ?? false) ? 3 : summaryStep
                 }
             }
-        case 3 where answers.tookBloodPressure:
+        case 3 where answers.tookBloodPressure == true:
             BloodPressureStepView(bp: $answers.bloodPressure) {
                 withAnimation(.easeInOut(duration: 0.3)) { step = summaryStep }
             }
@@ -267,7 +267,7 @@ private struct YesNoStepView: View {
     @EnvironmentObject private var appTheme: AppTheme
     let question: LocalizedStringKey
     let icon: String
-    @Binding var value: Bool
+    @Binding var value: Bool?
     let onNext: () -> Void
 
     var body: some View {

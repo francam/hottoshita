@@ -18,22 +18,28 @@ struct AdaptiveStepLayout<Header: View, Controls: View>: View {
     @ViewBuilder let controls: () -> Controls
 
     var body: some View {
-        if isCompactHeight || forceSideBySide {
-            HStack(spacing: 24) {
-                header()
-                    .frame(maxWidth: .infinity)
-                controls()
-                    .frame(maxWidth: .infinity)
-            }
-            .padding(.horizontal, 24)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-        } else {
-            VStack(spacing: spacing) {
-                header()
-                controls()
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        // A single call site for header()/controls() keeps their view
+        // identity stable across the axis switch below — branching into two
+        // separate HStack/VStack blocks (each calling header()/controls()
+        // itself) tears down and rebuilds the controls subtree whenever
+        // forceSideBySide flips, which crashes on real devices if that
+        // happens to be the exact moment a TextField inside it is becoming
+        // first responder (e.g. the blood-pressure step's keyboard-up
+        // transition on iPad). AnyLayout swaps the container without
+        // destroying the children.
+        let sideBySide = isCompactHeight || forceSideBySide
+        let layout: AnyLayout = sideBySide
+            ? AnyLayout(HStackLayout(spacing: 24))
+            : AnyLayout(VStackLayout(spacing: spacing))
+
+        layout {
+            header()
+                .frame(maxWidth: sideBySide ? .infinity : nil)
+            controls()
+                .frame(maxWidth: sideBySide ? .infinity : nil)
         }
+        .padding(.horizontal, sideBySide ? 24 : 0)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 

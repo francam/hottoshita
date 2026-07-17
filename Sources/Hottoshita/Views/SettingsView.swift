@@ -12,25 +12,32 @@ struct SettingsView: View {
     @State private var userNameInput = ""
     @State private var contactNameInput = ""
     @State private var emailInput = ""
+    @State private var reminderEnabledInput = false
+    @State private var reminderMinutesInput = 9 * 60
     @State private var showContactPicker = false
     @State private var showNotificationsDenied = false
+    // Background colour still applies live as swatches are tapped (so the
+    // whole app previews the choice), but Cancel restores this so browsing
+    // swatches isn't itself a commit.
+    @State private var originalTheme: ColorTheme = .default
     @Environment(\.dismiss) private var dismiss
 
-    private var reminderTime: Binding<Date> {
+    // Staged the same way as the name/contact fields above — bound directly
+    // to @AppStorage, this used to write (and reschedule the real
+    // notification) the instant the user touched it, so Cancel couldn't
+    // undo it. Only `save()` should commit reminder changes.
+    private var reminderTimeInput: Binding<Date> {
         Binding(
             get: {
                 Calendar.current.date(
-                    bySettingHour: reminderMinutes / 60,
-                    minute: reminderMinutes % 60,
+                    bySettingHour: reminderMinutesInput / 60,
+                    minute: reminderMinutesInput % 60,
                     second: 0, of: Date()
                 ) ?? Date()
             },
             set: { newDate in
                 let c = Calendar.current.dateComponents([.hour, .minute], from: newDate)
-                reminderMinutes = (c.hour ?? 9) * 60 + (c.minute ?? 0)
-                if reminderEnabled {
-                    ReminderScheduler.schedule(hour: c.hour ?? 9, minute: c.minute ?? 0)
-                }
+                reminderMinutesInput = (c.hour ?? 9) * 60 + (c.minute ?? 0)
             }
         )
     }
@@ -74,11 +81,11 @@ struct SettingsView: View {
                 }
 
                 Section("Daily Reminder") {
-                    Toggle("Remind me every day", isOn: $reminderEnabled)
+                    Toggle("Remind me every day", isOn: $reminderEnabledInput)
                         .font(.title3)
                         .tint(appTheme.accent)
-                    if reminderEnabled {
-                        DatePicker("Time", selection: reminderTime, displayedComponents: .hourAndMinute)
+                    if reminderEnabledInput {
+                        DatePicker("Time", selection: reminderTimeInput, displayedComponents: .hourAndMinute)
                             .font(.title3)
                     }
                 }
@@ -98,7 +105,10 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
+                    Button {
+                        appTheme.theme = originalTheme
+                        dismiss()
+                    } label: {
                         Text("Cancel")
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(appTheme.onAccent)
@@ -124,22 +134,21 @@ struct SettingsView: View {
                 userNameInput = userName
                 contactNameInput = contactName
                 emailInput = contactEmail
+                reminderEnabledInput = reminderEnabled
+                reminderMinutesInput = reminderMinutes
+                originalTheme = appTheme.theme
             }
-            .onChange(of: reminderEnabled) { enabled in
+            .onChange(of: reminderEnabledInput) { enabled in
+                // Only the permission prompt happens live — actually
+                // scheduling or cancelling the notification is deferred to
+                // save() so Cancel can still back out of this.
                 if enabled {
                     Task {
-                        if await ReminderScheduler.requestAuthorization() {
-                            ReminderScheduler.schedule(
-                                hour: reminderMinutes / 60,
-                                minute: reminderMinutes % 60
-                            )
-                        } else {
-                            reminderEnabled = false
+                        if !(await ReminderScheduler.requestAuthorization()) {
+                            reminderEnabledInput = false
                             showNotificationsDenied = true
                         }
                     }
-                } else {
-                    ReminderScheduler.cancel()
                 }
             }
             .alert("Notifications Disabled", isPresented: $showNotificationsDenied) {
@@ -197,6 +206,14 @@ struct SettingsView: View {
         userName = userNameInput.trimmingCharacters(in: .whitespaces)
         contactName = contactNameInput.trimmingCharacters(in: .whitespaces)
         contactEmail = emailInput.trimmingCharacters(in: .whitespaces)
+
+        reminderEnabled = reminderEnabledInput
+        reminderMinutes = reminderMinutesInput
+        if reminderEnabledInput {
+            ReminderScheduler.schedule(hour: reminderMinutesInput / 60, minute: reminderMinutesInput % 60)
+        } else {
+            ReminderScheduler.cancel()
+        }
         dismiss()
     }
 }

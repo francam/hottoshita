@@ -24,9 +24,9 @@ struct BloodPressure: Codable {
 
 struct CheckInAnswers: Codable, Identifiable {
     var id: UUID = UUID()
-    var sleep: SleepRating = .ok
+    var sleep: SleepRating? = nil
     var feelings: [String] = []
-    var tookBloodPressure: Bool = false
+    var tookBloodPressure: Bool? = nil
     var bloodPressure: BloodPressure = BloodPressure()
     var date: Date = Date()
 

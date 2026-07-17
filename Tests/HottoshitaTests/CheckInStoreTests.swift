@@ -73,7 +73,7 @@ final class CheckInStoreTests: XCTestCase {
         let entry = try! XCTUnwrap(reloaded.entries.first)
         XCTAssertEqual(entry.sleep, .deeply)
         XCTAssertEqual(entry.feelings, ["Happy", "Calm"])
-        XCTAssertTrue(entry.tookBloodPressure)
+        XCTAssertEqual(entry.tookBloodPressure, true)
         XCTAssertEqual(entry.bloodPressure.systolic, "120")
         XCTAssertEqual(entry.bloodPressure.diastolic, "80")
     }

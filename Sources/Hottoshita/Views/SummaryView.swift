@@ -131,7 +131,7 @@ struct SummaryView: View {
             summaryRow(
                 icon: "moon.zzz.fill",
                 label: "Sleep",
-                value: String(localized: String.LocalizationValue(answers.sleep.rawValue))
+                value: String(localized: String.LocalizationValue(answers.sleep?.rawValue ?? ""))
             )
             summaryRow(
                 icon: "face.smiling",
@@ -141,7 +141,7 @@ struct SummaryView: View {
             summaryRow(
                 icon: "heart.fill",
                 label: "Blood Pressure",
-                value: answers.tookBloodPressure && answers.bloodPressure.isValid
+                value: (answers.tookBloodPressure ?? false) && answers.bloodPressure.isValid
                     ? answers.bloodPressure.formatted
                     : String(localized: "Not taken")
             )
@@ -191,31 +191,36 @@ struct SummaryView: View {
             .buttonStyle(.borderedProminent)
             .tint(appTheme.accent)
 
-            Button {
-                // Finishing without emailing still counts as today's
-                // check-in and shows up in History.
-                if !saved {
-                    store.save(answers)
-                    saved = true
+            // Done and Start Over share a row instead of each taking a full
+            // width row — on a 13" iPad portrait, three stacked full-width
+            // buttons pushed Start Over below the fold, forcing a scroll.
+            HStack(spacing: 16) {
+                Button {
+                    // Finishing without emailing still counts as today's
+                    // check-in and shows up in History.
+                    if !saved {
+                        store.save(answers)
+                        saved = true
+                    }
+                    dismiss()
+                } label: {
+                    Text("Done")
+                        .font(.title3.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, isCompactHeight ? 10 : 16)
                 }
-                dismiss()
-            } label: {
-                Text("Done")
-                    .font(.title3.bold())
-                    .frame(maxWidth: 420)
-                    .padding(.vertical, isCompactHeight ? 10 : 16)
-            }
-            .buttonStyle(.bordered)
-            .tint(appTheme.accent)
+                .buttonStyle(.bordered)
+                .tint(appTheme.accent)
 
-            Button(action: onStartOver) {
-                Label("Start Over", systemImage: "arrow.counterclockwise")
-                    .font(.title3)
-                    .frame(maxWidth: 420)
-                    .padding(.vertical, isCompactHeight ? 8 : 12)
+                Button(action: onStartOver) {
+                    Label("Start Over", systemImage: "arrow.counterclockwise")
+                        .font(.title3)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, isCompactHeight ? 10 : 16)
+                }
+                .buttonStyle(.bordered)
+                .tint(.gray)
             }
-            .buttonStyle(.bordered)
-            .tint(.gray)
         }
     }
 
