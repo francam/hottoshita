@@ -34,6 +34,9 @@ struct HottoshitaApp: App {
             UserDefaults.standard.set("test@example.com", forKey: "contactEmail")
         }
         #endif
+        // Starts observing UserDefaults / NSUbiquitousKeyValueStore now, so
+        // changes made before Settings is ever opened still sync.
+        _ = iCloudSettingsSync.shared
     }
 
     var body: some Scene {

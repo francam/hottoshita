@@ -156,3 +156,10 @@
 "Send everything" = "Send everything";
 "Only today's" = "Only today's";
 "Send Unsent Check-ins" = "Send Unsent Check-ins";
+
+// iCloud sync
+"iCloud Sync" = "iCloud Sync";
+"Sync between your devices" = "Sync between your devices";
+"sync.description" = "Your check-in history and settings sync privately between your own devices signed in with the same Apple ID.";
+"iCloud Sync Unavailable" = "iCloud Sync Unavailable";
+"Please sign in to iCloud in the Settings app to sync between your devices." = "Please sign in to iCloud in the Settings app to sync between your devices.";

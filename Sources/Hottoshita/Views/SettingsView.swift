@@ -1,3 +1,4 @@
+import CloudKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -5,6 +6,7 @@ struct SettingsView: View {
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
     @EnvironmentObject private var appTheme: AppTheme
+    @EnvironmentObject private var store: CheckInStore
 
     @AppStorage("reminderEnabled") private var reminderEnabled = false
     @AppStorage("reminderMinutes") private var reminderMinutes = 9 * 60  // 09:00
@@ -14,8 +16,10 @@ struct SettingsView: View {
     @State private var emailInput = ""
     @State private var reminderEnabledInput = false
     @State private var reminderMinutesInput = 9 * 60
+    @State private var iCloudSyncInput = false
     @State private var showContactPicker = false
     @State private var showNotificationsDenied = false
+    @State private var showiCloudSyncUnavailable = false
     // Background colour still applies live as swatches are tapped (so the
     // whole app previews the choice), but Cancel restores this so browsing
     // swatches isn't itself a commit.
@@ -98,6 +102,16 @@ struct SettingsView: View {
                     }
                     .padding(.vertical, 8)
                 }
+
+                Section {
+                    Toggle("Sync between your devices", isOn: $iCloudSyncInput)
+                        .font(.title3)
+                        .tint(appTheme.accent)
+                } header: {
+                    Text("iCloud Sync")
+                } footer: {
+                    Text("sync.description")
+                }
             }
             .scrollContentBackground(.hidden)
             .background(appTheme.background)
@@ -137,6 +151,7 @@ struct SettingsView: View {
                 reminderEnabledInput = reminderEnabled
                 reminderMinutesInput = reminderMinutes
                 originalTheme = appTheme.theme
+                iCloudSyncInput = iCloudSettingsSync.shared.isEnabled
             }
             .onChange(of: reminderEnabledInput) { enabled in
                 // Only the permission prompt happens live — actually
@@ -151,6 +166,19 @@ struct SettingsView: View {
                     }
                 }
             }
+            .onChange(of: iCloudSyncInput) { enabled in
+                // Same pattern as the reminder toggle above: only check
+                // account availability live, actually turning sync on is
+                // deferred to save() so Cancel can still back out.
+                guard enabled else { return }
+                Task {
+                    let status = try? await CKContainer(identifier: "iCloud.com.hottoshita.app").accountStatus()
+                    if status != .available {
+                        iCloudSyncInput = false
+                        showiCloudSyncUnavailable = true
+                    }
+                }
+            }
             .alert("Notifications Disabled", isPresented: $showNotificationsDenied) {
                 Button("Open Settings") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -160,6 +188,16 @@ struct SettingsView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text("Please allow notifications for Hottoshita in the Settings app.")
+            }
+            .alert("iCloud Sync Unavailable", isPresented: $showiCloudSyncUnavailable) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please sign in to iCloud in the Settings app to sync between your devices.")
             }
             .background(
                 ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
@@ -214,6 +252,20 @@ struct SettingsView: View {
         } else {
             ReminderScheduler.cancel()
         }
+
+        if iCloudSyncInput != iCloudSettingsSync.shared.isEnabled {
+            iCloudSettingsSync.shared.isEnabled = iCloudSyncInput
+            if iCloudSyncInput {
+                // Backfill: push everything already on this device up, and
+                // pull down anything already synced from another device.
+                let entriesToPush = store.entries
+                Task {
+                    CheckInCloudSync.shared.pushAll(entriesToPush)
+                    await store.syncWithCloud()
+                }
+            }
+        }
+
         dismiss()
     }
 }

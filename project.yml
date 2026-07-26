@@ -43,6 +43,7 @@ targets:
     dependencies:
       - sdk: MessageUI.framework
       - sdk: ContactsUI.framework
+      - sdk: CloudKit.framework
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.hottoshita.app
@@ -51,6 +52,7 @@ targets:
         ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES: icon-pink icon-lavender icon-mint icon-sky icon-peach icon-lemon
         DEVELOPMENT_TEAM: 7G685PLH5A
         CODE_SIGN_STYLE: Automatic
+        CODE_SIGN_ENTITLEMENTS: Hottoshita/Hottoshita.entitlements
 
   HottoshitaTests:
     type: bundle.unit-test

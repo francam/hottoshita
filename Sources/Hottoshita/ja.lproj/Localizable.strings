@@ -156,3 +156,10 @@
 "Send everything" = "すべて送る";
 "Only today's" = "今日の分だけ";
 "Send Unsent Check-ins" = "未送信のチェックインを送る";
+
+// iCloud sync
+"iCloud Sync" = "iCloud 同期";
+"Sync between your devices" = "端末間で同期する";
+"sync.description" = "チェックイン履歴と設定は、同じ Apple ID でサインインしたご自身の他の端末と非公開で同期されます。";
+"iCloud Sync Unavailable" = "iCloud 同期を利用できません";
+"Please sign in to iCloud in the Settings app to sync between your devices." = "端末間で同期するには、設定アプリで iCloud にサインインしてください。";
