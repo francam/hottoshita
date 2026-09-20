@@ -215,6 +215,8 @@ struct SummaryView: View {
                 } label: {
                     Text("Done")
                         .font(.title3.bold())
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, isCompactHeight ? 10 : 16)
                 }
@@ -228,6 +230,8 @@ struct SummaryView: View {
                         Image(systemName: "arrow.counterclockwise").accessibilityHidden(true)
                     }
                     .font(.title3)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, isCompactHeight ? 10 : 16)
                 }

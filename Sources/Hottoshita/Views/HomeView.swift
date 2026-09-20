@@ -161,11 +161,15 @@ struct HomeView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             Button { showCheckIn = true } label: {
-                Label("Submit again anyway", systemImage: "arrow.clockwise")
-                    .font(.title3.weight(.semibold))
-                    .minimumScaleFactor(0.8)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 8)
+                HStack(alignment: .center, spacing: 6) {
+                    Image(systemName: "arrow.clockwise")
+                        .accessibilityHidden(true)
+                    Text("Submit again anyway")
+                }
+                .font(.title3.weight(.semibold))
+                .minimumScaleFactor(0.8)
+                .padding(.vertical, 10)
+                .padding(.horizontal, 8)
             }
             .buttonStyle(.bordered)
             .tint(appTheme.accent)
