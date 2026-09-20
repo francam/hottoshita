@@ -116,6 +116,7 @@ struct SummaryView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: isCompactHeight ? 40 : 64))
                 .foregroundStyle(appTheme.accent)
+                .accessibilityHidden(true)
             Text("Check-in Complete")
                 .font(.largeTitle.bold())
                 .minimumScaleFactor(0.6)
@@ -151,9 +152,13 @@ struct SummaryView: View {
     private var actionsBlock: some View {
         VStack(spacing: isCompactHeight ? 12 : 16) {
             if reportSent {
-                Label("Report sent!", systemImage: "checkmark.circle.fill")
-                    .font(.title3.bold())
-                    .foregroundStyle(appTheme.accent)
+                Label {
+                    Text("Report sent!")
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill").accessibilityHidden(true)
+                }
+                .font(.title3.bold())
+                .foregroundStyle(appTheme.accent)
             } else {
                 Text("Will be sent to: \(contactName)")
                     .font(.title3)
@@ -182,11 +187,15 @@ struct SummaryView: View {
                     showMail = true
                 }
             } label: {
-                Label(reportSent ? "Send Again" : "Send Report", systemImage: "envelope.fill")
-                    .font(.title2.bold())
-                    .foregroundStyle(appTheme.onAccent)
-                    .frame(maxWidth: 420)
-                    .padding(.vertical, isCompactHeight ? 14 : 22)
+                Label {
+                    Text(reportSent ? "Send Again" : "Send Report")
+                } icon: {
+                    Image(systemName: "envelope.fill").accessibilityHidden(true)
+                }
+                .font(.title2.bold())
+                .foregroundStyle(appTheme.onAccent)
+                .frame(maxWidth: 420)
+                .padding(.vertical, isCompactHeight ? 14 : 22)
             }
             .buttonStyle(.borderedProminent)
             .tint(appTheme.accent)
@@ -213,10 +222,14 @@ struct SummaryView: View {
                 .tint(appTheme.accent)
 
                 Button(action: onStartOver) {
-                    Label("Start Over", systemImage: "arrow.counterclockwise")
-                        .font(.title3)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, isCompactHeight ? 10 : 16)
+                    Label {
+                        Text("Start Over")
+                    } icon: {
+                        Image(systemName: "arrow.counterclockwise").accessibilityHidden(true)
+                    }
+                    .font(.title3)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, isCompactHeight ? 10 : 16)
                 }
                 .buttonStyle(.bordered)
                 .tint(.gray)
@@ -230,6 +243,7 @@ struct SummaryView: View {
                 .font(.title3)
                 .foregroundStyle(appTheme.accent)
                 .frame(width: 36)
+                .accessibilityHidden(true)
             Text(label)
                 .font(.title3)
             Spacer()

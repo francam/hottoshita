@@ -106,6 +106,7 @@ struct HomeView: View {
             VStack(spacing: 16) {
                 Image(systemName: "heart.text.clipboard.fill")
                     .font(.system(size: isCompactHeight ? 40 : 56))
+                    .accessibilityHidden(true)
                 Text("Start Today's Check-in")
                     .font(.title.bold())
                     .minimumScaleFactor(0.7)
@@ -136,6 +137,7 @@ struct HomeView: View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon).font(.title2)
+                    .accessibilityHidden(true)
                 Text(title).font(.title3.weight(.semibold))
             }
             .frame(maxWidth: .infinity)

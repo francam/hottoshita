@@ -60,6 +60,7 @@ struct StepHeader: View {
                 Image(systemName: icon)
                     .font(.system(size: isCompactHeight ? 40 : iconSize))
                     .foregroundStyle(appTheme.accent)
+                    .accessibilityHidden(true)
             }
             Text(question)
                 .font(.largeTitle.bold())

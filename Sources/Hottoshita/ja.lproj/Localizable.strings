@@ -91,7 +91,7 @@
 "Will be sent to: %@" = "送信先：%@";
 "Send Report" = "レポートを送る";
 "Done" = "完了";
-"Start Over" = "最初からやり直す";
+"Start Over" = "やり直す";
 "Cannot Send Email" = "メールを送信できません";
 "Please configure an email account on this device to send reports." = "レポートを送信するには、この端末でメールアカウントを設定してください。";
 

@@ -24,6 +24,11 @@ struct SettingsView: View {
     // whole app previews the choice), but Cancel restores this so browsing
     // swatches isn't itself a commit.
     @State private var originalTheme: ColorTheme = .default
+    // `onAppear` assigns into `reminderEnabledInput`/`iCloudSyncInput` from
+    // stored state, which would otherwise trigger their `onChange` handlers
+    // as if the user had just flipped the toggle. Guards those handlers
+    // until the initial load has finished.
+    @State private var hasLoadedInitialState = false
     @Environment(\.dismiss) private var dismiss
 
     // Staged the same way as the name/contact fields above — bound directly
@@ -78,8 +83,12 @@ struct SettingsView: View {
                     Button {
                         showContactPicker = true
                     } label: {
-                        Label("Choose from Contacts", systemImage: "person.crop.circle.badge.plus")
-                            .font(.title3)
+                        Label {
+                            Text("Choose from Contacts")
+                        } icon: {
+                            Image(systemName: "person.crop.circle.badge.plus").accessibilityHidden(true)
+                        }
+                        .font(.title3)
                     }
                     .foregroundStyle(appTheme.accent)
                 }
@@ -152,11 +161,13 @@ struct SettingsView: View {
                 reminderMinutesInput = reminderMinutes
                 originalTheme = appTheme.theme
                 iCloudSyncInput = iCloudSettingsSync.shared.isEnabled
+                hasLoadedInitialState = true
             }
             .onChange(of: reminderEnabledInput) { enabled in
                 // Only the permission prompt happens live — actually
                 // scheduling or cancelling the notification is deferred to
                 // save() so Cancel can still back out of this.
+                guard hasLoadedInitialState else { return }
                 if enabled {
                     Task {
                         if !(await ReminderScheduler.requestAuthorization()) {
@@ -170,7 +181,7 @@ struct SettingsView: View {
                 // Same pattern as the reminder toggle above: only check
                 // account availability live, actually turning sync on is
                 // deferred to save() so Cancel can still back out.
-                guard enabled else { return }
+                guard hasLoadedInitialState, enabled else { return }
                 Task {
                     let status = try? await CKContainer(identifier: "iCloud.com.hottoshita.app").accountStatus()
                     if status != .available {
@@ -222,7 +233,7 @@ struct SettingsView: View {
                         Circle().stroke(selected ? appTheme.accent : Color.secondary.opacity(0.3), lineWidth: selected ? 3 : 1)
                     )
                     .overlay(
-                        selected ? Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent) : nil
+                        selected ? Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent).accessibilityHidden(true) : nil
                     )
                 Text(theme.label)
                     .font(.caption2)
@@ -230,6 +241,7 @@ struct SettingsView: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private func formRow(label: LocalizedStringKey, @ViewBuilder field: () -> some View) -> some View {

@@ -18,10 +18,14 @@ struct CheckInFlowView: View {
                     Button {
                         withAnimation(.easeInOut(duration: 0.25)) { step -= 1 }
                     } label: {
-                        Label("Back", systemImage: "chevron.left")
-                            .font(.title3.weight(.semibold))
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 6)
+                        Label {
+                            Text("Back")
+                        } icon: {
+                            Image(systemName: "chevron.left").accessibilityHidden(true)
+                        }
+                        .font(.title3.weight(.semibold))
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 6)
                     }
                     .buttonStyle(.bordered)
                     .tint(appTheme.accent)
@@ -30,10 +34,14 @@ struct CheckInFlowView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Label("Cancel", systemImage: "xmark")
-                        .font(.title3.weight(.semibold))
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 6)
+                    Label {
+                        Text("Cancel")
+                    } icon: {
+                        Image(systemName: "xmark").accessibilityHidden(true)
+                    }
+                    .font(.title3.weight(.semibold))
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 6)
                 }
                 .buttonStyle(.bordered)
                 .tint(appTheme.accent)
@@ -44,6 +52,7 @@ struct CheckInFlowView: View {
             if step < summaryStep {
                 ProgressView(value: Double(step + 1), total: Double(totalSteps))
                     .tint(appTheme.accent)
+                    .accessibilityHidden(true)
                     .padding(.horizontal)
                     .padding(.bottom, 6)
 

@@ -21,8 +21,12 @@ final class OnboardingUITests: XCTestCase {
     }
 
     private func dismissKeyboard() {
+        // Inject the keystroke directly instead of locating and tapping the
+        // on-screen keyboard's Return button — that AX hit-test/scroll path
+        // is what's flaky in headless/sandboxed simulator sessions. This
+        // also works regardless of which text field currently has focus.
         if app.keyboards.count > 0 {
-            app.keyboards.buttons["return"].tap()
+            app.typeText("\n")
         }
     }
 
@@ -57,9 +61,13 @@ final class OnboardingUITests: XCTestCase {
         app.buttons["Choose from Contacts"].tap()
 
         // The contact picker runs out-of-process in ContactsViewService.
-        // Simulators (especially beta runtimes) often fail to render remote
-        // view controller content, so treat that as a skip, not a failure —
-        // verify on a real device.
+        // Confirmed 2026-09-20: this isn't a beta-simulator quirk or a
+        // timing issue (still skips here after a 20s wait, on a stable
+        // Xcode/iOS simulator) — it renders fine both on a real device and
+        // when the app is driven live outside XCTest, so XCTest itself
+        // appears unable to render another process's remote view controller
+        // into its hierarchy. Treat that as a skip, not a failure, and rely
+        // on the real-device/manual verification instead.
         let picker = XCUIApplication(bundleIdentifier: "com.apple.ContactsViewService")
         guard picker.navigationBars.firstMatch.waitForExistence(timeout: 5) else {
             throw XCTSkip("Contact picker remote content did not render (known simulator limitation)")

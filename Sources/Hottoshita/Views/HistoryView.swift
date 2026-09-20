@@ -30,6 +30,7 @@ struct HistoryView: View {
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.system(size: 48))
                                 .foregroundStyle(.secondary)
+                                .accessibilityHidden(true)
                             Text("No Check-ins Yet")
                                 .font(.headline)
                             Text("Your completed check-ins will appear here.")
@@ -89,11 +90,15 @@ struct HistoryView: View {
                             showMailError = true
                         }
                     } label: {
-                        Label("Send Unsent Check-ins", systemImage: "envelope.fill")
-                            .font(.title3.bold())
-                            .foregroundStyle(appTheme.onAccent)
-                            .frame(maxWidth: 420)
-                            .padding(.vertical, 14)
+                        Label {
+                            Text("Send Unsent Check-ins")
+                        } icon: {
+                            Image(systemName: "envelope.fill").accessibilityHidden(true)
+                        }
+                        .font(.title3.bold())
+                        .foregroundStyle(appTheme.onAccent)
+                        .frame(maxWidth: 420)
+                        .padding(.vertical, 14)
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(appTheme.accent)
@@ -178,6 +183,7 @@ private struct HistoryRowView: View {
             Image(systemName: icon)
                 .foregroundStyle(appTheme.accent)
                 .frame(width: 20)
+                .accessibilityHidden(true)
             Text(label)
                 .foregroundStyle(.secondary)
             Text(value)
