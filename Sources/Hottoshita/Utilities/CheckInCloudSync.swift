@@ -72,7 +72,11 @@ final class CheckInCloudSync {
             return []
         }
 
-        let query = CKQuery(recordType: Self.recordType, predicate: NSPredicate(value: true))
+        // NSPredicate(value: true) would query against recordName, which has
+        // no queryable index by default and fails with "Field 'recordName'
+        // is not marked queryable". Querying on `date` instead works with a
+        // queryable index on that field, which we do control in the schema.
+        let query = CKQuery(recordType: Self.recordType, predicate: NSPredicate(format: "date > %@", Date.distantPast as NSDate))
         let results: [(CKRecord.ID, Result<CKRecord, Error>)]
         do {
             (results, _) = try await database.records(matching: query)
