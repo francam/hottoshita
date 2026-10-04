@@ -20,6 +20,8 @@ struct CheckInFlowView: View {
                     } label: {
                         Label {
                             Text("Back")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
                         } icon: {
                             Image(systemName: "chevron.left").accessibilityHidden(true)
                         }
@@ -36,6 +38,8 @@ struct CheckInFlowView: View {
                 } label: {
                     Label {
                         Text("Cancel")
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
                     } icon: {
                         Image(systemName: "xmark").accessibilityHidden(true)
                     }

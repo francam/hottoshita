@@ -41,6 +41,8 @@ struct OnboardingView: View {
                     } label: {
                         Label {
                             Text("Back")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
                         } icon: {
                             Image(systemName: "chevron.left").accessibilityHidden(true)
                         }
@@ -288,6 +290,8 @@ private struct OnboardingContactStep: View {
             Button { showContactPicker = true } label: {
                 Label {
                     Text("Choose from Contacts")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                 } icon: {
                     Image(systemName: "person.crop.circle.badge.plus").accessibilityHidden(true)
                 }
@@ -378,6 +382,8 @@ private struct OnboardingReminderStep: View {
                     Button { withAnimation { wantsReminder = true } } label: {
                         Label {
                             Text("Yes, remind me")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
                         } icon: {
                             Image(systemName: "bell.fill").accessibilityHidden(true)
                         }

@@ -10,6 +10,7 @@ struct SummaryView: View {
     @AppStorage("contactEmail") private var contactEmail = ""
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var store: CheckInStore
     @EnvironmentObject private var appTheme: AppTheme
 
@@ -154,6 +155,8 @@ struct SummaryView: View {
             if reportSent {
                 Label {
                     Text("Report sent!")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                 } icon: {
                     Image(systemName: "checkmark.circle.fill").accessibilityHidden(true)
                 }
@@ -189,6 +192,8 @@ struct SummaryView: View {
             } label: {
                 Label {
                     Text(reportSent ? "Send Again" : "Send Report")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
                 } icon: {
                     Image(systemName: "envelope.fill").accessibilityHidden(true)
                 }
@@ -203,42 +208,60 @@ struct SummaryView: View {
             // Done and Start Over share a row instead of each taking a full
             // width row — on a 13" iPad portrait, three stacked full-width
             // buttons pushed Start Over below the fold, forcing a scroll.
-            HStack(spacing: 16) {
-                Button {
-                    // Finishing without emailing still counts as today's
-                    // check-in and shows up in History.
-                    if !saved {
-                        store.save(answers)
-                        saved = true
-                    }
-                    dismiss()
-                } label: {
-                    Text("Done")
-                        .font(.title3.bold())
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.7)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, isCompactHeight ? 10 : 16)
+            // At accessibility text sizes, though, cramming both into half
+            // the width each truncates "Start Over" to "Star…" even after
+            // shrinking — stack them instead, since scrolling is already
+            // expected at these sizes.
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(spacing: 12) {
+                    doneButton
+                    startOverButton
                 }
-                .buttonStyle(.bordered)
-                .tint(appTheme.accent)
-
-                Button(action: onStartOver) {
-                    Label {
-                        Text("Start Over")
-                    } icon: {
-                        Image(systemName: "arrow.counterclockwise").accessibilityHidden(true)
-                    }
-                    .font(.title3)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, isCompactHeight ? 10 : 16)
+            } else {
+                HStack(spacing: 16) {
+                    doneButton
+                    startOverButton
                 }
-                .buttonStyle(.bordered)
-                .tint(.gray)
             }
         }
+    }
+
+    private var doneButton: some View {
+        Button {
+            // Finishing without emailing still counts as today's check-in
+            // and shows up in History.
+            if !saved {
+                store.save(answers)
+                saved = true
+            }
+            dismiss()
+        } label: {
+            Text("Done")
+                .font(.title3.bold())
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, isCompactHeight ? 10 : 16)
+        }
+        .buttonStyle(.bordered)
+        .tint(appTheme.accent)
+    }
+
+    private var startOverButton: some View {
+        Button(action: onStartOver) {
+            Label {
+                Text("Start Over")
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            } icon: {
+                Image(systemName: "arrow.counterclockwise").accessibilityHidden(true)
+            }
+            .font(.title3)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, isCompactHeight ? 10 : 16)
+        }
+        .buttonStyle(.bordered)
+        .tint(.gray)
     }
 
     private func summaryRow(icon: String, label: LocalizedStringKey, value: String) -> some View {

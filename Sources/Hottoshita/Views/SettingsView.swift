@@ -85,6 +85,8 @@ struct SettingsView: View {
                     } label: {
                         Label {
                             Text("Choose from Contacts")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
                         } icon: {
                             Image(systemName: "person.crop.circle.badge.plus").accessibilityHidden(true)
                         }

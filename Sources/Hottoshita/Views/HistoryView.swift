@@ -92,6 +92,8 @@ struct HistoryView: View {
                     } label: {
                         Label {
                             Text("Send Unsent Check-ins")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
                         } icon: {
                             Image(systemName: "envelope.fill").accessibilityHidden(true)
                         }
