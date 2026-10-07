@@ -2,6 +2,11 @@ import Foundation
 
 @MainActor
 final class CheckInStore: ObservableObject {
+    /// Lets non-view code (ReminderScheduler call sites outside SwiftUI,
+    /// like iCloudSettingsSync) check `submittedToday` without needing
+    /// CheckInStore threaded through as a dependency everywhere.
+    static private(set) weak var current: CheckInStore?
+
     @Published private(set) var entries: [CheckInAnswers] = []
 
     private let fileURL: URL
@@ -11,6 +16,7 @@ final class CheckInStore: ObservableObject {
             .urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("checkins.json")
         load()
+        Self.current = self
         Task { [weak self] in await self?.syncWithCloud() }
     }
 
@@ -23,6 +29,16 @@ final class CheckInStore: ObservableObject {
         entries.append(answers)
         persist()
         CheckInCloudSync.shared.push(answers)
+        rescheduleReminderIfNeeded()
+    }
+
+    /// An early check-in shouldn't still get nagged at by today's reminder —
+    /// roll it to tomorrow instead of leaving it firing at the usual time.
+    private func rescheduleReminderIfNeeded() {
+        let defaults = UserDefaults.standard
+        guard defaults.bool(forKey: "reminderEnabled") else { return }
+        let minutes = defaults.object(forKey: "reminderMinutes") as? Int ?? 9 * 60
+        ReminderScheduler.scheduleNext(hour: minutes / 60, minute: minutes % 60, submittedToday: submittedToday)
     }
 
     func delete(_ entry: CheckInAnswers) {

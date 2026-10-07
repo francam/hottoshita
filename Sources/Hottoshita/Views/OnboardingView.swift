@@ -420,7 +420,7 @@ private struct OnboardingReminderStep: View {
                 let c = Calendar.current.dateComponents([.hour, .minute], from: pickedTime)
                 reminderMinutes = (c.hour ?? 9) * 60 + (c.minute ?? 0)
                 reminderEnabled = true
-                ReminderScheduler.schedule(hour: c.hour ?? 9, minute: c.minute ?? 0)
+                ReminderScheduler.scheduleNext(hour: c.hour ?? 9, minute: c.minute ?? 0, submittedToday: false)
                 onNext()
             } else {
                 reminderEnabled = false

@@ -72,7 +72,8 @@ final class iCloudSettingsSync {
         guard keys.contains("reminderEnabled") || keys.contains("reminderMinutes") else { return }
         if defaults.bool(forKey: "reminderEnabled") {
             let minutes = defaults.object(forKey: "reminderMinutes") as? Int ?? 9 * 60
-            ReminderScheduler.schedule(hour: minutes / 60, minute: minutes % 60)
+            let submittedToday = CheckInStore.current?.submittedToday ?? false
+            ReminderScheduler.scheduleNext(hour: minutes / 60, minute: minutes % 60, submittedToday: submittedToday)
         } else {
             ReminderScheduler.cancel()
         }

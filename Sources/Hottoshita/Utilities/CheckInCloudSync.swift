@@ -37,8 +37,22 @@ final class CheckInCloudSync {
         let record = CKRecord(recordType: Self.recordType, recordID: CKRecord.ID(recordName: entry.id.uuidString))
         record["payload"] = payload as CKRecordValue
         record["date"] = entry.date as CKRecordValue
-        database.save(record) { [log] _, error in
-            if let error {
+        // database.save(_:) defaults to the .ifServerRecordUnchanged policy,
+        // which compares change tags — but a freshly-built CKRecord has none,
+        // so updating an entry that was already pushed once (e.g. marking it
+        // sent) always lost to a CKError.serverRecordChanged conflict.
+        // .allKeys unconditionally overwrites, which is what we want since
+        // the device doing the push always has the authoritative full state
+        // for that entry.
+        Task { [log, database] in
+            do {
+                let (saveResults, _) = try await database.modifyRecords(
+                    saving: [record], deleting: [], savePolicy: .allKeys, atomically: true
+                )
+                if case .failure(let error) = saveResults[record.recordID] {
+                    log.error("push failed for \(entry.id, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                }
+            } catch {
                 log.error("push failed for \(entry.id, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }

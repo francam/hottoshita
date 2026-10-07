@@ -262,7 +262,7 @@ struct SettingsView: View {
         reminderEnabled = reminderEnabledInput
         reminderMinutes = reminderMinutesInput
         if reminderEnabledInput {
-            ReminderScheduler.schedule(hour: reminderMinutesInput / 60, minute: reminderMinutesInput % 60)
+            ReminderScheduler.scheduleNext(hour: reminderMinutesInput / 60, minute: reminderMinutesInput % 60, submittedToday: store.submittedToday)
         } else {
             ReminderScheduler.cancel()
         }
