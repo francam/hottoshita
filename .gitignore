@@ -17,3 +17,6 @@ xcuserdata/
 # Local working notes, not part of the project
 DEVICE-TEST-CHECKLIST.md
 PLAN.md
+
+# App Store screenshots + the patch that regenerates them (git apply)
+AppStoreScreenshots/
