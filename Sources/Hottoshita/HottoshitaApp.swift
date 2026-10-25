@@ -45,6 +45,7 @@ struct HottoshitaApp: App {
                 .environmentObject(store)
                 .environmentObject(appTheme)
                 .cappedDynamicType()
+                .detectsShortHeight()
         }
     }
 }
