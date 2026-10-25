@@ -10,6 +10,7 @@ struct SummaryView: View {
     @AppStorage("contactEmail") private var contactEmail = ""
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.isDense) private var isDense
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var store: CheckInStore
     @EnvironmentObject private var appTheme: AppTheme
@@ -46,7 +47,7 @@ struct SummaryView: View {
                         }
                         .padding(.horizontal, 24)
                     } else {
-                        VStack(spacing: 36) {
+                        VStack(spacing: isDense ? 20 : 36) {
                             headerBlock
                                 .padding(.top, 8)
 
@@ -57,7 +58,7 @@ struct SummaryView: View {
 
                             actionsBlock
                                 .padding(.horizontal, 48)
-                                .padding(.bottom, 40)
+                                .padding(.bottom, isDense ? 16 : 40)
                         }
                     }
                 }
@@ -115,7 +116,7 @@ struct SummaryView: View {
     private var headerBlock: some View {
         VStack(spacing: 8) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: isCompactHeight ? 40 : 64))
+                .font(.system(size: isDense ? 40 : 64))
                 .foregroundStyle(appTheme.accent)
                 .accessibilityHidden(true)
             Text("Check-in Complete")
@@ -129,7 +130,7 @@ struct SummaryView: View {
     }
 
     private var summaryRows: some View {
-        VStack(spacing: isCompactHeight ? 10 : 14) {
+        VStack(spacing: isDense ? 10 : 14) {
             summaryRow(
                 icon: "moon.zzz.fill",
                 label: "Sleep",
@@ -152,7 +153,7 @@ struct SummaryView: View {
     }
 
     private var actionsBlock: some View {
-        VStack(spacing: isCompactHeight ? 12 : 16) {
+        VStack(spacing: isDense ? 12 : 16) {
             if reportSent {
                 Label {
                     Text("Report sent!")
@@ -201,7 +202,7 @@ struct SummaryView: View {
                 .font(.title2.bold())
                 .foregroundStyle(appTheme.onAccent)
                 .frame(maxWidth: 420)
-                .padding(.vertical, isCompactHeight ? 14 : 22)
+                .padding(.vertical, isDense ? 14 : 22)
             }
             .buttonStyle(.borderedProminent)
             .tint(appTheme.accent)
@@ -242,7 +243,7 @@ struct SummaryView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, isCompactHeight ? 10 : 16)
+                .padding(.vertical, isDense ? 10 : 16)
         }
         .buttonStyle(.bordered)
         .tint(appTheme.accent)
@@ -259,7 +260,7 @@ struct SummaryView: View {
             }
             .font(.title3)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, isCompactHeight ? 10 : 16)
+            .padding(.vertical, isDense ? 10 : 16)
         }
         .buttonStyle(.bordered)
         .tint(.gray)
@@ -283,7 +284,7 @@ struct SummaryView: View {
                 .lineLimit(singleLine ? 1 : nil)
                 .minimumScaleFactor(singleLine ? 0.7 : 1)
         }
-        .padding(.vertical, isCompactHeight ? 8 : 16)
+        .padding(.vertical, isDense ? 8 : 16)
         .padding(.horizontal, 16)
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 14))
     }

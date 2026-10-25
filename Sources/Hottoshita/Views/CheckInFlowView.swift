@@ -5,6 +5,7 @@ struct CheckInFlowView: View {
     @State private var step = 0
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.isDense) private var isDense
     @EnvironmentObject private var appTheme: AppTheme
 
     // Steps: 0=sleep, 1=feeling, 2=bp-yn, 3=bp-input (conditional), summary
@@ -51,7 +52,7 @@ struct CheckInFlowView: View {
                 .tint(appTheme.accent)
             }
             .padding(.horizontal)
-            .padding(.vertical, isCompactHeight ? 6 : 16)
+            .padding(.vertical, isDense ? 6 : 16)
 
             if step < summaryStep {
                 ProgressView(value: Double(step + 1), total: Double(totalSteps))
@@ -63,7 +64,7 @@ struct CheckInFlowView: View {
                 Text("Question \(step + 1) of \(totalSteps)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .padding(.bottom, isCompactHeight ? 8 : 24)
+                    .padding(.bottom, isDense ? 8 : 24)
             }
 
             // Portrait: scrollable as a safety net for very large text sizes;
@@ -88,7 +89,7 @@ struct CheckInFlowView: View {
                                 insertion: .move(edge: .trailing).combined(with: .opacity),
                                 removal: .move(edge: .leading).combined(with: .opacity)
                             ))
-                            .padding(.vertical, 16)
+                            .padding(.vertical, isDense ? 8 : 16)
                             .frame(maxWidth: .infinity, minHeight: geo.size.height)
                     }
                 }
@@ -152,6 +153,7 @@ struct CheckInFlowView: View {
 
 private struct SingleChoiceStepView: View {
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.isDense) private var isDense
     @EnvironmentObject private var appTheme: AppTheme
     let question: LocalizedStringKey
     let icon: String
@@ -163,7 +165,7 @@ private struct SingleChoiceStepView: View {
         AdaptiveStepLayout(spacing: 48) {
             StepHeader(icon: icon, question: question)
         } controls: {
-            VStack(spacing: isCompactHeight ? 12 : 18) {
+            VStack(spacing: isDense ? 12 : 18) {
                 ForEach(choices, id: \.self) { choice in
                     Button {
                         selection = choice
@@ -176,7 +178,7 @@ private struct SingleChoiceStepView: View {
                             .font(.title2.bold())
                             .minimumScaleFactor(0.7)
                             .frame(maxWidth: 420)
-                            .padding(.vertical, isCompactHeight ? 12 : 24)
+                            .padding(.vertical, isDense ? 12 : 24)
                             .background(
                                 selection == choice ? appTheme.accent : Color(.systemGroupedBackground),
                                 in: RoundedRectangle(cornerRadius: 18)
@@ -195,6 +197,7 @@ private struct SingleChoiceStepView: View {
 
 private struct MultiSelectStepView: View {
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.isDense) private var isDense
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var appTheme: AppTheme
     let question: LocalizedStringKey
@@ -217,10 +220,10 @@ private struct MultiSelectStepView: View {
                     nextButton
                 }
             } else {
-                VStack(spacing: 40) {
+                VStack(spacing: isDense ? 20 : 40) {
                     optionsGrid
                     nextButton
-                        .padding(.bottom, 16)
+                        .padding(.bottom, isDense ? 8 : 16)
                 }
                 .padding(.horizontal, 48)
             }
@@ -235,7 +238,7 @@ private struct MultiSelectStepView: View {
     }
 
     private var optionsGrid: some View {
-        LazyVGrid(columns: gridColumns, spacing: isCompactHeight ? 10 : 16) {
+        LazyVGrid(columns: gridColumns, spacing: isDense ? 10 : 16) {
             ForEach(options, id: \.self) { option in
                 Button {
                     if selections.contains(option) {
@@ -248,7 +251,7 @@ private struct MultiSelectStepView: View {
                         .font(.title3.bold())
                         .minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, isCompactHeight ? 12 : 26)
+                        .padding(.vertical, isDense ? 12 : 26)
                         .background(
                             selections.contains(option) ? appTheme.accent : Color(.systemGroupedBackground),
                             in: RoundedRectangle(cornerRadius: 16)
@@ -266,7 +269,7 @@ private struct MultiSelectStepView: View {
                 .font(.title3.bold())
                 .foregroundStyle(appTheme.onAccent)
                 .frame(maxWidth: 300)
-                .padding(.vertical, isCompactHeight ? 12 : 18)
+                .padding(.vertical, isDense ? 12 : 18)
         }
         .buttonStyle(.borderedProminent)
         .tint(appTheme.accent)
@@ -277,6 +280,7 @@ private struct MultiSelectStepView: View {
 
 private struct YesNoStepView: View {
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.isDense) private var isDense
     @EnvironmentObject private var appTheme: AppTheme
     let question: LocalizedStringKey
     let icon: String
@@ -307,7 +311,7 @@ private struct YesNoStepView: View {
                 .font(.title.bold())
                 .minimumScaleFactor(0.6)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, isCompactHeight ? 20 : 32)
+                .padding(.vertical, isDense ? 20 : 32)
                 .background(
                     value == answer ? appTheme.accent : Color(.systemGroupedBackground),
                     in: RoundedRectangle(cornerRadius: 22)
@@ -322,6 +326,7 @@ private struct YesNoStepView: View {
 
 private struct BloodPressureStepView: View {
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.isDense) private var isDense
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var appTheme: AppTheme
     @Binding var bp: BloodPressure
@@ -342,7 +347,7 @@ private struct BloodPressureStepView: View {
             StepHeader(icon: "waveform.path.ecg", question: "Enter your blood pressure",
                        showIcon: isCompactHeight || !keyboardUp)
         } controls: {
-            VStack(spacing: isCompactHeight ? 16 : keyboardUp ? 24 : 48) {
+            VStack(spacing: isDense ? 16 : keyboardUp ? 24 : 48) {
                 // Fields flex to share the width; a hard minimum here would
                 // overflow an iPhone screen in portrait and clip the step.
                 HStack(spacing: 16) {
@@ -360,7 +365,7 @@ private struct BloodPressureStepView: View {
                         .font(.title3.bold())
                         .foregroundStyle(appTheme.onAccent)
                         .frame(maxWidth: 300)
-                        .padding(.vertical, isCompactHeight ? 12 : 18)
+                        .padding(.vertical, isDense ? 12 : 18)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(appTheme.accent)

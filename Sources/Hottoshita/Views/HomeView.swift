@@ -18,6 +18,9 @@ struct HomeView: View {
     /// Landscape on iPhone: lay content out side-by-side and shrink the
     /// oversized paddings so the screen fits without scrolling.
     private var isCompactHeight: Bool { verticalSizeClass == .compact }
+    @Environment(\.isShortHeight) private var isShortHeight
+    /// Compact height or a short screen (iPhone SE): tighter spacing only.
+    private var isDense: Bool { isCompactHeight || isShortHeight }
 
     private var greeting: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -51,7 +54,7 @@ struct HomeView: View {
                                 .frame(maxWidth: .infinity)
                             }
                         } else {
-                            VStack(spacing: 40) {
+                            VStack(spacing: isShortHeight ? 20 : 40) {
                                 Spacer()
 
                                 greetingBlock
@@ -78,14 +81,17 @@ struct HomeView: View {
         .fullScreenCover(isPresented: $showCheckIn) {
             CheckInFlowView().environmentObject(appTheme).environmentObject(store)
                 .cappedDynamicType()
+                .detectsShortHeight()
         }
         .sheet(isPresented: $showSettings, onDismiss: { appTheme.updateAppIcon() }) {
             SettingsView().environmentObject(appTheme)
                 .cappedDynamicType()
+                .detectsShortHeight()
         }
         .sheet(isPresented: $showHistory) {
             HistoryView().environmentObject(store).environmentObject(appTheme)
                 .cappedDynamicType()
+                .detectsShortHeight()
         }
     }
 
@@ -105,7 +111,7 @@ struct HomeView: View {
         Button { showCheckIn = true } label: {
             VStack(spacing: 16) {
                 Image(systemName: "heart.text.clipboard.fill")
-                    .font(.system(size: isCompactHeight ? 40 : 56))
+                    .font(.system(size: isDense ? 40 : 56))
                     .accessibilityHidden(true)
                 Text("Start Today's Check-in")
                     .font(.title.bold())
@@ -113,7 +119,7 @@ struct HomeView: View {
             }
             .foregroundStyle(appTheme.onAccent)
             .frame(maxWidth: 420)
-            .padding(.vertical, isCompactHeight ? 20 : 32)
+            .padding(.vertical, isDense ? 20 : 32)
             .padding(.horizontal)
         }
         .buttonStyle(.borderedProminent)
@@ -130,7 +136,7 @@ struct HomeView: View {
             homeActionButton(icon: "gear", title: "Settings") { showSettings = true }
         }
         .padding(.horizontal, isCompactHeight ? 16 : 32)
-        .padding(.bottom, isCompactHeight ? 0 : 16)
+        .padding(.bottom, isCompactHeight ? 0 : isShortHeight ? 8 : 16)
     }
 
     private func homeActionButton(icon: String, title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
@@ -141,16 +147,16 @@ struct HomeView: View {
                 Text(title).font(.title3.weight(.semibold))
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 20)
+            .padding(.vertical, isShortHeight ? 14 : 20)
         }
         .buttonStyle(.bordered)
         .tint(appTheme.accent)
     }
 
     private var alreadySubmittedBanner: some View {
-        VStack(spacing: isCompactHeight ? 12 : 16) {
+        VStack(spacing: isDense ? 12 : 16) {
             Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: isCompactHeight ? 44 : 64))
+                .font(.system(size: isDense ? 44 : 64))
                 .foregroundStyle(appTheme.accent)
             Text("Already submitted today!")
                 .font(.title2.bold())
@@ -175,7 +181,7 @@ struct HomeView: View {
             .tint(appTheme.accent)
             .padding(.top, 8)
         }
-        .padding(isCompactHeight ? 16 : 24)
+        .padding(isDense ? 16 : 24)
         .frame(maxWidth: 420)
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 24))
         .padding(.horizontal, isCompactHeight ? 0 : 24)
