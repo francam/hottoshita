@@ -30,6 +30,7 @@ struct HistoryView: View {
                             Image(systemName: "clock.arrow.circlepath")
                                 .font(.system(size: 48))
                                 .foregroundStyle(.secondary)
+                                .accessibilityHidden(true)
                             Text("No Check-ins Yet")
                                 .font(.headline)
                             Text("Your completed check-ins will appear here.")
@@ -89,11 +90,17 @@ struct HistoryView: View {
                             showMailError = true
                         }
                     } label: {
-                        Label("Send Unsent Check-ins", systemImage: "envelope.fill")
-                            .font(.title3.bold())
-                            .foregroundStyle(appTheme.onAccent)
-                            .frame(maxWidth: 420)
-                            .padding(.vertical, 14)
+                        Label {
+                            Text("Send Unsent Check-ins")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                        } icon: {
+                            Image(systemName: "envelope.fill").accessibilityHidden(true)
+                        }
+                        .font(.title3.bold())
+                        .foregroundStyle(appTheme.onAccent)
+                        .frame(maxWidth: 420)
+                        .padding(.vertical, 14)
                     }
                     .buttonStyle(.glassProminent)
                     .tint(appTheme.accent)
@@ -134,7 +141,7 @@ private struct HistoryRowView: View {
     private var feelingsText: String {
         entry.feelings.isEmpty
             ? String(localized: "Not specified")
-            : entry.feelings.map { String(localized: String.LocalizationValue($0)) }.joined(separator: ", ")
+            : entry.feelings.map { String(localized: String.LocalizationValue($0)) }.joined(separator: String(localized: "list.separator"))
     }
 
     var body: some View {
@@ -158,13 +165,13 @@ private struct HistoryRowView: View {
                 historyGridRow(
                     icon: "moon.zzz.fill",
                     label: "Sleep",
-                    value: String(localized: String.LocalizationValue(entry.sleep.rawValue))
+                    value: String(localized: String.LocalizationValue(entry.sleep?.rawValue ?? ""))
                 )
                 historyGridRow(icon: "face.smiling", label: "Feeling", value: feelingsText)
                 historyGridRow(
                     icon: "heart.fill",
                     label: "Blood Pressure",
-                    value: entry.tookBloodPressure && entry.bloodPressure.isValid
+                    value: (entry.tookBloodPressure ?? false) && entry.bloodPressure.isValid
                         ? entry.bloodPressure.formatted
                         : String(localized: "Not taken")
                 )
@@ -178,6 +185,7 @@ private struct HistoryRowView: View {
             Image(systemName: icon)
                 .foregroundStyle(appTheme.accent)
                 .frame(width: 20)
+                .accessibilityHidden(true)
             Text(label)
                 .foregroundStyle(.secondary)
             Text(value)

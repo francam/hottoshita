@@ -87,6 +87,7 @@
 "Feeling" = "Feeling";
 "Blood Pressure" = "Blood Pressure";
 "Not specified" = "Not specified";
+"list.separator" = ", ";
 "Not taken" = "Not taken";
 "Will be sent to: %@" = "Will be sent to: %@";
 "Send Report" = "Send Report";
@@ -156,3 +157,10 @@
 "Send everything" = "Send everything";
 "Only today's" = "Only today's";
 "Send Unsent Check-ins" = "Send Unsent Check-ins";
+
+// iCloud sync
+"iCloud Sync" = "iCloud Sync";
+"Sync between your devices" = "Sync between your devices";
+"sync.description" = "Your check-in history and settings sync privately between your own devices signed in with the same Apple ID.";
+"iCloud Sync Unavailable" = "iCloud Sync Unavailable";
+"Please sign in to iCloud in the Settings app to sync between your devices." = "Please sign in to iCloud in the Settings app to sync between your devices.";

@@ -1,3 +1,4 @@
+import CloudKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -5,6 +6,7 @@ struct SettingsView: View {
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
     @EnvironmentObject private var appTheme: AppTheme
+    @EnvironmentObject private var store: CheckInStore
 
     @AppStorage("reminderEnabled") private var reminderEnabled = false
     @AppStorage("reminderMinutes") private var reminderMinutes = 9 * 60  // 09:00
@@ -12,25 +14,39 @@ struct SettingsView: View {
     @State private var userNameInput = ""
     @State private var contactNameInput = ""
     @State private var emailInput = ""
+    @State private var reminderEnabledInput = false
+    @State private var reminderMinutesInput = 9 * 60
+    @State private var iCloudSyncInput = false
     @State private var showContactPicker = false
     @State private var showNotificationsDenied = false
+    @State private var showiCloudSyncUnavailable = false
+    // Background colour still applies live as swatches are tapped (so the
+    // whole app previews the choice), but Cancel restores this so browsing
+    // swatches isn't itself a commit.
+    @State private var originalTheme: ColorTheme = .default
+    // `onAppear` assigns into `reminderEnabledInput`/`iCloudSyncInput` from
+    // stored state, which would otherwise trigger their `onChange` handlers
+    // as if the user had just flipped the toggle. Guards those handlers
+    // until the initial load has finished.
+    @State private var hasLoadedInitialState = false
     @Environment(\.dismiss) private var dismiss
 
-    private var reminderTime: Binding<Date> {
+    // Staged the same way as the name/contact fields above — bound directly
+    // to @AppStorage, this used to write (and reschedule the real
+    // notification) the instant the user touched it, so Cancel couldn't
+    // undo it. Only `save()` should commit reminder changes.
+    private var reminderTimeInput: Binding<Date> {
         Binding(
             get: {
                 Calendar.current.date(
-                    bySettingHour: reminderMinutes / 60,
-                    minute: reminderMinutes % 60,
+                    bySettingHour: reminderMinutesInput / 60,
+                    minute: reminderMinutesInput % 60,
                     second: 0, of: Date()
                 ) ?? Date()
             },
             set: { newDate in
                 let c = Calendar.current.dateComponents([.hour, .minute], from: newDate)
-                reminderMinutes = (c.hour ?? 9) * 60 + (c.minute ?? 0)
-                if reminderEnabled {
-                    ReminderScheduler.schedule(hour: c.hour ?? 9, minute: c.minute ?? 0)
-                }
+                reminderMinutesInput = (c.hour ?? 9) * 60 + (c.minute ?? 0)
             }
         )
     }
@@ -67,18 +83,24 @@ struct SettingsView: View {
                     Button {
                         showContactPicker = true
                     } label: {
-                        Label("Choose from Contacts", systemImage: "person.crop.circle.badge.plus")
-                            .font(.title3)
+                        Label {
+                            Text("Choose from Contacts")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                        } icon: {
+                            Image(systemName: "person.crop.circle.badge.plus").accessibilityHidden(true)
+                        }
+                        .font(.title3)
                     }
                     .foregroundStyle(appTheme.accent)
                 }
 
                 Section("Daily Reminder") {
-                    Toggle("Remind me every day", isOn: $reminderEnabled)
+                    Toggle("Remind me every day", isOn: $reminderEnabledInput)
                         .font(.title3)
                         .tint(appTheme.accent)
-                    if reminderEnabled {
-                        DatePicker("Time", selection: reminderTime, displayedComponents: .hourAndMinute)
+                    if reminderEnabledInput {
+                        DatePicker("Time", selection: reminderTimeInput, displayedComponents: .hourAndMinute)
                             .font(.title3)
                     }
                 }
@@ -91,6 +113,16 @@ struct SettingsView: View {
                     }
                     .padding(.vertical, 8)
                 }
+
+                Section {
+                    Toggle("Sync between your devices", isOn: $iCloudSyncInput)
+                        .font(.title3)
+                        .tint(appTheme.accent)
+                } header: {
+                    Text("iCloud Sync")
+                } footer: {
+                    Text("sync.description")
+                }
             }
             .scrollContentBackground(.hidden)
             .background(appTheme.background)
@@ -98,13 +130,17 @@ struct SettingsView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button { dismiss() } label: {
+                    Button {
+                        appTheme.theme = originalTheme
+                        dismiss()
+                    } label: {
                         Text("Cancel")
                             .font(.title3.weight(.semibold))
+                            .foregroundStyle(appTheme.onAccent)
                             .padding(.horizontal, 2)
                             .fixedSize()
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.borderedProminent)
                     .tint(appTheme.accent)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -123,22 +159,37 @@ struct SettingsView: View {
                 userNameInput = userName
                 contactNameInput = contactName
                 emailInput = contactEmail
+                reminderEnabledInput = reminderEnabled
+                reminderMinutesInput = reminderMinutes
+                originalTheme = appTheme.theme
+                iCloudSyncInput = iCloudSettingsSync.shared.isEnabled
+                hasLoadedInitialState = true
             }
-            .onChange(of: reminderEnabled) { enabled in
+            .onChange(of: reminderEnabledInput) { enabled in
+                // Only the permission prompt happens live — actually
+                // scheduling or cancelling the notification is deferred to
+                // save() so Cancel can still back out of this.
+                guard hasLoadedInitialState else { return }
                 if enabled {
                     Task {
-                        if await ReminderScheduler.requestAuthorization() {
-                            ReminderScheduler.schedule(
-                                hour: reminderMinutes / 60,
-                                minute: reminderMinutes % 60
-                            )
-                        } else {
-                            reminderEnabled = false
+                        if !(await ReminderScheduler.requestAuthorization()) {
+                            reminderEnabledInput = false
                             showNotificationsDenied = true
                         }
                     }
-                } else {
-                    ReminderScheduler.cancel()
+                }
+            }
+            .onChange(of: iCloudSyncInput) { enabled in
+                // Same pattern as the reminder toggle above: only check
+                // account availability live, actually turning sync on is
+                // deferred to save() so Cancel can still back out.
+                guard hasLoadedInitialState, enabled else { return }
+                Task {
+                    let status = try? await CKContainer(identifier: "iCloud.com.hottoshita.app").accountStatus()
+                    if status != .available {
+                        iCloudSyncInput = false
+                        showiCloudSyncUnavailable = true
+                    }
                 }
             }
             .alert("Notifications Disabled", isPresented: $showNotificationsDenied) {
@@ -150,6 +201,16 @@ struct SettingsView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text("Please allow notifications for Hottoshita in the Settings app.")
+            }
+            .alert("iCloud Sync Unavailable", isPresented: $showiCloudSyncUnavailable) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please sign in to iCloud in the Settings app to sync between your devices.")
             }
             .background(
                 ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
@@ -174,7 +235,7 @@ struct SettingsView: View {
                         Circle().stroke(selected ? appTheme.accent : Color.secondary.opacity(0.3), lineWidth: selected ? 3 : 1)
                     )
                     .overlay(
-                        selected ? Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent) : nil
+                        selected ? Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent).accessibilityHidden(true) : nil
                     )
                 Text(theme.label)
                     .font(.caption2)
@@ -182,6 +243,7 @@ struct SettingsView: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
     private func formRow(label: LocalizedStringKey, @ViewBuilder field: () -> some View) -> some View {
@@ -196,6 +258,28 @@ struct SettingsView: View {
         userName = userNameInput.trimmingCharacters(in: .whitespaces)
         contactName = contactNameInput.trimmingCharacters(in: .whitespaces)
         contactEmail = emailInput.trimmingCharacters(in: .whitespaces)
+
+        reminderEnabled = reminderEnabledInput
+        reminderMinutes = reminderMinutesInput
+        if reminderEnabledInput {
+            ReminderScheduler.scheduleNext(hour: reminderMinutesInput / 60, minute: reminderMinutesInput % 60, submittedToday: store.submittedToday)
+        } else {
+            ReminderScheduler.cancel()
+        }
+
+        if iCloudSyncInput != iCloudSettingsSync.shared.isEnabled {
+            iCloudSettingsSync.shared.isEnabled = iCloudSyncInput
+            if iCloudSyncInput {
+                // Backfill: push everything already on this device up, and
+                // pull down anything already synced from another device.
+                let entriesToPush = store.entries
+                Task {
+                    CheckInCloudSync.shared.pushAll(entriesToPush)
+                    await store.syncWithCloud()
+                }
+            }
+        }
+
         dismiss()
     }
 }

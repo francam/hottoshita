@@ -39,7 +39,14 @@ struct OnboardingView: View {
                     Button {
                         withAnimation(.easeInOut(duration: 0.3)) { step = step == 2 ? 0 : step - 1 }
                     } label: {
-                        Label("Back", systemImage: "chevron.left").font(.title3)
+                        Label {
+                            Text("Back")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                        } icon: {
+                            Image(systemName: "chevron.left").accessibilityHidden(true)
+                        }
+                        .font(.title3)
                     }
                     .foregroundStyle(appTheme.accent)
                 }
@@ -168,6 +175,7 @@ private struct OnboardingGreetingSplash: View {
             Image(systemName: "hand.wave.fill")
                 .font(.system(size: 88))
                 .foregroundStyle(appTheme.accent)
+                .accessibilityHidden(true)
             Text(String(format: NSLocalizedString("greeting.hi", comment: ""), name))
                 .font(.system(size: 52, weight: .bold, design: .rounded))
                 .multilineTextAlignment(.center)
@@ -280,10 +288,16 @@ private struct OnboardingContactStep: View {
     private var fields: some View {
         VStack(spacing: isCompactHeight ? 10 : 16) {
             Button { showContactPicker = true } label: {
-                Label("Choose from Contacts", systemImage: "person.crop.circle.badge.plus")
-                    .font(.title3.weight(.semibold))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, isCompactHeight ? 8 : 12)
+                Label {
+                    Text("Choose from Contacts")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                } icon: {
+                    Image(systemName: "person.crop.circle.badge.plus").accessibilityHidden(true)
+                }
+                .font(.title3.weight(.semibold))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, isCompactHeight ? 8 : 12)
             }
             .buttonStyle(.bordered)
             .tint(accent)
@@ -366,11 +380,17 @@ private struct OnboardingReminderStep: View {
             } else {
                 VStack(spacing: isCompactHeight ? 12 : 16) {
                     Button { withAnimation { wantsReminder = true } } label: {
-                        Label("Yes, remind me", systemImage: "bell.fill")
-                            .font(.title2.bold())
-                            .foregroundStyle(appTheme.onAccent)
-                            .frame(maxWidth: 400)
-                            .padding(.vertical, isCompactHeight ? 14 : 20)
+                        Label {
+                            Text("Yes, remind me")
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.6)
+                        } icon: {
+                            Image(systemName: "bell.fill").accessibilityHidden(true)
+                        }
+                        .font(.title2.bold())
+                        .foregroundStyle(appTheme.onAccent)
+                        .frame(maxWidth: 400)
+                        .padding(.vertical, isCompactHeight ? 14 : 20)
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(appTheme.accent)
@@ -400,7 +420,7 @@ private struct OnboardingReminderStep: View {
                 let c = Calendar.current.dateComponents([.hour, .minute], from: pickedTime)
                 reminderMinutes = (c.hour ?? 9) * 60 + (c.minute ?? 0)
                 reminderEnabled = true
-                ReminderScheduler.schedule(hour: c.hour ?? 9, minute: c.minute ?? 0)
+                ReminderScheduler.scheduleNext(hour: c.hour ?? 9, minute: c.minute ?? 0, submittedToday: false)
                 onNext()
             } else {
                 reminderEnabled = false
@@ -468,13 +488,14 @@ private struct OnboardingColorStep: View {
                     .fill(theme.color)
                     .frame(width: 52, height: 52)
                     .overlay(Circle().stroke(selected ? appTheme.accent : Color.secondary.opacity(0.3), lineWidth: selected ? 3 : 1))
-                    .overlay(selected ? Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent) : nil)
+                    .overlay(selected ? Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent).accessibilityHidden(true) : nil)
                 Text(theme.label)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 

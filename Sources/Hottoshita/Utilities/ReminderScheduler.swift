@@ -9,17 +9,31 @@ enum ReminderScheduler {
             .requestAuthorization(options: [.alert, .sound])) ?? false
     }
 
-    /// Schedules (or reschedules) the repeating daily reminder.
-    static func schedule(hour: Int, minute: Int) {
+    /// Schedules the next occurrence of the daily reminder: today at
+    /// hour:minute, unless that time already passed today or today's
+    /// check-in is already done, in which case it rolls to tomorrow.
+    ///
+    /// Deliberately a one-shot trigger recomputed from scratch each call,
+    /// not a single `repeats: true` trigger — that's what makes "skip
+    /// today's reminder because I already checked in" possible at all.
+    /// Call this whenever reminder settings change, a check-in is saved, or
+    /// the app becomes active (so a one-shot that already fired gets a
+    /// fresh successor).
+    static func scheduleNext(hour: Int, minute: Int, submittedToday: Bool) {
+        let calendar = Calendar.current
+        let now = Date()
+        guard var target = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: now) else { return }
+        if submittedToday || target <= now {
+            target = calendar.date(byAdding: .day, value: 1, to: target) ?? target
+        }
+
         let content = UNMutableNotificationContent()
         content.title = String(localized: "reminder.title")
         content.body = String(localized: "reminder.body")
         content.sound = .default
 
-        var components = DateComponents()
-        components.hour = hour
-        components.minute = minute
-        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: target)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
         let request = UNNotificationRequest(identifier: notificationID, content: content, trigger: trigger)
 
         let center = UNUserNotificationCenter.current()

@@ -10,6 +10,7 @@ struct SummaryView: View {
     @AppStorage("contactEmail") private var contactEmail = ""
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @EnvironmentObject private var store: CheckInStore
     @EnvironmentObject private var appTheme: AppTheme
 
@@ -25,7 +26,7 @@ struct SummaryView: View {
         guard !answers.feelings.isEmpty else { return String(localized: "Not specified") }
         return answers.feelings
             .map { String(localized: String.LocalizationValue($0)) }
-            .joined(separator: ", ")
+            .joined(separator: String(localized: "list.separator"))
     }
 
     var body: some View {
@@ -116,6 +117,7 @@ struct SummaryView: View {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: isCompactHeight ? 40 : 64))
                 .foregroundStyle(appTheme.accent)
+                .accessibilityHidden(true)
             Text("Check-in Complete")
                 .font(.largeTitle.bold())
                 .minimumScaleFactor(0.6)
@@ -131,7 +133,7 @@ struct SummaryView: View {
             summaryRow(
                 icon: "moon.zzz.fill",
                 label: "Sleep",
-                value: String(localized: String.LocalizationValue(answers.sleep.rawValue))
+                value: String(localized: String.LocalizationValue(answers.sleep?.rawValue ?? ""))
             )
             summaryRow(
                 icon: "face.smiling",
@@ -141,9 +143,10 @@ struct SummaryView: View {
             summaryRow(
                 icon: "heart.fill",
                 label: "Blood Pressure",
-                value: answers.tookBloodPressure && answers.bloodPressure.isValid
+                value: (answers.tookBloodPressure ?? false) && answers.bloodPressure.isValid
                     ? answers.bloodPressure.formatted
-                    : String(localized: "Not taken")
+                    : String(localized: "Not taken"),
+                singleLine: true
             )
         }
     }
@@ -151,9 +154,15 @@ struct SummaryView: View {
     private var actionsBlock: some View {
         VStack(spacing: isCompactHeight ? 12 : 16) {
             if reportSent {
-                Label("Report sent!", systemImage: "checkmark.circle.fill")
-                    .font(.title3.bold())
-                    .foregroundStyle(appTheme.accent)
+                Label {
+                    Text("Report sent!")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                } icon: {
+                    Image(systemName: "checkmark.circle.fill").accessibilityHidden(true)
+                }
+                .font(.title3.bold())
+                .foregroundStyle(appTheme.accent)
             } else {
                 Text("Will be sent to: \(contactName)")
                     .font(.title3)
@@ -182,55 +191,97 @@ struct SummaryView: View {
                     showMail = true
                 }
             } label: {
-                Label(reportSent ? "Send Again" : "Send Report", systemImage: "envelope.fill")
-                    .font(.title2.bold())
-                    .foregroundStyle(appTheme.onAccent)
-                    .frame(maxWidth: 420)
-                    .padding(.vertical, isCompactHeight ? 14 : 22)
+                Label {
+                    Text(reportSent ? "Send Again" : "Send Report")
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                } icon: {
+                    Image(systemName: "envelope.fill").accessibilityHidden(true)
+                }
+                .font(.title2.bold())
+                .foregroundStyle(appTheme.onAccent)
+                .frame(maxWidth: 420)
+                .padding(.vertical, isCompactHeight ? 14 : 22)
             }
             .buttonStyle(.glassProminent)
             .tint(appTheme.accent)
 
-            Button {
-                // Finishing without emailing still counts as today's
-                // check-in and shows up in History.
-                if !saved {
-                    store.save(answers)
-                    saved = true
+            // Done and Start Over share a row instead of each taking a full
+            // width row — on a 13" iPad portrait, three stacked full-width
+            // buttons pushed Start Over below the fold, forcing a scroll.
+            // At accessibility text sizes, though, cramming both into half
+            // the width each truncates "Start Over" to "Star…" even after
+            // shrinking — stack them instead, since scrolling is already
+            // expected at these sizes.
+            if dynamicTypeSize.isAccessibilitySize {
+                VStack(spacing: 12) {
+                    doneButton
+                    startOverButton
                 }
-                dismiss()
-            } label: {
-                Text("Done")
-                    .font(.title3.bold())
-                    .frame(maxWidth: 420)
-                    .padding(.vertical, isCompactHeight ? 10 : 16)
+            } else {
+                HStack(spacing: 16) {
+                    doneButton
+                    startOverButton
+                }
             }
-            .buttonStyle(.glass)
-            .tint(appTheme.accent)
-
-            Button(action: onStartOver) {
-                Label("Start Over", systemImage: "arrow.counterclockwise")
-                    .font(.title3)
-                    .frame(maxWidth: 420)
-                    .padding(.vertical, isCompactHeight ? 8 : 12)
-            }
-            .buttonStyle(.glass)
-            .tint(.gray)
         }
     }
 
-    private func summaryRow(icon: String, label: LocalizedStringKey, value: String) -> some View {
+    private var doneButton: some View {
+        Button {
+            // Finishing without emailing still counts as today's check-in
+            // and shows up in History.
+            if !saved {
+                store.save(answers)
+                saved = true
+            }
+            dismiss()
+        } label: {
+            Text("Done")
+                .font(.title3.bold())
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, isCompactHeight ? 10 : 16)
+        }
+        .buttonStyle(.glass)
+        .tint(appTheme.accent)
+    }
+
+    private var startOverButton: some View {
+        Button(action: onStartOver) {
+            Label {
+                Text("Start Over")
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            } icon: {
+                Image(systemName: "arrow.counterclockwise").accessibilityHidden(true)
+            }
+            .font(.title3)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, isCompactHeight ? 10 : 16)
+        }
+        .buttonStyle(.glass)
+        .tint(.gray)
+    }
+
+    /// `singleLine` keeps short values like "128/82 mmHg" from splitting
+    /// across lines next to a long label — they shrink slightly instead.
+    private func summaryRow(icon: String, label: LocalizedStringKey, value: String, singleLine: Bool = false) -> some View {
         HStack {
             Image(systemName: icon)
                 .font(.title3)
                 .foregroundStyle(appTheme.accent)
                 .frame(width: 36)
+                .accessibilityHidden(true)
             Text(label)
                 .font(.title3)
             Spacer()
             Text(value)
                 .font(.title3.bold())
                 .multilineTextAlignment(.trailing)
+                .lineLimit(singleLine ? 1 : nil)
+                .minimumScaleFactor(singleLine ? 0.7 : 1)
         }
         .padding(.vertical, isCompactHeight ? 8 : 16)
         .padding(.horizontal, 16)

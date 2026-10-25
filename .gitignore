@@ -16,3 +16,8 @@ xcuserdata/
 
 # Local working notes, not part of the project
 DEVICE-TEST-CHECKLIST.md
+PLAN.md
+
+# App Store submission assets: listing copy, screenshots + the patch that regenerates them (git apply)
+AppStoreScreenshots/
+AppStoreListing.md

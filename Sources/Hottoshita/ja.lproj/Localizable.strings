@@ -12,7 +12,7 @@
 // Daily reminder
 "Would you like a daily reminder?" = "毎日のリマインダーを設定しますか？";
 "We'll remind you to send your check-in." = "チェックインの送信を毎日お知らせします。";
-"Yes, remind me" = "はい、通知して";
+"Yes, remind me" = "はい、通知してください";
 "Not now" = "今はしない";
 "Set Reminder" = "リマインダーを設定";
 "You can turn reminders on later in Settings." = "リマインダーは後から設定画面でオンにできます。";
@@ -41,7 +41,7 @@
 "greeting.morning" = "おはようございます\n%@さん！";
 "greeting.afternoon" = "こんにちは\n%@さん！";
 "greeting.evening" = "こんばんは\n%@さん！";
-"Start Today's Check-in" = "今日のチェックインを始める";
+"Start Today's Check-in" = "今日の\nチェックイン";
 
 // Settings sections
 "About You" = "あなたについて";
@@ -87,11 +87,12 @@
 "Feeling" = "気分";
 "Blood Pressure" = "血圧";
 "Not specified" = "未回答";
+"list.separator" = "、";
 "Not taken" = "測定なし";
 "Will be sent to: %@" = "送信先：%@";
 "Send Report" = "レポートを送る";
 "Done" = "完了";
-"Start Over" = "最初からやり直す";
+"Start Over" = "やり直す";
 "Cannot Send Email" = "メールを送信できません";
 "Please configure an email account on this device to send reports." = "レポートを送信するには、この端末でメールアカウントを設定してください。";
 
@@ -156,3 +157,10 @@
 "Send everything" = "すべて送る";
 "Only today's" = "今日の分だけ";
 "Send Unsent Check-ins" = "未送信のチェックインを送る";
+
+// iCloud sync
+"iCloud Sync" = "iCloud 同期";
+"Sync between your devices" = "端末間で同期する";
+"sync.description" = "チェックイン履歴と設定は、同じ Apple ID でサインインしたご自身の他の端末と非公開で同期されます。";
+"iCloud Sync Unavailable" = "iCloud 同期を利用できません";
+"Please sign in to iCloud in the Settings app to sync between your devices." = "端末間で同期するには、設定アプリで iCloud にサインインしてください。";
