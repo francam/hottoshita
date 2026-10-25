@@ -18,5 +18,6 @@ xcuserdata/
 DEVICE-TEST-CHECKLIST.md
 PLAN.md
 
-# App Store screenshots + the patch that regenerates them (git apply)
+# App Store submission assets: listing copy, screenshots + the patch that regenerates them (git apply)
 AppStoreScreenshots/
+AppStoreListing.md
