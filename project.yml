@@ -32,7 +32,7 @@ targets:
         # Version/build and export compliance live here, not in Info.plist:
         # `xcodegen generate` rewrites Info.plist from these properties.
         CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "8"
+        CFBundleVersion: "9"
         ITSAppUsesNonExemptEncryption: false
         CFBundleLocalizations:
           - en
