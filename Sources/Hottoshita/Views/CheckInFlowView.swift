@@ -30,8 +30,7 @@ struct CheckInFlowView: View {
                         .padding(.vertical, 8)
                         .padding(.horizontal, 6)
                     }
-                    .buttonStyle(.glass)
-                    .tint(appTheme.accent)
+                    .secondaryActionStyle(accent: appTheme.accent)
                 }
                 Spacer()
                 Button {
@@ -48,8 +47,7 @@ struct CheckInFlowView: View {
                     .padding(.vertical, 8)
                     .padding(.horizontal, 6)
                 }
-                .buttonStyle(.glass)
-                .tint(appTheme.accent)
+                .secondaryActionStyle(accent: appTheme.accent)
             }
             .padding(.horizontal)
             .padding(.vertical, isDense ? 6 : 16)
@@ -165,27 +163,32 @@ private struct SingleChoiceStepView: View {
         AdaptiveStepLayout(spacing: 48) {
             StepHeader(icon: icon, question: question)
         } controls: {
-            VStack(spacing: isDense ? 12 : 18) {
-                ForEach(choices, id: \.self) { choice in
-                    Button {
-                        selection = choice
-                        Task {
-                            try? await Task.sleep(for: .milliseconds(180))
-                            onNext()
-                        }
-                    } label: {
-                        Text(LocalizedStringKey(choice))
+            GlassGroup {
+                VStack(spacing: isDense ? 12 : 18) {
+                    ForEach(choices, id: \.self) { choice in
+                        Button {
+                            selection = choice
+                            Task {
+                                try? await Task.sleep(for: .milliseconds(180))
+                                onNext()
+                            }
+                        } label: {
+                            HStack(spacing: 8) {
+                                if selection == choice {
+                                    Image(systemName: "checkmark").accessibilityHidden(true)
+                                }
+                                Text(LocalizedStringKey(choice))
+                            }
                             .font(.title2.bold())
                             .minimumScaleFactor(0.7)
                             .frame(maxWidth: 420)
                             .padding(.vertical, isDense ? 12 : 24)
-                            .glassEffect(selection == choice
-                                         ? .regular.tint(appTheme.accent).interactive()
-                                         : .regular.interactive(),
-                                         in: RoundedRectangle(cornerRadius: 18))
+                            .answerTileBackground(selected: selection == choice, accent: appTheme.accent, cornerRadius: 18)
                             .foregroundStyle(selection == choice ? appTheme.onAccent : .primary)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(selection == choice ? .isSelected : [])
                     }
-                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, isCompactHeight ? 0 : 48)
@@ -238,27 +241,32 @@ private struct MultiSelectStepView: View {
     }
 
     private var optionsGrid: some View {
-        LazyVGrid(columns: gridColumns, spacing: isDense ? 10 : 16) {
-            ForEach(options, id: \.self) { option in
-                Button {
-                    if selections.contains(option) {
-                        selections.removeAll { $0 == option }
-                    } else {
-                        selections.append(option)
-                    }
-                } label: {
-                    Text(LocalizedStringKey(option))
+        GlassGroup {
+            LazyVGrid(columns: gridColumns, spacing: isDense ? 10 : 16) {
+                ForEach(options, id: \.self) { option in
+                    Button {
+                        if selections.contains(option) {
+                            selections.removeAll { $0 == option }
+                        } else {
+                            selections.append(option)
+                        }
+                    } label: {
+                        HStack(spacing: 8) {
+                            if selections.contains(option) {
+                                Image(systemName: "checkmark").accessibilityHidden(true)
+                            }
+                            Text(LocalizedStringKey(option))
+                        }
                         .font(.title3.bold())
                         .minimumScaleFactor(0.7)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, isDense ? 12 : 26)
-                        .glassEffect(selections.contains(option)
-                                     ? .regular.tint(appTheme.accent).interactive()
-                                     : .regular.interactive(),
-                                     in: RoundedRectangle(cornerRadius: 16))
+                        .answerTileBackground(selected: selections.contains(option), accent: appTheme.accent, cornerRadius: 16)
                         .foregroundStyle(selections.contains(option) ? appTheme.onAccent : .primary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selections.contains(option) ? .isSelected : [])
                 }
-                .buttonStyle(.plain)
             }
         }
     }
@@ -271,8 +279,7 @@ private struct MultiSelectStepView: View {
                 .frame(maxWidth: 300)
                 .padding(.vertical, isDense ? 12 : 18)
         }
-        .buttonStyle(.glassProminent)
-        .tint(appTheme.accent)
+        .primaryActionStyle(accent: appTheme.accent)
     }
 }
 
@@ -291,9 +298,11 @@ private struct YesNoStepView: View {
         AdaptiveStepLayout(spacing: 48) {
             StepHeader(icon: icon, question: question)
         } controls: {
-            HStack(spacing: 16) {
-                yesNoButton(key: "Yes", answer: true)
-                yesNoButton(key: "No", answer: false)
+            GlassGroup {
+                HStack(spacing: 16) {
+                    yesNoButton(key: "Yes", answer: true)
+                    yesNoButton(key: "No", answer: false)
+                }
             }
             .padding(.horizontal, isCompactHeight ? 0 : 32)
         }
@@ -307,18 +316,21 @@ private struct YesNoStepView: View {
                 onNext()
             }
         } label: {
-            Text(key)
-                .font(.title.bold())
-                .minimumScaleFactor(0.6)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, isDense ? 20 : 32)
-                .glassEffect(value == answer
-                             ? .regular.tint(appTheme.accent).interactive()
-                             : .regular.interactive(),
-                             in: RoundedRectangle(cornerRadius: 22))
-                .foregroundStyle(value == answer ? appTheme.onAccent : .primary)
+            HStack(spacing: 8) {
+                if value == answer {
+                    Image(systemName: "checkmark").accessibilityHidden(true)
+                }
+                Text(key)
+            }
+            .font(.title.bold())
+            .minimumScaleFactor(0.6)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, isDense ? 20 : 32)
+            .answerTileBackground(selected: value == answer, accent: appTheme.accent, cornerRadius: 22)
+            .foregroundStyle(value == answer ? appTheme.onAccent : .primary)
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(value == answer ? .isSelected : [])
     }
 }
 
@@ -367,8 +379,7 @@ private struct BloodPressureStepView: View {
                         .frame(maxWidth: 300)
                         .padding(.vertical, isDense ? 12 : 18)
                 }
-                .buttonStyle(.glassProminent)
-                .tint(appTheme.accent)
+                .primaryActionStyle(accent: appTheme.accent)
             }
         }
         .onAppear { focusedField = .systolic }

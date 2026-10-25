@@ -122,11 +122,10 @@ struct HomeView: View {
             .padding(.vertical, isDense ? 20 : 32)
             .padding(.horizontal)
         }
-        .buttonStyle(.glassProminent)
+        .primaryActionStyle(accent: appTheme.accent)
         // Squircle on iPhone; the default capsule-like shape suits iPad better.
         .buttonBorderShape(UIDevice.current.userInterfaceIdiom == .phone
                            ? .roundedRectangle(radius: 36) : .automatic)
-        .tint(appTheme.accent)
         .padding(.horizontal, isCompactHeight ? 16 : 32)
     }
 
@@ -149,8 +148,7 @@ struct HomeView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, isShortHeight ? 14 : 20)
         }
-        .buttonStyle(.glass)
-        .tint(appTheme.accent)
+        .secondaryActionStyle(accent: appTheme.accent)
     }
 
     private var alreadySubmittedBanner: some View {
@@ -177,13 +175,13 @@ struct HomeView: View {
                 .padding(.vertical, 10)
                 .padding(.horizontal, 8)
             }
-            .buttonStyle(.glass)
-            .tint(appTheme.accent)
+            .secondaryActionStyle(accent: appTheme.accent)
             .padding(.top, 8)
         }
         .padding(isDense ? 16 : 24)
         .frame(maxWidth: 420)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24))
+        // Content layer: a solid card, so its glass button isn't glass on glass.
+        .background(.quaternary, in: RoundedRectangle(cornerRadius: 24))
         .padding(.horizontal, isCompactHeight ? 0 : 24)
     }
 }

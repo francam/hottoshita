@@ -129,29 +129,26 @@ struct SettingsView: View {
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .cancel) {
                         appTheme.theme = originalTheme
                         dismiss()
                     } label: {
                         Text("Cancel")
                             .font(.title3.weight(.semibold))
-                            .foregroundStyle(appTheme.onAccent)
                             .padding(.horizontal, 2)
                             .fixedSize()
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(appTheme.accent)
+                    .toolbarSecondaryStyle(accent: appTheme.accent)
                 }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button(action: save) {
                         Text("Save")
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(canSave ? appTheme.onAccent : Color.secondary)
                             .padding(.horizontal, 2)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(appTheme.accent)
+                    .primaryActionStyle(accent: appTheme.accent)
                     .disabled(!canSave)
                 }
             }

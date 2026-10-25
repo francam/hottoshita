@@ -152,8 +152,7 @@ private struct OnboardingNameStep: View {
                         .frame(maxWidth: 400)
                         .padding(.vertical, isCompactHeight ? 14 : 20)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(accent)
+                .primaryActionStyle(accent: accent)
                 .disabled(value.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             .padding(.horizontal, isCompactHeight ? 0 : 48)
@@ -299,8 +298,7 @@ private struct OnboardingContactStep: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, isCompactHeight ? 8 : 12)
             }
-            .buttonStyle(.bordered)
-            .tint(accent)
+            .secondaryActionStyle(accent: accent)
 
             Text("or enter the details yourself:")
                 .font(.subheadline)
@@ -319,8 +317,7 @@ private struct OnboardingContactStep: View {
                 .frame(maxWidth: 400)
                 .padding(.vertical, isCompactHeight ? 10 : 20)
         }
-        .buttonStyle(.borderedProminent)
-        .tint(accent)
+        .primaryActionStyle(accent: accent)
         .disabled(!canContinue)
     }
 }
@@ -369,8 +366,7 @@ private struct OnboardingReminderStep: View {
                             .frame(maxWidth: 400)
                             .padding(.vertical, isCompactHeight ? 14 : 20)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(appTheme.accent)
+                    .primaryActionStyle(accent: appTheme.accent)
 
                     Button("Not now") { declineAndContinue() }
                         .font(.title3)
@@ -392,8 +388,7 @@ private struct OnboardingReminderStep: View {
                         .frame(maxWidth: 400)
                         .padding(.vertical, isCompactHeight ? 14 : 20)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(appTheme.accent)
+                    .primaryActionStyle(accent: appTheme.accent)
 
                     Button { declineAndContinue() } label: {
                         Text("Not now")
@@ -401,8 +396,7 @@ private struct OnboardingReminderStep: View {
                             .frame(maxWidth: 400)
                             .padding(.vertical, isCompactHeight ? 12 : 16)
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.gray)
+                    .secondaryActionStyle(accent: .gray)
                 }
                 .padding(.horizontal, isCompactHeight ? 0 : 48)
             }
@@ -471,8 +465,7 @@ private struct OnboardingColorStep: View {
                         .frame(maxWidth: 400)
                         .padding(.vertical, isCompactHeight ? 12 : 20)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(appTheme.accent)
+                .primaryActionStyle(accent: appTheme.accent)
             }
             .padding(.horizontal, isCompactHeight ? 0 : 48)
         }

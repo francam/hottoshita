@@ -204,8 +204,7 @@ struct SummaryView: View {
                 .frame(maxWidth: 420)
                 .padding(.vertical, isDense ? 14 : 22)
             }
-            .buttonStyle(.glassProminent)
-            .tint(appTheme.accent)
+            .primaryActionStyle(accent: appTheme.accent)
 
             // Done and Start Over share a row instead of each taking a full
             // width row — on a 13" iPad portrait, three stacked full-width
@@ -245,8 +244,7 @@ struct SummaryView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, isDense ? 10 : 16)
         }
-        .buttonStyle(.glass)
-        .tint(appTheme.accent)
+        .secondaryActionStyle(accent: appTheme.accent)
     }
 
     private var startOverButton: some View {
@@ -262,8 +260,7 @@ struct SummaryView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, isDense ? 10 : 16)
         }
-        .buttonStyle(.glass)
-        .tint(.gray)
+        .secondaryActionStyle(accent: .gray)
     }
 
     /// `singleLine` keeps short values like "128/82 mmHg" from splitting
@@ -286,6 +283,7 @@ struct SummaryView: View {
         }
         .padding(.vertical, isDense ? 8 : 16)
         .padding(.horizontal, 16)
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 14))
+        // Content layer: a solid surface, not glass.
+        .background(.quaternary, in: RoundedRectangle(cornerRadius: 14))
     }
 }

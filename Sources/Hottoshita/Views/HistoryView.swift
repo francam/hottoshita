@@ -64,15 +64,14 @@ struct HistoryView: View {
             .navigationBarTitleDisplayMode(.large)
             .background(appTheme.background)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button { dismiss() } label: {
                         Text("Done")
                             .font(.title3.weight(.semibold))
                             .foregroundStyle(appTheme.onAccent)
                             .padding(.horizontal, 2)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(appTheme.accent)
+                    .primaryActionStyle(accent: appTheme.accent)
                 }
             }
             .alert("Delete this check-in?", isPresented: $showDeleteConfirm, presenting: entryToDelete) { entry in
@@ -102,8 +101,7 @@ struct HistoryView: View {
                         .frame(maxWidth: 420)
                         .padding(.vertical, 14)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(appTheme.accent)
+                    .primaryActionStyle(accent: appTheme.accent)
                     .padding(.horizontal, 24)
                     .padding(.bottom, 8)
                 }
