@@ -26,7 +26,7 @@ struct SummaryView: View {
         guard !answers.feelings.isEmpty else { return String(localized: "Not specified") }
         return answers.feelings
             .map { String(localized: String.LocalizationValue($0)) }
-            .joined(separator: ", ")
+            .joined(separator: String(localized: "list.separator"))
     }
 
     var body: some View {
@@ -145,7 +145,8 @@ struct SummaryView: View {
                 label: "Blood Pressure",
                 value: (answers.tookBloodPressure ?? false) && answers.bloodPressure.isValid
                     ? answers.bloodPressure.formatted
-                    : String(localized: "Not taken")
+                    : String(localized: "Not taken"),
+                singleLine: true
             )
         }
     }
@@ -264,7 +265,9 @@ struct SummaryView: View {
         .tint(.gray)
     }
 
-    private func summaryRow(icon: String, label: LocalizedStringKey, value: String) -> some View {
+    /// `singleLine` keeps short values like "128/82 mmHg" from splitting
+    /// across lines next to a long label — they shrink slightly instead.
+    private func summaryRow(icon: String, label: LocalizedStringKey, value: String, singleLine: Bool = false) -> some View {
         HStack {
             Image(systemName: icon)
                 .font(.title3)
@@ -277,6 +280,8 @@ struct SummaryView: View {
             Text(value)
                 .font(.title3.bold())
                 .multilineTextAlignment(.trailing)
+                .lineLimit(singleLine ? 1 : nil)
+                .minimumScaleFactor(singleLine ? 0.7 : 1)
         }
         .padding(.vertical, isCompactHeight ? 8 : 16)
         .padding(.horizontal, 16)

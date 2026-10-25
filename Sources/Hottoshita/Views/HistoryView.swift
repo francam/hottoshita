@@ -141,7 +141,7 @@ private struct HistoryRowView: View {
     private var feelingsText: String {
         entry.feelings.isEmpty
             ? String(localized: "Not specified")
-            : entry.feelings.map { String(localized: String.LocalizationValue($0)) }.joined(separator: ", ")
+            : entry.feelings.map { String(localized: String.LocalizationValue($0)) }.joined(separator: String(localized: "list.separator"))
     }
 
     var body: some View {

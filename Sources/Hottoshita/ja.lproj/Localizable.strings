@@ -41,7 +41,7 @@
 "greeting.morning" = "おはようございます\n%@さん！";
 "greeting.afternoon" = "こんにちは\n%@さん！";
 "greeting.evening" = "こんばんは\n%@さん！";
-"Start Today's Check-in" = "今日のチェックインを始める";
+"Start Today's Check-in" = "今日の\nチェックイン";
 
 // Settings sections
 "About You" = "あなたについて";
@@ -87,6 +87,7 @@
 "Feeling" = "気分";
 "Blood Pressure" = "血圧";
 "Not specified" = "未回答";
+"list.separator" = "、";
 "Not taken" = "測定なし";
 "Will be sent to: %@" = "送信先：%@";
 "Send Report" = "レポートを送る";

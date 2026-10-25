@@ -4,6 +4,7 @@ options:
   deploymentTarget:
     iOS: "16.0"
   defaultConfig: Debug
+  xcodeVersion: "2710"
 
 settings:
   base:
@@ -28,6 +29,11 @@ targets:
       path: Hottoshita/Info.plist
       properties:
         CFBundleDisplayName: hottoshita
+        # Version/build and export compliance live here, not in Info.plist:
+        # `xcodegen generate` rewrites Info.plist from these properties.
+        CFBundleShortVersionString: "1.0"
+        CFBundleVersion: "6"
+        ITSAppUsesNonExemptEncryption: false
         CFBundleLocalizations:
           - en
           - ja
@@ -53,6 +59,10 @@ targets:
         DEVELOPMENT_TEAM: 7G685PLH5A
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: Hottoshita/Hottoshita.entitlements
+    scheme:
+      testTargets:
+        - HottoshitaTests
+        - HottoshitaUITests
 
   HottoshitaTests:
     type: bundle.unit-test

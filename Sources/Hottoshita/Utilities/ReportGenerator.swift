@@ -41,7 +41,7 @@ enum ReportGenerator {
         let sleepValue = NSLocalizedString(answers.sleep?.rawValue ?? "", comment: "")
         let feelingsValue = answers.feelings.isEmpty
             ? NSLocalizedString("Not specified", comment: "")
-            : answers.feelings.sorted().map { NSLocalizedString($0, comment: "") }.joined(separator: ", ")
+            : answers.feelings.sorted().map { NSLocalizedString($0, comment: "") }.joined(separator: NSLocalizedString("list.separator", comment: ""))
         let bpValue = (answers.tookBloodPressure ?? false) && answers.bloodPressure.isValid
             ? answers.bloodPressure.formatted
             : NSLocalizedString("Not taken", comment: "")
