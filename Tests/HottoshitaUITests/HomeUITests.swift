@@ -122,6 +122,54 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Settings"].exists)
     }
 
+    func testAddingContactsStopsAtFive() {
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        let add = app.buttons["Add Another Contact"]
+        // The first contact plus four more.
+        for n in 1...4 {
+            var swipes = 0
+            while !(add.exists && add.isHittable) && swipes < 6 { app.swipeUp(); swipes += 1 }
+            add.tap()
+            XCTAssertTrue(app.navigationBars["Add Contact"].waitForExistence(timeout: 3))
+            app.textFields["addContact.name"].tap()
+            app.textFields["addContact.name"].typeText("Person \(n)")
+            app.textFields["addContact.email"].tap()
+            app.textFields["addContact.email"].typeText("p\(n)@example.com")
+            app.buttons["Add"].tap()
+            XCTAssertTrue(app.staticTexts["Person \(n)"].waitForExistence(timeout: 3))
+        }
+        XCTAssertFalse(add.exists, "no more than five contacts")
+
+        // Removing one brings the button back.
+        app.buttons["Remove Person 4"].tap()
+        XCTAssertFalse(app.staticTexts["Person 4"].exists)
+        XCTAssertTrue(add.waitForExistence(timeout: 3))
+
+        // Saved with Settings; Cancel would have discarded them.
+        app.buttons["Save"].tap()
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Person 3"].waitForExistence(timeout: 3))
+    }
+
+    func testAddedContactIsDiscardedOnCancel() {
+        app.buttons["Settings"].tap()
+        let add = app.buttons["Add Another Contact"]
+        var swipes = 0
+        while !(add.exists && add.isHittable) && swipes < 6 { app.swipeUp(); swipes += 1 }
+        add.tap()
+        app.textFields["addContact.name"].tap()
+        app.textFields["addContact.name"].typeText("Tom")
+        app.textFields["addContact.email"].tap()
+        app.textFields["addContact.email"].typeText("tom@example.com")
+        app.buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts["Tom"].waitForExistence(timeout: 3))
+        app.buttons["Cancel"].tap()
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.staticTexts["Tom"].exists)
+    }
+
     /// Settings is a lazy list: the Erase row only exists once scrolled to.
     private func tapEraseAllData() {
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))

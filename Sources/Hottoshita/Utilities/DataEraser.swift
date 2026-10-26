@@ -10,6 +10,7 @@ enum DataEraser {
     private static let defaultsKeys = [
         "userName", "contactName", "contactEmail",
         "colorTheme", "reminderEnabled", "reminderMinutes",
+        TrustedContacts.storageKey,
     ]
 
     /// Returns false — with nothing erased — if iCloud was reachable but its

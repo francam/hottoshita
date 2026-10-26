@@ -11,6 +11,12 @@ struct HistoryView: View {
     @AppStorage("userName") private var userName = ""
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
+    @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
+
+    private var recipients: ReportRecipients {
+        ReportRecipients(primaryName: contactName, primaryEmail: contactEmail,
+                         additional: TrustedContacts.decode(additionalContactsJSON))
+    }
 
     @State private var entryToDelete: CheckInAnswers?
     @State private var showDeleteConfirm = false
@@ -129,9 +135,10 @@ struct HistoryView: View {
                 let unsent = store.unsentEntries().sorted { $0.date < $1.date }
                 if let primary = unsent.last {
                     MailComposeView(
-                        recipient: contactEmail,
+                        recipients: recipients.emails,
+                        bcc: recipients.usesBCC,
                         subject: ReportGenerator.subject(for: primary),
-                        body: ReportGenerator.generate(answers: primary, contactName: contactName, userName: userName,
+                        body: ReportGenerator.generate(answers: primary, contactName: recipients.greetingName, userName: userName,
                                                        previousUnsent: Array(unsent.dropLast()))
                     ) { result in
                         if result == .sent {

@@ -7,6 +7,7 @@ struct SettingsView: View {
     @AppStorage("userName") private var userName = ""
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
+    @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
     @EnvironmentObject private var appTheme: AppTheme
     @EnvironmentObject private var store: CheckInStore
 
@@ -22,6 +23,8 @@ struct SettingsView: View {
     @State private var showContactPicker = false
     @State private var showNotificationsDenied = false
     @State private var showiCloudSyncUnavailable = false
+    @State private var additionalContactsInput: [TrustedContact] = []
+    @State private var showAddContact = false
     @State private var showEraseConfirm = false
     @State private var showEraseFinal = false
     @State private var showEraseFailed = false
@@ -99,6 +102,42 @@ struct SettingsView: View {
                         .font(.title3)
                     }
                     .foregroundStyle(appTheme.accent)
+                }
+
+                Section {
+                    ForEach(additionalContactsInput) { contact in
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(contact.name).font(.title3)
+                                Text(contact.email).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            // An explicit button rather than swipe-to-delete,
+                            // which elderly users rarely discover.
+                            Button(role: .destructive) {
+                                additionalContactsInput.removeAll { $0.id == contact.id }
+                            } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(.red)
+                            }
+                            .buttonStyle(.borderless)
+                            .accessibilityLabel(Text("Remove \(contact.name)"))
+                        }
+                    }
+                    if additionalContactsInput.count < TrustedContacts.maximum - 1 {
+                        Button {
+                            showAddContact = true
+                        } label: {
+                            Label("Add Another Contact", systemImage: "plus.circle.fill")
+                                .font(.title3)
+                        }
+                        .foregroundStyle(appTheme.accent)
+                    }
+                } header: {
+                    Text("More Contacts")
+                } footer: {
+                    Text("contacts.footer")
                 }
 
                 Section("Daily Reminder") {
@@ -216,6 +255,7 @@ struct SettingsView: View {
             .onAppear {
                 userNameInput = userName
                 contactNameInput = contactName
+                additionalContactsInput = TrustedContacts.decode(additionalContactsJSON)
                 emailInput = contactEmail
                 reminderEnabledInput = reminderEnabled
                 reminderMinutesInput = reminderMinutes
@@ -249,6 +289,12 @@ struct SettingsView: View {
                         showiCloudSyncUnavailable = true
                     }
                 }
+            }
+            // Presented from the screen, not from inside the (lazy) list.
+            .sheet(isPresented: $showAddContact) {
+                AddContactSheet { additionalContactsInput.append($0) }
+                    .environmentObject(appTheme)
+                    .cappedDynamicType()
             }
             .alert("Notifications Disabled", isPresented: $showNotificationsDenied) {
                 Button("Open Settings") {
@@ -338,6 +384,7 @@ struct SettingsView: View {
         userName = userNameInput.trimmingCharacters(in: .whitespaces)
         contactName = contactNameInput.trimmingCharacters(in: .whitespaces)
         contactEmail = emailInput.trimmingCharacters(in: .whitespaces)
+        additionalContactsJSON = TrustedContacts.encode(additionalContactsInput)
 
         reminderEnabled = reminderEnabledInput
         reminderMinutes = reminderMinutesInput

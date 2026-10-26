@@ -182,3 +182,12 @@
 // Save failure (storage full)
 "Couldn't Save Check-in" = "Couldn't Save Check-in";
 "save.failed" = "Your check-in couldn't be stored on this device, perhaps because it's full. You can still send today's report, and Hottoshita will try saving again the next time it opens.";
+
+// More contacts
+"More Contacts" = "More Contacts";
+"Add Another Contact" = "Add Another Contact";
+"Add Contact" = "Add Contact";
+"Add" = "Add";
+"Remove %@" = "Remove %@";
+"contacts.footer" = "Everyone receives the same report. With more than one contact, nobody can see who else it was sent to. You can have up to 5 contacts.";
+"report.greeting.everyone" = "Hello,";

@@ -1,11 +1,13 @@
 import Foundation
 
 enum ReportGenerator {
-    static func generate(answers: CheckInAnswers, contactName: String, userName: String,
+    /// `contactName` nil: several recipients (in BCC), greeted generically.
+    static func generate(answers: CheckInAnswers, contactName: String?, userName: String,
                          previousUnsent: [CheckInAnswers] = []) -> String {
         let dateStr = answers.date.formatted(.dateTime.weekday(.wide).month(.wide).day().year())
 
-        let greeting = String(format: NSLocalizedString("report.greeting", comment: ""), contactName)
+        let greeting = contactName.map { String(format: NSLocalizedString("report.greeting", comment: ""), $0) }
+            ?? NSLocalizedString("report.greeting.everyone", comment: "")
         let intro = String(format: NSLocalizedString("report.intro", comment: ""), userName)
         let footer = NSLocalizedString("report.footer", comment: "")
 

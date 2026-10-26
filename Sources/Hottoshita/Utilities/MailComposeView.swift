@@ -2,7 +2,9 @@ import SwiftUI
 import MessageUI
 
 struct MailComposeView: UIViewControllerRepresentable {
-    let recipient: String
+    let recipients: [String]
+    /// Several contacts: BCC, so they don't see each other's addresses.
+    var bcc = false
     let subject: String
     let body: String
     var onResult: (MFMailComposeResult) -> Void = { _ in }
@@ -14,7 +16,11 @@ struct MailComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> MFMailComposeViewController {
         let vc = MFMailComposeViewController()
         vc.mailComposeDelegate = context.coordinator
-        vc.setToRecipients([recipient])
+        if bcc {
+            vc.setBccRecipients(recipients)
+        } else {
+            vc.setToRecipients(recipients)
+        }
         vc.setSubject(subject)
         vc.setMessageBody(body, isHTML: false)
         return vc

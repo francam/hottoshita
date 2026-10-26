@@ -8,6 +8,12 @@ struct SummaryView: View {
     @AppStorage("userName") private var userName = ""
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
+    @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
+
+    private var recipients: ReportRecipients {
+        ReportRecipients(primaryName: contactName, primaryEmail: contactEmail,
+                         additional: TrustedContacts.decode(additionalContactsJSON))
+    }
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isCompactHeight) private var isCompactHeight
     @Environment(\.isDense) private var isDense
@@ -88,9 +94,10 @@ struct SummaryView: View {
         .background(appTheme.background.ignoresSafeArea())
         .sheet(isPresented: $showMail) {
             MailComposeView(
-                recipient: contactEmail,
+                recipients: recipients.emails,
+                bcc: recipients.usesBCC,
                 subject: ReportGenerator.subject(for: answers),
-                body: ReportGenerator.generate(answers: answers, contactName: contactName, userName: userName,
+                body: ReportGenerator.generate(answers: answers, contactName: recipients.greetingName, userName: userName,
                                                previousUnsent: includeBacklog ? store.unsentEntries(excluding: answers.id) : [])
             ) { result in
                 if result == .sent {
@@ -124,7 +131,7 @@ struct SummaryView: View {
             Button("Try Again") { showMail = true }
             Button("OK", role: .cancel) {}
         } message: {
-            Text("Your report was not sent to \(contactName).")
+            Text("Your report was not sent to \(recipients.displayNames).")
         }
         .alert("Couldn't Save Check-in", isPresented: $showSaveFailed) {
             Button("OK") {
@@ -193,7 +200,7 @@ struct SummaryView: View {
                 .font(.title3.bold())
                 .foregroundStyle(appTheme.accent)
             } else {
-                Text("Will be sent to: \(contactName)")
+                Text("Will be sent to: \(recipients.displayNames)")
                     .font(.title3)
                     .foregroundStyle(.secondary)
                 if !store.unsentEntries(excluding: answers.id).isEmpty {
