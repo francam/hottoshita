@@ -3,6 +3,8 @@ import SwiftUI
 struct CheckInFlowView: View {
     @State private var answers = CheckInAnswers()
     @State private var step = 0
+    @State private var fold: VerticalFold?
+    @State private var barsVertical = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isCompactHeight) private var isCompactHeight
     @Environment(\.isDense) private var isDense
@@ -13,45 +15,28 @@ struct CheckInFlowView: View {
     private var summaryStep: Int { (answers.tookBloodPressure ?? false) ? 4 : 3 }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                if step > 0 && step < summaryStep {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.25)) { step -= 1 }
-                    } label: {
-                        Label {
-                            Text("Back")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.6)
-                        } icon: {
-                            Image(systemName: "chevron.left").accessibilityHidden(true)
-                        }
-                        .font(.title3.weight(.semibold))
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 6)
-                    }
-                    .secondaryActionStyle(accent: appTheme.accent)
+        // Back / Cancel are real toolbar items, not a hand-made bar: on
+        // iPhone Duo the system moves toolbars to the side of the display
+        // (and only system toolbar items with an icon go there), which
+        // frees vertical space on the short outer display.
+        NavigationStack {
+            flowContent
+                .toolbar {
+                    CheckInToolbar(
+                        iconsOnly: barsVertical,
+                        showBack: step > 0 && step < summaryStep,
+                        accent: appTheme.accent,
+                        onBack: { withAnimation(.easeInOut(duration: 0.25)) { step -= 1 } },
+                        onCancel: { dismiss() }
+                    )
                 }
-                Spacer()
-                Button {
-                    dismiss()
-                } label: {
-                    Label {
-                        Text("Cancel")
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.6)
-                    } icon: {
-                        Image(systemName: "xmark").accessibilityHidden(true)
-                    }
-                    .font(.title3.weight(.semibold))
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 6)
-                }
-                .secondaryActionStyle(accent: appTheme.accent)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, isDense ? 6 : 16)
+                .navigationBarTitleDisplayMode(.inline)
+                .background { VerticalBarsReader(isVertical: $barsVertical) }
+        }
+    }
 
+    private var flowContent: some View {
+        VStack(spacing: 0) {
             if step < summaryStep {
                 ProgressView(value: Double(step + 1), total: Double(totalSteps))
                     .tint(appTheme.accent)
@@ -62,6 +47,11 @@ struct CheckInFlowView: View {
                 Text("Question \(step + 1) of \(totalSteps)")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    // Centred, it would sit on the iPhone Duo hinge; move it
+                    // onto the question's page instead.
+                    .frame(maxWidth: .infinity, alignment: fold == nil ? .center : .leading)
+                    .padding(.horizontal)
+                    .readsVerticalFold($fold)
                     .padding(.bottom, isDense ? 8 : 24)
             }
 
@@ -149,6 +139,32 @@ struct CheckInFlowView: View {
 
 // MARK: - Single Choice
 
+/// Back / Cancel for the check-in flow. Horizontal bars (every iPhone,
+/// iPad) get worded buttons — clearer than bare ‹ and ✕ for elderly users,
+/// and the system would show a Label's icon alone there. When the system
+/// shows bars vertically (iPhone Duo side bar) they become icon items, the
+/// only kind it places there.
+private struct CheckInToolbar: ToolbarContent {
+    let iconsOnly: Bool
+    let showBack: Bool
+    let accent: Color
+    let onBack: () -> Void
+    let onCancel: () -> Void
+
+    var body: some ToolbarContent {
+        ToolbarItem(placement: .topBarLeading) {
+            if showBack {
+                Button(action: onBack) { toolbarButtonLabel("Back", icon: "chevron.left", iconsOnly: iconsOnly) }
+                    .toolbarNavigationStyle(accent: accent)
+            }
+        }
+        ToolbarItem(placement: .topBarTrailing) {
+            Button(action: onCancel) { toolbarButtonLabel("Cancel", icon: "xmark", iconsOnly: iconsOnly) }
+                .toolbarNavigationStyle(accent: accent)
+        }
+    }
+}
+
 private struct SingleChoiceStepView: View {
     @Environment(\.isCompactHeight) private var isCompactHeight
     @Environment(\.isDense) private var isDense
@@ -234,38 +250,41 @@ private struct MultiSelectStepView: View {
     }
 
     /// iPad is wide enough for 4 across, which halves the grid's height so
-    /// the step fits landscape without scrolling. iPhone keeps 2 columns.
-    private var gridColumns: [GridItem] {
-        let count = horizontalSizeClass == .regular && !isCompactHeight ? 4 : 2
+    /// the step fits landscape without scrolling. iPhone keeps 2 columns,
+    /// and so does half of a folded iPhone Duo.
+    private func gridColumns(foldSplit: Bool) -> [GridItem] {
+        let count = horizontalSizeClass == .regular && !isCompactHeight && !foldSplit ? 4 : 2
         return Array(repeating: GridItem(.flexible()), count: count)
     }
 
     private var optionsGrid: some View {
-        GlassGroup {
-            LazyVGrid(columns: gridColumns, spacing: isDense ? 10 : 16) {
-                ForEach(options, id: \.self) { option in
-                    Button {
-                        if selections.contains(option) {
-                            selections.removeAll { $0 == option }
-                        } else {
-                            selections.append(option)
-                        }
-                    } label: {
-                        HStack(spacing: 8) {
+        FoldSplitReader { foldSplit in
+            GlassGroup {
+                LazyVGrid(columns: gridColumns(foldSplit: foldSplit), spacing: isDense ? 10 : 16) {
+                    ForEach(options, id: \.self) { option in
+                        Button {
                             if selections.contains(option) {
-                                Image(systemName: "checkmark").accessibilityHidden(true)
+                                selections.removeAll { $0 == option }
+                            } else {
+                                selections.append(option)
                             }
-                            Text(LocalizedStringKey(option))
+                        } label: {
+                            HStack(spacing: 8) {
+                                if selections.contains(option) {
+                                    Image(systemName: "checkmark").accessibilityHidden(true)
+                                }
+                                Text(LocalizedStringKey(option))
+                            }
+                            .font(.title3.bold())
+                            .minimumScaleFactor(0.7)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, isDense ? 12 : 26)
+                            .answerTileBackground(selected: selections.contains(option), accent: appTheme.accent, cornerRadius: 16)
+                            .foregroundStyle(selections.contains(option) ? appTheme.onAccent : .primary)
                         }
-                        .font(.title3.bold())
-                        .minimumScaleFactor(0.7)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, isDense ? 12 : 26)
-                        .answerTileBackground(selected: selections.contains(option), accent: appTheme.accent, cornerRadius: 16)
-                        .foregroundStyle(selections.contains(option) ? appTheme.onAccent : .primary)
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(selections.contains(option) ? .isSelected : [])
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityAddTraits(selections.contains(option) ? .isSelected : [])
                 }
             }
         }

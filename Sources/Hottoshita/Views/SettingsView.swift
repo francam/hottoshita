@@ -2,6 +2,8 @@ import CloudKit
 import SwiftUI
 
 struct SettingsView: View {
+    @State private var barsVertical = false
+    @Environment(\.keepSheetToolbarHorizontal) private var keepSheetToolbarHorizontal
     @AppStorage("userName") private var userName = ""
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
@@ -128,28 +130,43 @@ struct SettingsView: View {
             .background(appTheme.background)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
+            .background { VerticalBarsReader(isVertical: $barsVertical) }
+            // On the right page of a folded iPhone Duo the system gives this
+            // sheet a side bar whose first item sits under the status bar
+            // (iOS 27.1); kept horizontal, the bar starts below it.
+            .horizontalToolbars(keepSheetToolbarHorizontal)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button(role: .cancel) {
-                        appTheme.theme = originalTheme
-                        dismiss()
-                    } label: {
-                        Text("Cancel")
-                            .font(.title3.weight(.semibold))
-                            .padding(.horizontal, 2)
-                            .fixedSize()
+                if barsVertical && !keepSheetToolbarHorizontal {
+                    // iPhone Duo side bar: plain leading/trailing icon items,
+                    // which the system lays out below the status bar (the
+                    // prominent confirm slot goes underneath it).
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button("Cancel", systemImage: "xmark", role: .cancel, action: cancel)
+                            .toolbarNavigationStyle(accent: appTheme.accent)
                     }
-                    .toolbarSecondaryStyle(accent: appTheme.accent)
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(action: save) {
-                        Text("Save")
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(canSave ? appTheme.onAccent : Color.secondary)
-                            .padding(.horizontal, 2)
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Save", systemImage: "checkmark", action: save)
+                            .toolbarNavigationStyle(accent: appTheme.accent)
+                            .disabled(!canSave)
                     }
-                    .primaryActionStyle(accent: appTheme.accent)
-                    .disabled(!canSave)
+                } else {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(role: .cancel, action: cancel) {
+                            toolbarButtonLabel("Cancel", icon: "xmark", iconsOnly: false, iconWithWords: false)
+                                .padding(.horizontal, 2)
+                                .fixedSize()
+                        }
+                        .toolbarSecondaryStyle(accent: appTheme.accent)
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button(action: save) {
+                            toolbarButtonLabel("Save", icon: "checkmark", iconsOnly: false, iconWithWords: false)
+                                .foregroundStyle(canSave ? appTheme.onAccent : Color.secondary)
+                                .padding(.horizontal, 2)
+                        }
+                        .primaryActionStyle(accent: appTheme.accent)
+                        .disabled(!canSave)
+                    }
                 }
             }
             .onAppear {
@@ -251,6 +268,12 @@ struct SettingsView: View {
             field()
         }
         .padding(.vertical, 4)
+    }
+
+    /// Discards the session, including a theme previewed live.
+    private func cancel() {
+        appTheme.theme = originalTheme
+        dismiss()
     }
 
     private func save() {

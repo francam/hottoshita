@@ -54,6 +54,7 @@ struct AdaptiveStepLayout<Header: View, Controls: View>: View {
     var forceSideBySide = false
     @ViewBuilder let header: () -> Header
     @ViewBuilder let controls: () -> Controls
+    @State private var fold: VerticalFold?
 
     var body: some View {
         // A single call site for header()/controls() keeps their view
@@ -64,19 +65,26 @@ struct AdaptiveStepLayout<Header: View, Controls: View>: View {
         // happens to be the exact moment a TextField inside it is becoming
         // first responder (e.g. the blood-pressure step's keyboard-up
         // transition on iPad). AnyLayout swaps the container without
-        // destroying the children.
+        // destroying the children — including into the iPhone Duo fold
+        // layout, so folding mid-typing keeps the field.
         let sideBySide = isCompactHeight || forceSideBySide
-        let layout: AnyLayout = sideBySide
-            ? AnyLayout(HStackLayout(spacing: 24))
-            : AnyLayout(VStackLayout(spacing: isShortHeight ? min(spacing, 24) : spacing))
+        let layout: AnyLayout = if let fold {
+            AnyLayout(FoldSplitLayout(fold: fold))
+        } else if sideBySide {
+            AnyLayout(HStackLayout(spacing: 24))
+        } else {
+            AnyLayout(VStackLayout(spacing: isShortHeight ? min(spacing, 24) : spacing))
+        }
 
         layout {
             header()
-                .frame(maxWidth: sideBySide ? .infinity : nil)
+                .frame(maxWidth: sideBySide || fold != nil ? .infinity : nil)
             controls()
-                .frame(maxWidth: sideBySide ? .infinity : nil)
+                .frame(maxWidth: sideBySide || fold != nil ? .infinity : nil)
         }
-        .padding(.horizontal, sideBySide ? 24 : 0)
+        .environment(\.isFoldSplit, fold != nil)
+        .readsVerticalFold($fold)
+        .padding(.horizontal, sideBySide && fold == nil ? 24 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

@@ -2,6 +2,8 @@ import SwiftUI
 import MessageUI
 
 struct HistoryView: View {
+    @State private var barsVertical = false
+    @Environment(\.keepSheetToolbarHorizontal) private var keepSheetToolbarHorizontal
     @EnvironmentObject private var store: CheckInStore
     @EnvironmentObject private var appTheme: AppTheme
     @Environment(\.dismiss) private var dismiss
@@ -62,16 +64,31 @@ struct HistoryView: View {
             }
             .navigationTitle("History")
             .navigationBarTitleDisplayMode(.large)
+            .background { VerticalBarsReader(isVertical: $barsVertical) }
+            // On the right page of a folded iPhone Duo the system gives this
+            // sheet a side bar whose first item sits under the status bar
+            // (iOS 27.1); kept horizontal, the bar starts below it.
+            .horizontalToolbars(keepSheetToolbarHorizontal)
             .background(appTheme.background)
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button { dismiss() } label: {
-                        Text("Done")
-                            .font(.title3.weight(.semibold))
-                            .foregroundStyle(appTheme.onAccent)
-                            .padding(.horizontal, 2)
+                if barsVertical && !keepSheetToolbarHorizontal {
+                    // iPhone Duo side bar: the system puts the prominent
+                    // confirm slot at the very top of the bar, under the
+                    // status bar. A plain trailing icon item lands below it,
+                    // like the check-in's Back/Cancel.
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done", systemImage: "checkmark") { dismiss() }
+                            .toolbarNavigationStyle(accent: appTheme.accent)
                     }
-                    .primaryActionStyle(accent: appTheme.accent)
+                } else {
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button { dismiss() } label: {
+                            toolbarButtonLabel("Done", icon: "checkmark", iconsOnly: false, iconWithWords: false)
+                                .foregroundStyle(appTheme.onAccent)
+                                .padding(.horizontal, 2)
+                        }
+                        .primaryActionStyle(accent: appTheme.accent)
+                    }
                 }
             }
             .alert("Delete this check-in?", isPresented: $showDeleteConfirm, presenting: entryToDelete) { entry in

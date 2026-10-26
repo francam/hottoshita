@@ -23,6 +23,7 @@ struct SummaryView: View {
     @State private var showNotSentAlert = false
     @State private var showBacklogChoice = false
     @State private var includeBacklog = false
+    @State private var fold: VerticalFold?
 
     private var localizedFeelings: String {
         guard !answers.feelings.isEmpty else { return String(localized: "Not specified") }
@@ -35,7 +36,20 @@ struct SummaryView: View {
         GeometryReader { geo in
             ScrollView {
                 Group {
-                    if isCompactHeight {
+                    if let fold {
+                        // iPhone Duo inner display: what was answered on the
+                        // left page, what to do with it on the right.
+                        FoldSplitLayout(fold: fold) {
+                            VStack(spacing: 16) {
+                                headerBlock
+                                summaryRows
+                            }
+                            .padding(.horizontal, 24)
+
+                            actionsBlock
+                                .padding(.horizontal, 24)
+                        }
+                    } else if isCompactHeight {
                         HStack(spacing: 24) {
                             VStack(spacing: 16) {
                                 headerBlock
@@ -63,7 +77,8 @@ struct SummaryView: View {
                         }
                     }
                 }
-                .frame(maxWidth: .infinity, minHeight: isCompactHeight ? geo.size.height : 0)
+                .readsVerticalFold($fold)
+                .frame(maxWidth: .infinity, minHeight: isCompactHeight || fold != nil ? geo.size.height : 0)
             }
         }
         .background(appTheme.background.ignoresSafeArea())

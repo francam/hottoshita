@@ -41,6 +41,17 @@ extension View {
         }
     }
 
+    /// Navigation toolbar buttons (Back / Cancel in the check-in flow):
+    /// plain system glass items on 26+, the light bordered pill before it.
+    @ViewBuilder
+    func toolbarNavigationStyle(accent: Color) -> some View {
+        if #available(iOS 26.0, *) {
+            foregroundStyle(accent)
+        } else {
+            buttonStyle(.bordered).tint(accent)
+        }
+    }
+
     /// Background for a tappable answer tile. Selected tiles are filled
     /// with the accent; unselected ones get an accent outline so the tile's
     /// edge clears 3:1 against the background (the glass rim and the old

@@ -9,6 +9,7 @@ struct HomeView: View {
     @State private var showCheckIn = false
     @State private var showSettings = false
     @State private var showHistory = false
+    @State private var fold: VerticalFold?
 
     @Environment(\.verticalSizeClass) private var verticalSizeClass
     @Environment(\.colorSchemeContrast) private var contrast
@@ -40,7 +41,21 @@ struct HomeView: View {
             GeometryReader { geo in
                 ScrollView {
                     Group {
-                        if isCompactHeight {
+                        if let fold {
+                            // iPhone Duo half-open like a book: greeting on
+                            // the left page, actions on the right.
+                            FoldSplitLayout(fold: fold) {
+                                greetingBlock
+                                VStack(spacing: 24) {
+                                    if store.submittedToday {
+                                        alreadySubmittedBanner
+                                    } else {
+                                        startButton
+                                    }
+                                    bottomActions
+                                }
+                            }
+                        } else if isCompactHeight {
                             HStack(spacing: 16) {
                                 greetingBlock
                                     .frame(maxWidth: .infinity)
@@ -72,6 +87,7 @@ struct HomeView: View {
                             }
                         }
                     }
+                    .readsVerticalFold($fold)
                     .padding(.vertical, 16)
                     .frame(maxWidth: .infinity, minHeight: geo.size.height)
                 }
@@ -88,11 +104,13 @@ struct HomeView: View {
             SettingsView().environmentObject(appTheme)
                 .cappedDynamicType()
                 .detectsShortHeight()
+                .placedOffFold(fold)
         }
         .sheet(isPresented: $showHistory) {
             HistoryView().environmentObject(store).environmentObject(appTheme)
                 .cappedDynamicType()
                 .detectsShortHeight()
+                .placedOffFold(fold)
         }
     }
 
