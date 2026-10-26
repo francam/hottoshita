@@ -178,3 +178,7 @@
 "Couldn't Reach iCloud" = "Couldn't Reach iCloud";
 "erase.failed" = "Nothing was erased. Check your internet connection and try again.";
 "Erasing…" = "Erasing…";
+
+// Save failure (storage full)
+"Couldn't Save Check-in" = "Couldn't Save Check-in";
+"save.failed" = "Your check-in couldn't be stored on this device, perhaps because it's full. You can still send today's report, and Hottoshita will try saving again the next time it opens.";

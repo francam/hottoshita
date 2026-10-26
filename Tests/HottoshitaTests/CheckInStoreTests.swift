@@ -28,6 +28,31 @@ final class CheckInStoreTests: XCTestCase {
         XCTAssertFalse(store.submittedToday)
     }
 
+    // MARK: - Save failure
+
+    func testFailedWriteIsReportedAndRetried() throws {
+        // A file inside a folder that doesn't exist yet: the write fails,
+        // standing in for a full disk.
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let failing = CheckInStore(fileURL: folder.appendingPathComponent("checkins.json"))
+        XCTAssertFalse(failing.saveFailed)
+
+        failing.save(CheckInAnswers())
+        XCTAssertTrue(failing.saveFailed)
+        XCTAssertEqual(failing.entries.count, 1, "the entry stays in memory")
+
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        failing.retryIfSaveFailed()
+        XCTAssertFalse(failing.saveFailed)
+        XCTAssertEqual(CheckInStore(fileURL: folder.appendingPathComponent("checkins.json")).entries.count, 1)
+    }
+
+    func testSuccessfulSaveIsNotReportedAsFailed() {
+        store.save(CheckInAnswers())
+        XCTAssertFalse(store.saveFailed)
+    }
+
     // MARK: - Erase All Data
 
     func testEraseLocalClearsEntriesAndFile() {

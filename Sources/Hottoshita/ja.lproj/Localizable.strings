@@ -178,3 +178,7 @@
 "Couldn't Reach iCloud" = "iCloud に接続できません";
 "erase.failed" = "何も消去されていません。インターネット接続を確認して、もう一度お試しください。";
 "Erasing…" = "消去しています…";
+
+// Save failure (storage full)
+"Couldn't Save Check-in" = "チェックインを保存できませんでした";
+"save.failed" = "端末の空き容量が足りないなどの理由で、チェックインをこの端末に保存できませんでした。今日のレポートは送信できます。次に開いたときに、もう一度保存を試みます。";

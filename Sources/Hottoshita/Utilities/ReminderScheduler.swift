@@ -28,8 +28,11 @@ enum ReminderScheduler {
         }
 
         let content = UNMutableNotificationContent()
-        content.title = String(localized: "reminder.title")
-        content.body = String(localized: "reminder.body")
+        // Translated when the notification is delivered, not now: a
+        // language change before it fires (without opening the app, which
+        // would reschedule it) still shows it in the new language.
+        content.title = NSString.localizedUserNotificationString(forKey: "reminder.title", arguments: nil)
+        content.body = NSString.localizedUserNotificationString(forKey: "reminder.body", arguments: nil)
         content.sound = .default
 
         let components = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: target)

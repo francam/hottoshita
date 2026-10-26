@@ -18,6 +18,10 @@ struct SummaryView: View {
 
     @State private var showMail = false
     @State private var showMailError = false
+    /// Couldn't write the history file (storage full); `afterSaveWarning`
+    /// is what the user was doing — closing, or sending the report.
+    @State private var showSaveFailed = false
+    @State private var afterSaveWarning: (() -> Void)?
     @State private var saved = false
     @State private var reportSent = false
     @State private var showNotSentAlert = false
@@ -122,6 +126,14 @@ struct SummaryView: View {
         } message: {
             Text("Your report was not sent to \(contactName).")
         }
+        .alert("Couldn't Save Check-in", isPresented: $showSaveFailed) {
+            Button("OK") {
+                afterSaveWarning?()
+                afterSaveWarning = nil
+            }
+        } message: {
+            Text("save.failed")
+        }
         .alert("Cannot Send Email", isPresented: $showMailError) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -193,20 +205,7 @@ struct SummaryView: View {
             }
 
             Button {
-                if !saved {
-                    store.save(answers)
-                    saved = true
-                }
-                if !MFMailComposeViewController.canSendMail() {
-                    showMailError = true
-                } else if !store.unsentEntries(excluding: answers.id).isEmpty {
-                    // Pending check-ins — let the user decide what this
-                    // email should contain.
-                    showBacklogChoice = true
-                } else {
-                    includeBacklog = false
-                    showMail = true
-                }
+                saveOnce(then: startSend)
             } label: {
                 Label {
                     Text(reportSent ? "Send Again" : "Send Report")
@@ -243,15 +242,39 @@ struct SummaryView: View {
         }
     }
 
+    /// Saves today's check-in (once), then continues with `next` — after a
+    /// gentle warning if the history file couldn't be written.
+    private func saveOnce(then next: @escaping () -> Void) {
+        if !saved {
+            store.save(answers)
+            saved = true
+        }
+        if store.saveFailed {
+            afterSaveWarning = next
+            showSaveFailed = true
+        } else {
+            next()
+        }
+    }
+
+    private func startSend() {
+        if !MFMailComposeViewController.canSendMail() {
+            showMailError = true
+        } else if !store.unsentEntries(excluding: answers.id).isEmpty {
+            // Pending check-ins — let the user decide what this
+            // email should contain.
+            showBacklogChoice = true
+        } else {
+            includeBacklog = false
+            showMail = true
+        }
+    }
+
     private var doneButton: some View {
         Button {
             // Finishing without emailing still counts as today's check-in
             // and shows up in History.
-            if !saved {
-                store.save(answers)
-                saved = true
-            }
-            dismiss()
+            saveOnce { dismiss() }
         } label: {
             Text("Done")
                 .font(.title3.bold())

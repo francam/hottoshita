@@ -25,7 +25,10 @@ struct RootView: View {
         // ReminderScheduler), so once it fires it needs a fresh successor
         // scheduled — foregrounding the app is the natural point to do that.
         .onChange(of: scenePhase) { newPhase in
-            guard newPhase == .active, reminderEnabled else { return }
+            guard newPhase == .active else { return }
+            // A history write that failed (storage full) gets another try.
+            store.retryIfSaveFailed()
+            guard reminderEnabled else { return }
             ReminderScheduler.scheduleNext(hour: reminderMinutes / 60, minute: reminderMinutes % 60, submittedToday: store.submittedToday)
         }
     }

@@ -8,6 +8,10 @@ final class CheckInStore: ObservableObject {
     static private(set) weak var current: CheckInStore?
 
     @Published private(set) var entries: [CheckInAnswers] = []
+    /// The last write of the history file failed (e.g. storage full). The
+    /// entries are still in memory and every later write saves all of them,
+    /// so `retryIfSaveFailed()` catches up once there's room again.
+    @Published private(set) var saveFailed = false
 
     private let fileURL: URL
 
@@ -112,8 +116,17 @@ final class CheckInStore: ObservableObject {
         entries = decoded
     }
 
+    func retryIfSaveFailed() {
+        if saveFailed { persist() }
+    }
+
     private func persist() {
-        guard let data = try? JSONEncoder().encode(entries) else { return }
-        try? data.write(to: fileURL, options: .atomic)
+        do {
+            let data = try JSONEncoder().encode(entries)
+            try data.write(to: fileURL, options: .atomic)
+            saveFailed = false
+        } catch {
+            saveFailed = true
+        }
     }
 }
