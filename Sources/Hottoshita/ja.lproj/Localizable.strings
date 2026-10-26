@@ -1,11 +1,6 @@
 // Onboarding
-"Trusted Contact Name" = "連絡先の名前";
-"e.g. Sarah" = "例：田中花子";
-"Email Address" = "メールアドレス";
-"e.g. sarah@example.com" = "例：hanako@example.com";
 "Get Started" = "はじめる";
 "Choose from Contacts" = "連絡先から選ぶ";
-"or enter the details yourself:" = "または直接入力してください：";
 "greeting.hi" = "%@さん、こんにちは！";
 "Let's get you set up." = "これから一緒に設定していきましょう。";
 
@@ -108,7 +103,6 @@
 
 // Settings
 "Settings" = "設定";
-"Trusted Contact" = "信頼できる連絡先";
 "Name" = "名前";
 "Email" = "メール";
 "Contact name" = "連絡先の名前";
@@ -184,10 +178,13 @@
 "save.failed" = "端末の空き容量が足りないなどの理由で、チェックインをこの端末に保存できませんでした。今日のレポートは送信できます。次に開いたときに、もう一度保存を試みます。";
 
 // More contacts
-"More Contacts" = "ほかの連絡先";
-"Add Another Contact" = "連絡先を追加";
 "Add Contact" = "連絡先を追加";
 "Add" = "追加";
 "Remove %@" = "%@を削除";
-"contacts.footer" = "全員に同じレポートが送られます。連絡先が2人以上の場合、ほかに誰に送られたかはわかりません。連絡先は5人まで登録できます。";
+"contacts.footer" = "全員に同じレポートが届きます。2人以上の場合、ほかに誰に送られたかはわかりません。5人まで登録できます。";
 "report.greeting.everyone" = "皆様、";
+"Type a Contact" = "連絡先を入力";
+"Edit Contact" = "連絡先を編集";
+"Trusted Contacts" = "見守る方の連絡先";
+"Double-tap to edit." = "ダブルタップで編集できます。";
+"Choose your name from Contacts" = "連絡先から自分の名前を選ぶ";

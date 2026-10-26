@@ -24,6 +24,21 @@ enum TrustedContacts {
         guard let data = try? JSONEncoder().encode(Array(list.prefix(maximum - 1))) else { return "" }
         return String(decoding: data, as: UTF8.self)
     }
+
+    /// The whole list as the screens show it: the stored first contact,
+    /// then the others.
+    static func list(primaryName: String, primaryEmail: String, additionalJSON: String) -> [TrustedContact] {
+        let primary = primaryName.isEmpty && primaryEmail.isEmpty
+            ? [] : [TrustedContact(name: primaryName, email: primaryEmail)]
+        return primary + decode(additionalJSON)
+    }
+
+    /// Back to storage: the first person in the list becomes the stored
+    /// first contact (so removing them promotes the next one).
+    static func split(_ list: [TrustedContact]) -> (name: String, email: String, additionalJSON: String) {
+        guard let first = list.first else { return ("", "", "") }
+        return (first.name, first.email, encode(Array(list.dropFirst())))
+    }
 }
 
 /// Who a report goes to, and how it addresses them.

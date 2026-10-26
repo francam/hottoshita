@@ -11,9 +11,7 @@ struct OnboardingView: View {
 
     @State private var step = 0
     @State private var userNameInput = ""
-    @State private var contactNameInput = ""
-    @State private var emailInput = ""
-    @State private var additionalContactsInput: [TrustedContact] = []
+    @State private var contactsInput: [TrustedContact] = []
 
     // Steps: 0 = name, 1 = greeting splash (transient), 2 = contact,
     // 3 = daily reminder opt-in, 4 = colour.
@@ -105,9 +103,7 @@ struct OnboardingView: View {
             }
         case 2:
             OnboardingContactStep(
-                name: $contactNameInput,
-                email: $emailInput,
-                additional: $additionalContactsInput,
+                contacts: $contactsInput,
                 accent: appTheme.accent
             ) {
                 withAnimation(.easeInOut(duration: 0.3)) { step = 3 }
@@ -119,9 +115,10 @@ struct OnboardingView: View {
         default:
             OnboardingColorStep(appTheme: appTheme) {
                 userName = userNameInput.trimmingCharacters(in: .whitespaces)
-                contactName = contactNameInput.trimmingCharacters(in: .whitespaces)
-                contactEmail = emailInput.trimmingCharacters(in: .whitespaces)
-                additionalContactsJSON = TrustedContacts.encode(additionalContactsInput)
+                let stored = TrustedContacts.split(contactsInput)
+                contactName = stored.name
+                contactEmail = stored.email
+                additionalContactsJSON = stored.additionalJSON
             }
         }
     }
@@ -152,13 +149,13 @@ private struct OnboardingNameStep: View {
                     LabeledTextField(label: "Your Name", placeholder: "e.g. John", text: $value)
                     // Optional shortcut: typing stays the main path.
                     Button { showContactPicker = true } label: {
-                        Label("Choose from Contacts", systemImage: "person.crop.circle")
-                            .font(.title3)
+                        oneLineButtonLabel("Choose from Contacts", systemImage: "person.crop.circle")
                     }
-                    .buttonStyle(.borderless)
-                    .foregroundStyle(accent)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .secondaryActionStyle(accent: accent)
+                    .accessibilityLabel(Text("Choose your name from Contacts"))
                 }
+                // Same width as Continue on iPad, instead of edge to edge.
+                .frame(maxWidth: 400)
 
                 Button(action: onNext) {
                     Text("Continue")
@@ -222,20 +219,14 @@ private struct OnboardingGreetingSplash: View {
 
 private struct OnboardingContactStep: View {
     @EnvironmentObject private var appTheme: AppTheme
-    @Binding var name: String
-    @Binding var email: String
-    /// Optional extra contacts (up to five in total), saved with the rest
-    /// of onboarding on Get Started.
-    @Binding var additional: [TrustedContact]
+    /// Everyone who receives the report (up to five), saved with the rest of
+    /// onboarding on Get Started.
+    @Binding var contacts: [TrustedContact]
     let accent: Color
     let onNext: () -> Void
 
-    @State private var showContactPicker = false
-    @State private var showAddContact = false
-
-    private var canContinue: Bool {
-        !name.trimmingCharacters(in: .whitespaces).isEmpty && email.contains("@")
-    }
+    @State private var editor = ContactsEditorState()
+    @State private var fold: Fold?
 
     private var autoOpenPickerForDebug: Bool {
         #if DEBUG
@@ -249,15 +240,30 @@ private struct OnboardingContactStep: View {
 
     var body: some View {
         // The Continue button stays pinned at the bottom of the screen; only
-        // the header/fields scroll (e.g. when the keyboard is up).
+        // the header and the list scroll.
         Group {
-            if isCompactHeight {
+            if let fold {
+                // iPhone Duo inner display: the question on one page, the
+                // list and Continue on the other — nothing on the hinge.
+                FoldSplitLayout(fold: fold) {
+                    header
+                    VStack(spacing: 12) {
+                        ScrollView {
+                            list
+                                .padding(.vertical, 4)
+                        }
+                        continueButton
+                    }
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 8)
+                }
+            } else if isCompactHeight {
                 HStack(spacing: 24) {
                     header
                         .frame(maxWidth: .infinity)
                     VStack(spacing: 12) {
                         ScrollView {
-                            fields
+                            list
                                 .padding(.vertical, 4)
                         }
                         continueButton
@@ -272,7 +278,7 @@ private struct OnboardingContactStep: View {
                         ScrollView {
                             VStack(spacing: 16) {
                                 header
-                                fields
+                                list
                                     .padding(.horizontal, 48)
                             }
                             .padding(.vertical, 8)
@@ -286,21 +292,11 @@ private struct OnboardingContactStep: View {
                 }
             }
         }
-        .background {
-            ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
-                name = pickedName
-                email = pickedEmail
-            }
-        }
-        // Presented from the step, not from inside its scroll view.
-        .sheet(isPresented: $showAddContact) {
-            AddContactSheet { additional.append($0) }
-                .environmentObject(appTheme)
-                .cappedDynamicType()
-        }
+        .readsFold($fold)
+        .trustedContactsEditing($contacts, state: $editor, appTheme: appTheme, fold: fold)
         .onAppear {
             if autoOpenPickerForDebug {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { showContactPicker = true }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { editor.showPicker = true }
             }
         }
     }
@@ -314,67 +310,16 @@ private struct OnboardingContactStep: View {
         )
     }
 
-    private var fields: some View {
-        VStack(spacing: isCompactHeight ? 10 : 16) {
-            Button { showContactPicker = true } label: {
-                Label {
-                    Text("Choose from Contacts")
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                } icon: {
-                    Image(systemName: "person.crop.circle.badge.plus").accessibilityHidden(true)
-                }
-                .font(.title3.weight(.semibold))
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, isCompactHeight ? 8 : 12)
-            }
-            .secondaryActionStyle(accent: accent)
-
-            Text("or enter the details yourself:")
-                .font(.subheadline)
+    private var list: some View {
+        VStack(spacing: isCompactHeight ? 10 : 14) {
+            TrustedContactsList(contacts: $contacts, state: $editor, accent: accent, cards: true)
+            Text("contacts.footer")
+                .font(.footnote)
                 .foregroundStyle(.secondary)
-
-            LabeledTextField(label: "Trusted Contact Name", placeholder: "e.g. Sarah", text: $name)
-            LabeledTextField(label: "Email Address", placeholder: "e.g. sarah@example.com", text: $email, keyboardType: .emailAddress)
-
-            ForEach(additional) { contact in
-                HStack(spacing: 12) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(contact.name).font(.title3)
-                        Text(contact.email).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button(role: .destructive) {
-                        additional.removeAll { $0.id == contact.id }
-                    } label: {
-                        Image(systemName: "minus.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.red)
-                    }
-                    .buttonStyle(.borderless)
-                    .accessibilityLabel(Text("Remove \(contact.name)"))
-                }
-                .padding(.vertical, 4)
-            }
-
-            // Only once the first contact is filled in, so the step starts
-            // as simple as before.
-            if canContinue && additional.count < TrustedContacts.maximum - 1 {
-                Button { showAddContact = true } label: {
-                    Label("Add Another Contact", systemImage: "plus.circle.fill")
-                        .font(.title3)
-                }
-                .buttonStyle(.borderless)
-                .foregroundStyle(accent)
                 .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            if !additional.isEmpty {
-                Text("contacts.footer")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
         }
+        // Same width as Continue on iPad, instead of edge to edge.
+        .frame(maxWidth: 400)
     }
 
     private var continueButton: some View {
@@ -386,7 +331,7 @@ private struct OnboardingContactStep: View {
                 .padding(.vertical, isCompactHeight ? 10 : 20)
         }
         .primaryActionStyle(accent: accent)
-        .disabled(!canContinue)
+        .disabled(contacts.isEmpty)
     }
 }
 

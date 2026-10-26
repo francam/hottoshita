@@ -15,17 +15,13 @@ struct SettingsView: View {
     @AppStorage("reminderMinutes") private var reminderMinutes = 9 * 60  // 09:00
 
     @State private var userNameInput = ""
-    @State private var contactNameInput = ""
-    @State private var emailInput = ""
+    @State private var contactsInput: [TrustedContact] = []
+    @State private var contactsEditor = ContactsEditorState()
     @State private var reminderEnabledInput = false
     @State private var reminderMinutesInput = 9 * 60
     @State private var iCloudSyncInput = false
-    @State private var showContactPicker = false
-    @State private var showOwnCardPicker = false
     @State private var showNotificationsDenied = false
     @State private var showiCloudSyncUnavailable = false
-    @State private var additionalContactsInput: [TrustedContact] = []
-    @State private var showAddContact = false
     @State private var showEraseConfirm = false
     @State private var showEraseFinal = false
     @State private var showEraseFailed = false
@@ -63,8 +59,7 @@ struct SettingsView: View {
 
     private var canSave: Bool {
         !userNameInput.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !contactNameInput.trimmingCharacters(in: .whitespaces).isEmpty &&
-        emailInput.contains("@")
+        !contactsInput.isEmpty
     }
 
     var body: some View {
@@ -76,72 +71,12 @@ struct SettingsView: View {
                             .font(.title3)
                             .textInputAutocapitalization(.words)
                     }
-                    Button { showOwnCardPicker = true } label: {
-                        Label("Choose from Contacts", systemImage: "person.crop.circle")
-                            .font(.title3)
-                    }
-                    .foregroundStyle(appTheme.accent)
-                }
-
-                Section("Trusted Contact") {
-                    formRow(label: "Name") {
-                        TextField("Contact name", text: $contactNameInput)
-                            .font(.title3)
-                    }
-                    formRow(label: "Email") {
-                        TextField("Contact email", text: $emailInput)
-                            .font(.title3)
-                            .keyboardType(.emailAddress)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                    }
-                    Button {
-                        showContactPicker = true
-                    } label: {
-                        Label {
-                            Text("Choose from Contacts")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.6)
-                        } icon: {
-                            Image(systemName: "person.crop.circle.badge.plus").accessibilityHidden(true)
-                        }
-                        .font(.title3)
-                    }
-                    .foregroundStyle(appTheme.accent)
                 }
 
                 Section {
-                    ForEach(additionalContactsInput) { contact in
-                        HStack(spacing: 12) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(contact.name).font(.title3)
-                                Text(contact.email).foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            // An explicit button rather than swipe-to-delete,
-                            // which elderly users rarely discover.
-                            Button(role: .destructive) {
-                                additionalContactsInput.removeAll { $0.id == contact.id }
-                            } label: {
-                                Image(systemName: "minus.circle.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(.red)
-                            }
-                            .buttonStyle(.borderless)
-                            .accessibilityLabel(Text("Remove \(contact.name)"))
-                        }
-                    }
-                    if additionalContactsInput.count < TrustedContacts.maximum - 1 {
-                        Button {
-                            showAddContact = true
-                        } label: {
-                            Label("Add Another Contact", systemImage: "plus.circle.fill")
-                                .font(.title3)
-                        }
-                        .foregroundStyle(appTheme.accent)
-                    }
+                    TrustedContactsList(contacts: $contactsInput, state: $contactsEditor, accent: appTheme.accent)
                 } header: {
-                    Text("More Contacts")
+                    Text("Trusted Contacts")
                 } footer: {
                     Text("contacts.footer")
                 }
@@ -260,9 +195,8 @@ struct SettingsView: View {
             }
             .onAppear {
                 userNameInput = userName
-                contactNameInput = contactName
-                additionalContactsInput = TrustedContacts.decode(additionalContactsJSON)
-                emailInput = contactEmail
+                contactsInput = TrustedContacts.list(primaryName: contactName, primaryEmail: contactEmail,
+                                                     additionalJSON: additionalContactsJSON)
                 reminderEnabledInput = reminderEnabled
                 reminderMinutesInput = reminderMinutes
                 originalTheme = appTheme.theme
@@ -296,12 +230,7 @@ struct SettingsView: View {
                     }
                 }
             }
-            // Presented from the screen, not from inside the (lazy) list.
-            .sheet(isPresented: $showAddContact) {
-                AddContactSheet { additionalContactsInput.append($0) }
-                    .environmentObject(appTheme)
-                    .cappedDynamicType()
-            }
+            .trustedContactsEditing($contactsInput, state: $contactsEditor, appTheme: appTheme)
             .alert("Notifications Disabled", isPresented: $showNotificationsDenied) {
                 Button("Open Settings") {
                     if let url = URL(string: UIApplication.openSettingsURLString) {
@@ -321,19 +250,6 @@ struct SettingsView: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text("Please sign in to iCloud in the Settings app to sync between your devices.")
-            }
-            .background {
-                ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
-                    contactNameInput = pickedName
-                    emailInput = pickedEmail
-                }
-            }
-            .background {
-                // The user's own card (name only), presented from the screen
-                // like the contact picker above, not from inside the list.
-                ContactPickerPresenter(isPresented: $showOwnCardPicker, purpose: .yourself) { name, _ in
-                    userNameInput = name
-                }
             }
         }
         .background(appTheme.background.ignoresSafeArea())
@@ -395,9 +311,10 @@ struct SettingsView: View {
 
     private func save() {
         userName = userNameInput.trimmingCharacters(in: .whitespaces)
-        contactName = contactNameInput.trimmingCharacters(in: .whitespaces)
-        contactEmail = emailInput.trimmingCharacters(in: .whitespaces)
-        additionalContactsJSON = TrustedContacts.encode(additionalContactsInput)
+        let stored = TrustedContacts.split(contactsInput)
+        contactName = stored.name
+        contactEmail = stored.email
+        additionalContactsJSON = stored.additionalJSON
 
         reminderEnabled = reminderEnabledInput
         reminderMinutes = reminderMinutesInput

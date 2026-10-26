@@ -20,6 +20,20 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Who receives your reports?"].waitForExistence(timeout: 8))
     }
 
+    /// Adds a contact through "Type a Contact" and its sheet.
+    private func typeContact(name: String, email: String) {
+        app.buttons["Add Contact"].tap()
+        XCTAssertTrue(app.buttons["Type a Contact"].waitForExistence(timeout: 3))
+        app.buttons["Type a Contact"].tap()
+        XCTAssertTrue(app.textFields["addContact.name"].waitForExistence(timeout: 3))
+        app.textFields["addContact.name"].tap()
+        app.textFields["addContact.name"].typeText(name)
+        app.textFields["addContact.email"].tap()
+        app.textFields["addContact.email"].typeText(email)
+        app.buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 3))
+    }
+
     private func dismissKeyboard() {
         // Inject the keystroke directly instead of locating and tapping the
         // on-screen keyboard's Return button — that AX hit-test/scroll path
@@ -36,30 +50,22 @@ final class OnboardingUITests: XCTestCase {
 
     func testNameStepOffersContactsAsAnOption() {
         // Optional shortcut next to the field; typing still works on its own.
-        XCTAssertTrue(app.buttons["Choose from Contacts"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Choose your name from Contacts"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.buttons["Continue"].isEnabled)
     }
 
-    func testExtraContactsCanBeAddedDuringOnboarding() {
+    func testSeveralContactsCanBeAddedDuringOnboarding() {
         advanceToContactStep()
-        // The option appears only once the first contact is filled in.
-        XCTAssertFalse(app.buttons["Add Another Contact"].exists)
-        app.textFields.element(boundBy: 0).tap()
-        app.textFields.element(boundBy: 0).typeText("Sarah")
-        app.textFields.element(boundBy: 1).tap()
-        app.textFields.element(boundBy: 1).typeText("sarah@example.com")
-        dismissKeyboard()
+        typeContact(name: "Sarah", email: "sarah@example.com")
+        typeContact(name: "Tom", email: "tom@example.com")
 
-        let add = app.buttons["Add Another Contact"]
-        XCTAssertTrue(add.waitForExistence(timeout: 3))
-        add.tap()
-        XCTAssertTrue(app.textFields["addContact.name"].waitForExistence(timeout: 3))
+        // Tapping a row edits it.
+        app.staticTexts["Tom"].tap()
+        XCTAssertTrue(app.navigationBars["Edit Contact"].waitForExistence(timeout: 3))
         app.textFields["addContact.name"].tap()
-        app.textFields["addContact.name"].typeText("Tom")
-        app.textFields["addContact.email"].tap()
-        app.textFields["addContact.email"].typeText("tom@example.com")
-        app.buttons["Add"].tap()
-        XCTAssertTrue(app.staticTexts["Tom"].waitForExistence(timeout: 3))
+        app.textFields["addContact.name"].typeText(" Smith")
+        app.buttons["Save"].tap()
+        XCTAssertTrue(app.staticTexts["Tom Smith"].waitForExistence(timeout: 3))
 
         app.buttons["Continue"].tap()
         XCTAssertTrue(app.buttons["Not now"].waitForExistence(timeout: 3))
@@ -67,13 +73,14 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Get Started"].waitForExistence(timeout: 3))
         app.buttons["Get Started"].tap()
 
-        // Saved with the rest of onboarding.
+        // Saved with the rest of onboarding, in the same list in Settings.
         XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 5))
         app.buttons["Settings"].tap()
-        let tom = app.staticTexts["Tom"]
+        let tom = app.staticTexts["Tom Smith"]
         var swipes = 0
         while !tom.exists && swipes < 4 { app.swipeUp(); swipes += 1 }
         XCTAssertTrue(tom.exists)
+        XCTAssertTrue(app.staticTexts["Sarah"].exists)
     }
 
     func testContinueDisabledWithEmptyName() {
@@ -94,12 +101,18 @@ final class OnboardingUITests: XCTestCase {
     func testContactStepShowsPickerAndFields() {
         advanceToContactStep()
 
-        XCTAssertTrue(app.buttons["Choose from Contacts"].exists)
-        XCTAssertEqual(app.textFields.count, 2)
+        // One list and one Add button offering both ways; no form fields.
+        XCTAssertTrue(app.buttons["Add Contact"].exists)
+        XCTAssertEqual(app.textFields.count, 0)
+        app.buttons["Add Contact"].tap()
+        XCTAssertTrue(app.buttons["Choose from Contacts"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Type a Contact"].exists)
     }
 
     func testContactPickerPresents() throws {
         advanceToContactStep()
+        app.buttons["Add Contact"].tap()
+        XCTAssertTrue(app.buttons["Choose from Contacts"].waitForExistence(timeout: 3))
         app.buttons["Choose from Contacts"].tap()
 
         // The contact picker runs out-of-process in ContactsViewService.
@@ -116,29 +129,23 @@ final class OnboardingUITests: XCTestCase {
         }
     }
 
-    func testContinueDisabledUntilContactValid() {
+    func testContinueNeedsAtLeastOneContact() {
         advanceToContactStep()
 
         let continueButton = app.buttons["Continue"]
-        XCTAssertFalse(continueButton.isEnabled)
+        XCTAssertFalse(continueButton.isEnabled, "needs at least one person")
 
-        app.textFields.element(boundBy: 0).tap()
-        app.textFields.element(boundBy: 0).typeText("Sarah")
-        XCTAssertFalse(continueButton.isEnabled)
-
-        app.textFields.element(boundBy: 1).tap()
-        app.textFields.element(boundBy: 1).typeText("sarah@example.com")
+        typeContact(name: "Sarah", email: "sarah@example.com")
         XCTAssertTrue(continueButton.isEnabled)
+
+        app.buttons["Remove Sarah"].tap()
+        XCTAssertFalse(continueButton.isEnabled)
     }
 
     func testCompletingOnboardingNavigatesToHome() {
         advanceToContactStep()
 
-        app.textFields.element(boundBy: 0).tap()
-        app.textFields.element(boundBy: 0).typeText("Sarah")
-        app.textFields.element(boundBy: 1).tap()
-        app.textFields.element(boundBy: 1).typeText("sarah@example.com")
-        dismissKeyboard()
+        typeContact(name: "Sarah", email: "sarah@example.com")
         app.buttons["Continue"].tap()
 
         // Reminder opt-in step: decline to avoid the permission dialog.
@@ -154,11 +161,7 @@ final class OnboardingUITests: XCTestCase {
     func testReminderStepOffersOptInAndTimePicker() {
         advanceToContactStep()
 
-        app.textFields.element(boundBy: 0).tap()
-        app.textFields.element(boundBy: 0).typeText("Sarah")
-        app.textFields.element(boundBy: 1).tap()
-        app.textFields.element(boundBy: 1).typeText("sarah@example.com")
-        dismissKeyboard()
+        typeContact(name: "Sarah", email: "sarah@example.com")
         app.buttons["Continue"].tap()
 
         XCTAssertTrue(app.staticTexts["Would you like a daily reminder?"].waitForExistence(timeout: 3))

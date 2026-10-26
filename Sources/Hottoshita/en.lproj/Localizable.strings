@@ -1,11 +1,6 @@
 // Onboarding
-"Trusted Contact Name" = "Trusted Contact Name";
-"e.g. Sarah" = "e.g. Sarah";
-"Email Address" = "Email Address";
-"e.g. sarah@example.com" = "e.g. sarah@example.com";
 "Get Started" = "Get Started";
 "Choose from Contacts" = "Choose from Contacts";
-"or enter the details yourself:" = "or enter the details yourself:";
 "greeting.hi" = "Hi %@!";
 "Let's get you set up." = "Let's get you set up.";
 
@@ -108,7 +103,6 @@
 
 // Settings
 "Settings" = "Settings";
-"Trusted Contact" = "Trusted Contact";
 "Name" = "Name";
 "Email" = "Email";
 "Contact name" = "Contact name";
@@ -184,10 +178,13 @@
 "save.failed" = "Your check-in couldn't be stored on this device, perhaps because it's full. You can still send today's report, and Hottoshita will try saving again the next time it opens.";
 
 // More contacts
-"More Contacts" = "More Contacts";
-"Add Another Contact" = "Add Another Contact";
 "Add Contact" = "Add Contact";
 "Add" = "Add";
 "Remove %@" = "Remove %@";
-"contacts.footer" = "Everyone receives the same report. With more than one contact, nobody can see who else it was sent to. You can have up to 5 contacts.";
+"contacts.footer" = "Everyone gets the same report. With more than one person, nobody sees who else it went to. Up to 5 people.";
 "report.greeting.everyone" = "Hello,";
+"Type a Contact" = "Type a Contact";
+"Edit Contact" = "Edit Contact";
+"Trusted Contacts" = "Trusted Contacts";
+"Double-tap to edit." = "Double-tap to edit.";
+"Choose your name from Contacts" = "Choose your name from Contacts";

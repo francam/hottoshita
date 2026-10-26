@@ -122,48 +122,66 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["Settings"].exists)
     }
 
+    /// Adds a contact in Settings through "Type a Contact".
+    private func typeContactInSettings(name: String, email: String) {
+        let add = app.buttons["Add Contact"]
+        var swipes = 0
+        while !(add.exists && add.isHittable) && swipes < 6 { app.swipeUp(); swipes += 1 }
+        add.tap()
+        XCTAssertTrue(app.buttons["Type a Contact"].waitForExistence(timeout: 3))
+        app.buttons["Type a Contact"].tap()
+        XCTAssertTrue(app.textFields["addContact.name"].waitForExistence(timeout: 3))
+        app.textFields["addContact.name"].tap()
+        app.textFields["addContact.name"].typeText(name)
+        app.textFields["addContact.email"].tap()
+        app.textFields["addContact.email"].typeText(email)
+        app.buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 3))
+    }
+
     func testAddingContactsStopsAtFive() {
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
-        let add = app.buttons["Add Another Contact"]
-        // The first contact plus four more.
-        for n in 1...4 {
-            var swipes = 0
-            while !(add.exists && add.isHittable) && swipes < 6 { app.swipeUp(); swipes += 1 }
-            add.tap()
-            XCTAssertTrue(app.navigationBars["Add Contact"].waitForExistence(timeout: 3))
-            app.textFields["addContact.name"].tap()
-            app.textFields["addContact.name"].typeText("Person \(n)")
-            app.textFields["addContact.email"].tap()
-            app.textFields["addContact.email"].typeText("p\(n)@example.com")
-            app.buttons["Add"].tap()
-            XCTAssertTrue(app.staticTexts["Person \(n)"].waitForExistence(timeout: 3))
-        }
-        XCTAssertFalse(add.exists, "no more than five contacts")
+        // Test Contact is already there: four more makes five.
+        for n in 1...4 { typeContactInSettings(name: "Person \(n)", email: "p\(n)@example.com") }
+        XCTAssertFalse(app.buttons["Add Contact"].exists, "no more than five contacts")
 
         // Removing one brings the button back.
         app.buttons["Remove Person 4"].tap()
         XCTAssertFalse(app.staticTexts["Person 4"].exists)
-        XCTAssertTrue(add.waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Add Contact"].waitForExistence(timeout: 3))
 
-        // Saved with Settings; Cancel would have discarded them.
+        // Saved with Settings.
         app.buttons["Save"].tap()
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.staticTexts["Person 3"].waitForExistence(timeout: 3))
     }
 
+    func testRemovingTheFirstContactPromotesTheNext() {
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        typeContactInSettings(name: "Tom", email: "tom@example.com")
+        app.buttons["Remove Test Contact"].tap()
+        app.buttons["Save"].tap()
+
+        // Tom is now the only (and first) contact — Home still works.
+        XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 3))
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Tom"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.staticTexts["Test Contact"].exists)
+    }
+
+    func testSettingsCannotSaveWithNoContacts() {
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        app.buttons["Remove Test Contact"].tap()
+        XCTAssertFalse(app.buttons["Save"].isEnabled)
+    }
+
     func testAddedContactIsDiscardedOnCancel() {
         app.buttons["Settings"].tap()
-        let add = app.buttons["Add Another Contact"]
-        var swipes = 0
-        while !(add.exists && add.isHittable) && swipes < 6 { app.swipeUp(); swipes += 1 }
-        add.tap()
-        app.textFields["addContact.name"].tap()
-        app.textFields["addContact.name"].typeText("Tom")
-        app.textFields["addContact.email"].tap()
-        app.textFields["addContact.email"].typeText("tom@example.com")
-        app.buttons["Add"].tap()
-        XCTAssertTrue(app.staticTexts["Tom"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        typeContactInSettings(name: "Tom", email: "tom@example.com")
         app.buttons["Cancel"].tap()
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
