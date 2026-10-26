@@ -5,6 +5,7 @@ struct OnboardingView: View {
     @AppStorage("userName") private var userName = ""
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
+    @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
 
     @Environment(\.isCompactHeight) private var isCompactHeight
 
@@ -12,6 +13,7 @@ struct OnboardingView: View {
     @State private var userNameInput = ""
     @State private var contactNameInput = ""
     @State private var emailInput = ""
+    @State private var additionalContactsInput: [TrustedContact] = []
 
     // Steps: 0 = name, 1 = greeting splash (transient), 2 = contact,
     // 3 = daily reminder opt-in, 4 = colour.
@@ -105,6 +107,7 @@ struct OnboardingView: View {
             OnboardingContactStep(
                 name: $contactNameInput,
                 email: $emailInput,
+                additional: $additionalContactsInput,
                 accent: appTheme.accent
             ) {
                 withAnimation(.easeInOut(duration: 0.3)) { step = 3 }
@@ -118,6 +121,7 @@ struct OnboardingView: View {
                 userName = userNameInput.trimmingCharacters(in: .whitespaces)
                 contactName = contactNameInput.trimmingCharacters(in: .whitespaces)
                 contactEmail = emailInput.trimmingCharacters(in: .whitespaces)
+                additionalContactsJSON = TrustedContacts.encode(additionalContactsInput)
             }
         }
     }
@@ -132,6 +136,7 @@ private struct OnboardingNameStep: View {
     let onNext: () -> Void
 
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @State private var showContactPicker = false
 
     var body: some View {
         AdaptiveStepLayout {
@@ -143,7 +148,17 @@ private struct OnboardingNameStep: View {
             )
         } controls: {
             VStack(spacing: isCompactHeight ? 16 : 40) {
-                LabeledTextField(label: "Your Name", placeholder: "e.g. John", text: $value)
+                VStack(spacing: 8) {
+                    LabeledTextField(label: "Your Name", placeholder: "e.g. John", text: $value)
+                    // Optional shortcut: typing stays the main path.
+                    Button { showContactPicker = true } label: {
+                        Label("Choose from Contacts", systemImage: "person.crop.circle")
+                            .font(.title3)
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(accent)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
 
                 Button(action: onNext) {
                     Text("Continue")
@@ -156,6 +171,11 @@ private struct OnboardingNameStep: View {
                 .disabled(value.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             .padding(.horizontal, isCompactHeight ? 0 : 48)
+        }
+        .background {
+            ContactPickerPresenter(isPresented: $showContactPicker, purpose: .yourself) { name, _ in
+                value = name
+            }
         }
     }
 }
@@ -204,10 +224,14 @@ private struct OnboardingContactStep: View {
     @EnvironmentObject private var appTheme: AppTheme
     @Binding var name: String
     @Binding var email: String
+    /// Optional extra contacts (up to five in total), saved with the rest
+    /// of onboarding on Get Started.
+    @Binding var additional: [TrustedContact]
     let accent: Color
     let onNext: () -> Void
 
     @State private var showContactPicker = false
+    @State private var showAddContact = false
 
     private var canContinue: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty && email.contains("@")
@@ -268,6 +292,12 @@ private struct OnboardingContactStep: View {
                 email = pickedEmail
             }
         }
+        // Presented from the step, not from inside its scroll view.
+        .sheet(isPresented: $showAddContact) {
+            AddContactSheet { additional.append($0) }
+                .environmentObject(appTheme)
+                .cappedDynamicType()
+        }
         .onAppear {
             if autoOpenPickerForDebug {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { showContactPicker = true }
@@ -306,6 +336,44 @@ private struct OnboardingContactStep: View {
 
             LabeledTextField(label: "Trusted Contact Name", placeholder: "e.g. Sarah", text: $name)
             LabeledTextField(label: "Email Address", placeholder: "e.g. sarah@example.com", text: $email, keyboardType: .emailAddress)
+
+            ForEach(additional) { contact in
+                HStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(contact.name).font(.title3)
+                        Text(contact.email).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Button(role: .destructive) {
+                        additional.removeAll { $0.id == contact.id }
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.red)
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel(Text("Remove \(contact.name)"))
+                }
+                .padding(.vertical, 4)
+            }
+
+            // Only once the first contact is filled in, so the step starts
+            // as simple as before.
+            if canContinue && additional.count < TrustedContacts.maximum - 1 {
+                Button { showAddContact = true } label: {
+                    Label("Add Another Contact", systemImage: "plus.circle.fill")
+                        .font(.title3)
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(accent)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if !additional.isEmpty {
+                Text("contacts.footer")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
     }
 

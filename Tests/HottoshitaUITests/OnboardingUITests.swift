@@ -34,6 +34,48 @@ final class OnboardingUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["What's your name?"].waitForExistence(timeout: 3))
     }
 
+    func testNameStepOffersContactsAsAnOption() {
+        // Optional shortcut next to the field; typing still works on its own.
+        XCTAssertTrue(app.buttons["Choose from Contacts"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Continue"].isEnabled)
+    }
+
+    func testExtraContactsCanBeAddedDuringOnboarding() {
+        advanceToContactStep()
+        // The option appears only once the first contact is filled in.
+        XCTAssertFalse(app.buttons["Add Another Contact"].exists)
+        app.textFields.element(boundBy: 0).tap()
+        app.textFields.element(boundBy: 0).typeText("Sarah")
+        app.textFields.element(boundBy: 1).tap()
+        app.textFields.element(boundBy: 1).typeText("sarah@example.com")
+        dismissKeyboard()
+
+        let add = app.buttons["Add Another Contact"]
+        XCTAssertTrue(add.waitForExistence(timeout: 3))
+        add.tap()
+        XCTAssertTrue(app.textFields["addContact.name"].waitForExistence(timeout: 3))
+        app.textFields["addContact.name"].tap()
+        app.textFields["addContact.name"].typeText("Tom")
+        app.textFields["addContact.email"].tap()
+        app.textFields["addContact.email"].typeText("tom@example.com")
+        app.buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts["Tom"].waitForExistence(timeout: 3))
+
+        app.buttons["Continue"].tap()
+        XCTAssertTrue(app.buttons["Not now"].waitForExistence(timeout: 3))
+        app.buttons["Not now"].tap()
+        XCTAssertTrue(app.buttons["Get Started"].waitForExistence(timeout: 3))
+        app.buttons["Get Started"].tap()
+
+        // Saved with the rest of onboarding.
+        XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 5))
+        app.buttons["Settings"].tap()
+        let tom = app.staticTexts["Tom"]
+        var swipes = 0
+        while !tom.exists && swipes < 4 { app.swipeUp(); swipes += 1 }
+        XCTAssertTrue(tom.exists)
+    }
+
     func testContinueDisabledWithEmptyName() {
         XCTAssertFalse(app.buttons["Continue"].isEnabled)
     }

@@ -21,6 +21,7 @@ struct SettingsView: View {
     @State private var reminderMinutesInput = 9 * 60
     @State private var iCloudSyncInput = false
     @State private var showContactPicker = false
+    @State private var showOwnCardPicker = false
     @State private var showNotificationsDenied = false
     @State private var showiCloudSyncUnavailable = false
     @State private var additionalContactsInput: [TrustedContact] = []
@@ -75,6 +76,11 @@ struct SettingsView: View {
                             .font(.title3)
                             .textInputAutocapitalization(.words)
                     }
+                    Button { showOwnCardPicker = true } label: {
+                        Label("Choose from Contacts", systemImage: "person.crop.circle")
+                            .font(.title3)
+                    }
+                    .foregroundStyle(appTheme.accent)
                 }
 
                 Section("Trusted Contact") {
@@ -320,6 +326,13 @@ struct SettingsView: View {
                 ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
                     contactNameInput = pickedName
                     emailInput = pickedEmail
+                }
+            }
+            .background {
+                // The user's own card (name only), presented from the screen
+                // like the contact picker above, not from inside the list.
+                ContactPickerPresenter(isPresented: $showOwnCardPicker, purpose: .yourself) { name, _ in
+                    userNameInput = name
                 }
             }
         }
