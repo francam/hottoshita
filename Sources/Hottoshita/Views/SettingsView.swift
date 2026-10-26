@@ -209,12 +209,12 @@ struct SettingsView: View {
             } message: {
                 Text("Please sign in to iCloud in the Settings app to sync between your devices.")
             }
-            .background(
+            .background {
                 ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
                     contactNameInput = pickedName
                     emailInput = pickedEmail
                 }
-            )
+            }
         }
         .background(appTheme.background.ignoresSafeArea())
     }
@@ -228,12 +228,14 @@ struct SettingsView: View {
                 Circle()
                     .fill(theme.color)
                     .frame(width: 48, height: 48)
-                    .overlay(
+                    .overlay {
                         Circle().stroke(selected ? appTheme.accent : Color.secondary.opacity(0.3), lineWidth: selected ? 3 : 1)
-                    )
-                    .overlay(
-                        selected ? Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent).accessibilityHidden(true) : nil
-                    )
+                    }
+                    .overlay {
+                        if selected {
+                            Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent).accessibilityHidden(true)
+                        }
+                    }
                 Text(theme.label)
                     .font(.caption2)
                     .foregroundStyle(.secondary)

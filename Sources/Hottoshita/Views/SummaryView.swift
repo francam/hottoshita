@@ -12,6 +12,7 @@ struct SummaryView: View {
     @Environment(\.isCompactHeight) private var isCompactHeight
     @Environment(\.isDense) private var isDense
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.colorSchemeContrast) private var contrast
     @EnvironmentObject private var store: CheckInStore
     @EnvironmentObject private var appTheme: AppTheme
 
@@ -269,7 +270,9 @@ struct SummaryView: View {
         HStack {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundStyle(appTheme.accent)
+                // Increase Contrast darkens the grey row fill until the
+                // accent icon nearly vanishes (measured 1.5:1).
+                .foregroundStyle(contrast == .increased ? Color.primary : appTheme.accent)
                 .frame(width: 36)
                 .accessibilityHidden(true)
             Text(label)

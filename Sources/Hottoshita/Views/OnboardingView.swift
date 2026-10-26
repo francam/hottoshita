@@ -262,12 +262,12 @@ private struct OnboardingContactStep: View {
                 }
             }
         }
-        .background(
+        .background {
             ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
                 name = pickedName
                 email = pickedEmail
             }
-        )
+        }
         .onAppear {
             if autoOpenPickerForDebug {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { showContactPicker = true }
@@ -480,8 +480,12 @@ private struct OnboardingColorStep: View {
                 Circle()
                     .fill(theme.color)
                     .frame(width: 52, height: 52)
-                    .overlay(Circle().stroke(selected ? appTheme.accent : Color.secondary.opacity(0.3), lineWidth: selected ? 3 : 1))
-                    .overlay(selected ? Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent).accessibilityHidden(true) : nil)
+                    .overlay { Circle().stroke(selected ? appTheme.accent : Color.secondary.opacity(0.3), lineWidth: selected ? 3 : 1) }
+                    .overlay {
+                        if selected {
+                            Image(systemName: "checkmark").font(.caption.bold()).foregroundStyle(appTheme.accent).accessibilityHidden(true)
+                        }
+                    }
                 Text(theme.label)
                     .font(.caption2)
                     .foregroundStyle(.secondary)

@@ -11,6 +11,7 @@ struct HomeView: View {
     @State private var showHistory = false
 
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.colorSchemeContrast) private var contrast
 
     @ScaledMetric(relativeTo: .largeTitle) private var greetingSize: CGFloat = 44
     @ScaledMetric(relativeTo: .title2) private var dateSize: CGFloat = 26
@@ -155,7 +156,8 @@ struct HomeView: View {
         VStack(spacing: isDense ? 12 : 16) {
             Image(systemName: "checkmark.seal.fill")
                 .font(.system(size: isDense ? 44 : 64))
-                .foregroundStyle(appTheme.accent)
+                // On the grey card, the accent fades under Increase Contrast.
+                .foregroundStyle(contrast == .increased ? Color.primary : appTheme.accent)
             Text("Already submitted today!")
                 .font(.title2.bold())
                 .multilineTextAlignment(.center)
