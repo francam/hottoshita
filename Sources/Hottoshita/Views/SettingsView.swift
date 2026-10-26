@@ -79,6 +79,7 @@ struct SettingsView: View {
                     Text("Trusted Contacts")
                 } footer: {
                     Text("contacts.footer")
+                        .sectionFooterSpacing()
                 }
 
                 Section("Daily Reminder") {
@@ -108,6 +109,7 @@ struct SettingsView: View {
                     Text("iCloud Sync")
                 } footer: {
                     Text("sync.description")
+                        .sectionFooterSpacing()
                 }
 
                 Section {
@@ -115,9 +117,11 @@ struct SettingsView: View {
                     // be undone, and deleting the app alone doesn't remove
                     // the iCloud copy.
                     Button(role: .destructive) { showEraseConfirm = true } label: {
-                        Label("Erase All Data", systemImage: "trash")
-                            .font(.title3)
+                        oneLineButtonLabel("Erase All Data", systemImage: "trash")
                     }
+                    // A red button, but the secondary style: the screen's
+                    // prominent action is Save, not a destructive one.
+                    .secondaryActionStyle(accent: .red)
                     .disabled(isErasing)
                     .alert("Erase all your data?", isPresented: $showEraseConfirm) {
                         Button("erase.continue", role: .destructive) { showEraseFinal = true }
@@ -140,6 +144,7 @@ struct SettingsView: View {
                     Text("Your Data")
                 } footer: {
                     Text("erase.footer")
+                        .sectionFooterSpacing()
                 }
             }
             .scrollContentBackground(.hidden)
@@ -338,5 +343,13 @@ struct SettingsView: View {
         }
 
         dismiss()
+    }
+}
+
+private extension View {
+    /// A footer note otherwise runs straight into the next section's header,
+    /// while sections without one get the full gap; this evens them out.
+    func sectionFooterSpacing() -> some View {
+        padding(.bottom, 20)
     }
 }
