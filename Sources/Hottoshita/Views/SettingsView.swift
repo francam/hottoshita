@@ -79,7 +79,6 @@ struct SettingsView: View {
                     Text("Trusted Contacts")
                 } footer: {
                     Text("contacts.footer")
-                        .sectionFooterSpacing()
                 }
 
                 Section("Daily Reminder") {
@@ -109,7 +108,6 @@ struct SettingsView: View {
                     Text("iCloud Sync")
                 } footer: {
                     Text("sync.description")
-                        .sectionFooterSpacing()
                 }
 
                 Section {
@@ -123,6 +121,9 @@ struct SettingsView: View {
                     // prominent action is Save, not a destructive one.
                     .secondaryActionStyle(accent: .red)
                     .disabled(isErasing)
+                    // The button stands on its own — no card around it.
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
                     .alert("Erase all your data?", isPresented: $showEraseConfirm) {
                         Button("erase.continue", role: .destructive) { showEraseFinal = true }
                         Button("Cancel", role: .cancel) {}
@@ -144,11 +145,10 @@ struct SettingsView: View {
                     Text("Your Data")
                 } footer: {
                     Text("erase.footer")
-                        .sectionFooterSpacing()
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(appTheme.background)
+            .background(appTheme.groupedBackground)
             .overlay {
                 if isErasing {
                     ProgressView("Erasing…")
@@ -257,7 +257,7 @@ struct SettingsView: View {
                 Text("Please sign in to iCloud in the Settings app to sync between your devices.")
             }
         }
-        .background(appTheme.background.ignoresSafeArea())
+        .background(appTheme.groupedBackground.ignoresSafeArea())
     }
 
     private func colorSwatch(_ theme: ColorTheme) -> some View {
@@ -343,13 +343,5 @@ struct SettingsView: View {
         }
 
         dismiss()
-    }
-}
-
-private extension View {
-    /// A footer note otherwise runs straight into the next section's header,
-    /// while sections without one get the full gap; this evens them out.
-    func sectionFooterSpacing() -> some View {
-        padding(.bottom, 20)
     }
 }

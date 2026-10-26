@@ -59,6 +59,13 @@ enum ColorTheme: String, CaseIterable {
         return Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? dark : pastel })
     }
 
+    /// Behind grouped lists (Settings): the default theme's plain white
+    /// would hide the white section cards, so it uses the system's grouped
+    /// grey; pastel themes already contrast with the cards.
+    var groupedBackground: Color {
+        pastel == nil ? Color(.systemGroupedBackground) : background
+    }
+
     var accentColor: Color {
         Color(uiColor: UIColor { [light = lightAccent, dark = darkAccent] in
             $0.userInterfaceStyle == .dark ? dark : light
@@ -88,6 +95,7 @@ final class AppTheme: ObservableObject {
     @AppStorage("colorTheme") var theme: ColorTheme = .default
 
     var background: Color { theme.background }
+    var groupedBackground: Color { theme.groupedBackground }
     var accent: Color { theme.accentColor }
     var onAccent: Color { theme.onAccentColor }
 
