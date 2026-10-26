@@ -54,7 +54,7 @@ struct AdaptiveStepLayout<Header: View, Controls: View>: View {
     var forceSideBySide = false
     @ViewBuilder let header: () -> Header
     @ViewBuilder let controls: () -> Controls
-    @State private var fold: VerticalFold?
+    @State private var fold: Fold?
 
     var body: some View {
         // A single call site for header()/controls() keeps their view
@@ -82,8 +82,8 @@ struct AdaptiveStepLayout<Header: View, Controls: View>: View {
             controls()
                 .frame(maxWidth: sideBySide || fold != nil ? .infinity : nil)
         }
-        .environment(\.isFoldSplit, fold != nil)
-        .readsVerticalFold($fold)
+        .environment(\.isFoldSplit, fold?.isVertical == true)
+        .readsFold($fold)
         .padding(.horizontal, sideBySide && fold == nil ? 24 : 0)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

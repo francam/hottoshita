@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct HomeView: View {
     @AppStorage("userName") private var userName = ""
@@ -9,9 +8,10 @@ struct HomeView: View {
     @State private var showCheckIn = false
     @State private var showSettings = false
     @State private var showHistory = false
-    @State private var fold: VerticalFold?
+    @State private var fold: Fold?
 
     @Environment(\.verticalSizeClass) private var verticalSizeClass
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.colorSchemeContrast) private var contrast
 
     @ScaledMetric(relativeTo: .largeTitle) private var greetingSize: CGFloat = 44
@@ -42,26 +42,31 @@ struct HomeView: View {
                 ScrollView {
                     Group {
                         if let fold {
-                            // iPhone Duo half-open like a book: greeting on
-                            // the left page, actions on the right.
+                            // iPhone Duo inner display: greeting on one page
+                            // (left / top), actions on the other.
                             FoldSplitLayout(fold: fold) {
                                 greetingBlock
                                 VStack(spacing: 24) {
                                     if store.submittedToday {
-                                        alreadySubmittedBanner
+                                        alreadySubmittedBanner()
                                     } else {
                                         startButton
                                     }
                                     bottomActions
                                 }
                             }
-                        } else if isCompactHeight {
+                        } else if isCompactHeight && geo.size.width > geo.size.height * 1.6 {
+                            // Landscape iPhone: very wide and short, so the
+                            // greeting and the actions sit side by side.
+                            // Shapes closer to square (iPhone Duo closed,
+                            // held sideways) stack instead: one reading
+                            // order, and full-width History/Settings.
                             HStack(spacing: 16) {
                                 greetingBlock
                                     .frame(maxWidth: .infinity)
                                 VStack(spacing: 16) {
                                     if store.submittedToday {
-                                        alreadySubmittedBanner
+                                        alreadySubmittedBanner()
                                     } else {
                                         startButton
                                     }
@@ -70,13 +75,13 @@ struct HomeView: View {
                                 .frame(maxWidth: .infinity)
                             }
                         } else {
-                            VStack(spacing: isShortHeight ? 20 : 40) {
+                            VStack(spacing: isCompactHeight ? 12 : isShortHeight ? 20 : 40) {
                                 Spacer()
 
                                 greetingBlock
 
                                 if store.submittedToday {
-                                    alreadySubmittedBanner
+                                    alreadySubmittedBanner(row: isCompactHeight)
                                 } else {
                                     startButton
                                 }
@@ -87,8 +92,8 @@ struct HomeView: View {
                             }
                         }
                     }
-                    .readsVerticalFold($fold)
-                    .padding(.vertical, 16)
+                    .readsFold($fold)
+                    .padding(.vertical, isCompactHeight ? 8 : 16)
                     .frame(maxWidth: .infinity, minHeight: geo.size.height)
                 }
             }
@@ -142,8 +147,10 @@ struct HomeView: View {
             .padding(.horizontal)
         }
         .primaryActionStyle(accent: appTheme.accent)
-        // Squircle on iPhone; the default capsule-like shape suits iPad better.
-        .buttonBorderShape(UIDevice.current.userInterfaceIdiom == .phone
+        // Squircle in phone-sized layouts; the default capsule-like shape
+        // suits iPad-sized ones better. By size class, not device idiom: the
+        // iPhone Duo's inner display is iPad-sized but still an "iPhone".
+        .buttonBorderShape(horizontalSizeClass == .compact || verticalSizeClass == .compact
                            ? .roundedRectangle(radius: 36) : .automatic)
         .padding(.horizontal, isCompactHeight ? 16 : 32)
     }
@@ -159,49 +166,94 @@ struct HomeView: View {
 
     private func homeActionButton(icon: String, title: LocalizedStringKey, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack(spacing: 12) {
-                Image(systemName: icon).font(.title2)
-                    .accessibilityHidden(true)
-                Text(title).font(.title3.weight(.semibold))
+            // When the pill is too narrow for icon and word (iPhone Duo
+            // closed, held sideways), drop the icon rather than letting the
+            // word hyphenate ("His-tory") or shrink.
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 12) {
+                    Image(systemName: icon).font(.title2)
+                        .accessibilityHidden(true)
+                    Text(title)
+                }
+                Text(title)
+                    .minimumScaleFactor(0.8)
             }
+            .font(.title3.weight(.semibold))
+            .lineLimit(1)
             .frame(maxWidth: .infinity)
             .padding(.vertical, isShortHeight ? 14 : 20)
         }
         .secondaryActionStyle(accent: appTheme.accent)
     }
 
-    private var alreadySubmittedBanner: some View {
-        VStack(spacing: isDense ? 12 : 16) {
-            Image(systemName: "checkmark.seal.fill")
-                .font(.system(size: isDense ? 44 : 64))
-                // On the grey card, the accent fades under Increase Contrast.
-                .foregroundStyle(contrast == .increased ? Color.primary : appTheme.accent)
-            Text("Already submitted today!")
-                .font(.title2.bold())
-                .multilineTextAlignment(.center)
-                .minimumScaleFactor(0.8)
-            Text("Come back tomorrow.")
-                .font(.title3)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            Button { showCheckIn = true } label: {
-                HStack(alignment: .center, spacing: 6) {
-                    Image(systemName: "arrow.clockwise")
-                        .accessibilityHidden(true)
-                    Text("Submit again anyway")
+    /// `row`: the stacked layout on a short, wide screen (iPhone Duo
+    /// closed, held sideways) — one row instead of a tall card, so History
+    /// and Settings still fit below it without scrolling.
+    private func alreadySubmittedBanner(row: Bool = false) -> some View {
+        Group {
+            if row {
+                HStack(spacing: 16) {
+                    submittedSeal(size: 36)
+                    VStack(alignment: .leading, spacing: 4) {
+                        submittedTitle
+                        submittedSubtitle
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    submitAgainButton
                 }
-                .font(.title3.weight(.semibold))
-                .minimumScaleFactor(0.8)
-                .padding(.vertical, 10)
-                .padding(.horizontal, 8)
+                .padding(16)
+                .frame(maxWidth: 640)
+            } else {
+                VStack(spacing: isDense ? 12 : 16) {
+                    submittedSeal(size: isDense ? 44 : 64)
+                    submittedTitle
+                        .multilineTextAlignment(.center)
+                    submittedSubtitle
+                        .multilineTextAlignment(.center)
+                    submitAgainButton
+                        .padding(.top, 8)
+                }
+                .padding(isDense ? 16 : 24)
+                .frame(maxWidth: 420)
             }
-            .secondaryActionStyle(accent: appTheme.accent)
-            .padding(.top, 8)
         }
-        .padding(isDense ? 16 : 24)
-        .frame(maxWidth: 420)
         // Content layer: a solid card, so its glass button isn't glass on glass.
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 24))
-        .padding(.horizontal, isCompactHeight ? 0 : 24)
+        // Row: same side margin as History/Settings below it.
+        .padding(.horizontal, row ? 16 : isCompactHeight ? 0 : 24)
+    }
+
+    private func submittedSeal(size: CGFloat) -> some View {
+        Image(systemName: "checkmark.seal.fill")
+            .font(.system(size: size))
+            // On the grey card, the accent fades under Increase Contrast.
+            .foregroundStyle(contrast == .increased ? Color.primary : appTheme.accent)
+    }
+
+    private var submittedTitle: some View {
+        Text("Already submitted today!")
+            .font(.title2.bold())
+            .minimumScaleFactor(0.8)
+    }
+
+    private var submittedSubtitle: some View {
+        Text("Come back tomorrow.")
+            .font(.title3)
+            .foregroundStyle(.secondary)
+    }
+
+    private var submitAgainButton: some View {
+        Button { showCheckIn = true } label: {
+            HStack(alignment: .center, spacing: 6) {
+                Image(systemName: "arrow.clockwise")
+                    .accessibilityHidden(true)
+                Text("Submit again anyway")
+            }
+            .font(.title3.weight(.semibold))
+            .minimumScaleFactor(0.8)
+            .padding(.vertical, 10)
+            .padding(.horizontal, 8)
+        }
+        .secondaryActionStyle(accent: appTheme.accent)
     }
 }

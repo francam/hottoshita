@@ -23,7 +23,7 @@ struct SummaryView: View {
     @State private var showNotSentAlert = false
     @State private var showBacklogChoice = false
     @State private var includeBacklog = false
-    @State private var fold: VerticalFold?
+    @State private var fold: Fold?
 
     private var localizedFeelings: String {
         guard !answers.feelings.isEmpty else { return String(localized: "Not specified") }
@@ -37,8 +37,8 @@ struct SummaryView: View {
             ScrollView {
                 Group {
                     if let fold {
-                        // iPhone Duo inner display: what was answered on the
-                        // left page, what to do with it on the right.
+                        // iPhone Duo inner display: what was answered on one
+                        // page (left / top), what to do with it on the other.
                         FoldSplitLayout(fold: fold) {
                             VStack(spacing: 16) {
                                 headerBlock
@@ -77,7 +77,7 @@ struct SummaryView: View {
                         }
                     }
                 }
-                .readsVerticalFold($fold)
+                .readsFold($fold)
                 .frame(maxWidth: .infinity, minHeight: isCompactHeight || fold != nil ? geo.size.height : 0)
             }
         }
@@ -296,7 +296,10 @@ struct SummaryView: View {
             Text(value)
                 .font(.title3.bold())
                 .multilineTextAlignment(.trailing)
-                .lineLimit(singleLine ? 1 : nil)
+                // In the side-by-side layout each row gets half the width;
+                // even shrunk, "128/82 mmHg" truncated there (iPhone Duo
+                // closed, held sideways), so let it break at the space.
+                .lineLimit(singleLine && !isCompactHeight ? 1 : nil)
                 .minimumScaleFactor(singleLine ? 0.7 : 1)
         }
         .padding(.vertical, isDense ? 8 : 16)

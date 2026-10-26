@@ -3,7 +3,7 @@ import SwiftUI
 struct CheckInFlowView: View {
     @State private var answers = CheckInAnswers()
     @State private var step = 0
-    @State private var fold: VerticalFold?
+    @State private var fold: Fold?
     @State private var barsVertical = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isCompactHeight) private var isCompactHeight
@@ -38,21 +38,24 @@ struct CheckInFlowView: View {
     private var flowContent: some View {
         VStack(spacing: 0) {
             if step < summaryStep {
-                ProgressView(value: Double(step + 1), total: Double(totalSteps))
-                    .tint(appTheme.accent)
-                    .accessibilityHidden(true)
-                    .padding(.horizontal)
-                    .padding(.bottom, 6)
+                let verticalHinge = fold?.isVertical == true ? fold : nil
+                VStack(spacing: 6) {
+                    ProgressView(value: Double(step + 1), total: Double(totalSteps))
+                        .tint(appTheme.accent)
+                        .accessibilityHidden(true)
 
-                Text("Question \(step + 1) of \(totalSteps)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    // Centred, it would sit on the iPhone Duo hinge; move it
-                    // onto the question's page instead.
-                    .frame(maxWidth: .infinity, alignment: fold == nil ? .center : .leading)
-                    .padding(.horizontal)
-                    .readsVerticalFold($fold)
-                    .padding(.bottom, isDense ? 8 : 24)
+                    Text("Question \(step + 1) of \(totalSteps)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: verticalHinge == nil ? .center : .leading)
+                }
+                .padding(.horizontal)
+                // Full width it would cross a vertical iPhone Duo hinge; keep
+                // it on the question's page instead.
+                .frame(width: verticalHinge?.frame.minX)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .readsFold($fold)
+                .padding(.bottom, isDense ? 8 : 24)
             }
 
             // Portrait: scrollable as a safety net for very large text sizes;
