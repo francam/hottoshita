@@ -99,6 +99,13 @@ final class CheckInStore: ObservableObject {
         persist()
     }
 
+    /// Erase All Data, this device's part: drops every entry and the
+    /// history file. The iCloud copy is handled by DataEraser.
+    func eraseLocal() {
+        entries = []
+        try? FileManager.default.removeItem(at: fileURL)
+    }
+
     private func load() {
         guard let data = try? Data(contentsOf: fileURL),
               let decoded = try? JSONDecoder().decode([CheckInAnswers].self, from: data) else { return }

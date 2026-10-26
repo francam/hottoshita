@@ -164,3 +164,17 @@
 "sync.description" = "チェックイン履歴と設定は、同じ Apple ID でサインインしたご自身の他の端末と非公開で同期されます。";
 "iCloud Sync Unavailable" = "iCloud 同期を利用できません";
 "Please sign in to iCloud in the Settings app to sync between your devices." = "端末間で同期するには、設定アプリで iCloud にサインインしてください。";
+
+// Erase All Data
+"Your Data" = "データ";
+"Erase All Data" = "すべてのデータを消去";
+"erase.footer" = "お名前・連絡先・設定とすべてのチェックインを、この端末と iCloud から削除します。アプリは初めて開いたときの状態に戻ります。";
+"Erase all your data?" = "すべてのデータを消去しますか？";
+"erase.message" = "お名前、見守る方の連絡先、設定、すべてのチェックインが、この端末と iCloud から削除されます。ほかの端末にあるデータは、その端末でも消去するまで残ります。";
+"erase.continue" = "続ける";
+"This can't be undone" = "元に戻すことはできません";
+"erase.final" = "消去したチェックインの記録は復元できません。";
+"Erase Everything" = "すべて消去";
+"Couldn't Reach iCloud" = "iCloud に接続できません";
+"erase.failed" = "何も消去されていません。インターネット接続を確認して、もう一度お試しください。";
+"Erasing…" = "消去しています…";

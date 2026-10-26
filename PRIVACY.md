@@ -48,7 +48,11 @@ The app lets you record how you slept, how you feel, and optionally your blood p
 
 ### Deleting your data
 
-All app data lives on your device, and — if iCloud sync is on — in your own private iCloud account as well. Deleting the app from a device removes it from that device, but **not** from iCloud or from any other device still signed in with the same Apple ID that still has the app installed. To remove everything: delete the app from every device where it's installed, or turn off iCloud sync for Hottoshita and delete its iCloud data from Settings ▸ [your name] ▸ iCloud ▸ Manage Storage. You can also change or clear your details at any time in Settings.
+All app data lives on your device, and — if iCloud sync is on — in your own private iCloud account as well. Deleting the app from a device removes it from that device only: a copy kept in iCloud is restored if you install the app again.
+
+To remove everything, use **Settings ▸ Erase All Data** in the app. It deletes your name, your trusted contact, your settings and every check-in from that device and from your iCloud account, and the app starts again as if newly installed. Other devices signed in with the same Apple ID keep their own copy until you erase them there too. If iCloud can't be reached at that moment (for example, without an internet connection), nothing is erased and you can try again later.
+
+You can also remove the iCloud copy yourself in Settings ▸ [your name] ▸ iCloud ▸ Manage Storage, and change or clear your details at any time in the app's Settings.
 
 ### Children
 
@@ -108,7 +112,11 @@ Questions? Email **sfrancam@icloud.com**.
 
 ### データの削除
 
-すべてのデータは端末内、および iCloud 同期をオンにしている場合はお客様ご自身の iCloud アカウントにも保存されます。ある端末で本アプリを削除しても、その端末からのみ削除され、iCloud、または同じ Apple ID でサインインし本アプリがインストールされたままの他の端末からは削除**されません**。完全に削除するには、本アプリがインストールされているすべての端末で削除するか、Hottoshita の iCloud 同期をオフにしたうえで「設定」▸「[お客様の名前]」▸「iCloud」▸「Appの容量を管理」から iCloud 上のデータを削除してください。設定画面からいつでも内容の変更・修正も可能です。
+すべてのデータは端末内、および iCloud 同期をオンにしている場合はお客様ご自身の iCloud アカウントにも保存されます。ある端末で本アプリを削除しても、削除されるのはその端末のデータのみで、iCloud に保存された内容は本アプリを再インストールすると復元されます。
+
+すべてを削除するには、本アプリの「設定」▸「すべてのデータを消去」をご利用ください。お名前、見守る方の連絡先、設定、すべてのチェックインが、その端末とお客様の iCloud アカウントから削除され、本アプリは初めて開いたときの状態に戻ります。同じ Apple ID でサインインしている他の端末のデータは、その端末でも消去するまで残ります。消去の時点で iCloud に接続できない場合（インターネットに接続されていない場合など）は何も消去されませんので、後ほどもう一度お試しください。
+
+「設定」▸「[お客様の名前]」▸「iCloud」▸「Appの容量を管理」から iCloud 上のデータをご自身で削除することもできます。また、本アプリの設定画面からいつでも内容の変更・修正が可能です。
 
 ### お子様について
 

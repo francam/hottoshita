@@ -164,3 +164,17 @@
 "sync.description" = "Your check-in history and settings sync privately between your own devices signed in with the same Apple ID.";
 "iCloud Sync Unavailable" = "iCloud Sync Unavailable";
 "Please sign in to iCloud in the Settings app to sync between your devices." = "Please sign in to iCloud in the Settings app to sync between your devices.";
+
+// Erase All Data
+"Your Data" = "Your Data";
+"Erase All Data" = "Erase All Data";
+"erase.footer" = "Removes your name, contact, settings and every check-in from this device and from iCloud. Hottoshita starts again as if newly installed.";
+"Erase all your data?" = "Erase all your data?";
+"erase.message" = "Your name, your trusted contact, your settings and all your check-ins will be deleted from this device and from iCloud. Other devices keep their own copy until you erase them there too.";
+"erase.continue" = "Continue";
+"This can't be undone" = "This can't be undone";
+"erase.final" = "Once erased, your check-in history can't be recovered.";
+"Erase Everything" = "Erase Everything";
+"Couldn't Reach iCloud" = "Couldn't Reach iCloud";
+"erase.failed" = "Nothing was erased. Check your internet connection and try again.";
+"Erasing…" = "Erasing…";

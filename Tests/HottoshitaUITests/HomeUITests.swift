@@ -92,6 +92,46 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(app.navigationBars["History"].waitForExistence(timeout: 3))
     }
 
+    func testEraseAllDataReturnsToOnboarding() {
+        // Some history first, so there's something to erase.
+        app.buttons["Start Today's Check-in"].tap()
+        app.buttons["Slept OK"].tap()
+        app.buttons["Skip"].tap()
+        app.buttons["No"].tap()
+        XCTAssertTrue(app.buttons["Done"].waitForExistence(timeout: 3))
+        app.buttons["Done"].tap()
+
+        app.buttons["Settings"].tap()
+        tapEraseAllData()
+
+        // Two confirmations before anything is deleted.
+        XCTAssertTrue(app.alerts["Erase all your data?"].waitForExistence(timeout: 3))
+        app.alerts.buttons["Continue"].tap()
+        XCTAssertTrue(app.alerts["This can't be undone"].waitForExistence(timeout: 3))
+        app.alerts.buttons["Erase Everything"].tap()
+
+        // Back to first launch: onboarding, not Home.
+        XCTAssertTrue(app.staticTexts["What's your name?"].waitForExistence(timeout: 10))
+    }
+
+    func testEraseAllDataCanBeCancelled() {
+        app.buttons["Settings"].tap()
+        tapEraseAllData()
+        XCTAssertTrue(app.alerts["Erase all your data?"].waitForExistence(timeout: 3))
+        app.alerts.buttons["Cancel"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].exists)
+    }
+
+    /// Settings is a lazy list: the Erase row only exists once scrolled to.
+    private func tapEraseAllData() {
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        let erase = app.buttons["Erase All Data"]
+        var swipes = 0
+        while !(erase.exists && erase.isHittable) && swipes < 8 { app.swipeUp(); swipes += 1 }
+        XCTAssertTrue(erase.isHittable)
+        erase.tap()
+    }
+
     func testSettingsViewOpens() {
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))

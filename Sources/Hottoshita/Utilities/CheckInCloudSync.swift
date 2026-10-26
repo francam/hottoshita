@@ -71,6 +71,41 @@ final class CheckInCloudSync {
         }
     }
 
+    /// Deletes every check-in record from the user's private database (Erase
+    /// All Data). Unlike push/delete this ignores the sync switch: a copy
+    /// uploaded while sync was on stays in iCloud after it's turned off.
+    /// Returns false only when iCloud was reachable but the deletion failed
+    /// (e.g. offline) — with no iCloud account there's nothing to delete.
+    func deleteAll() async -> Bool {
+        do {
+            guard try await container.accountStatus() == .available else { return true }
+        } catch {
+            log.error("deleteAll: accountStatus check failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+
+        // Same queryable predicate as fetchAll; ids only.
+        let query = CKQuery(recordType: Self.recordType, predicate: NSPredicate(format: "date > %@", Date.distantPast as NSDate))
+        var ids: [CKRecord.ID] = []
+        do {
+            var (results, cursor) = try await database.records(matching: query, desiredKeys: [])
+            ids += results.map(\.0)
+            while let next = cursor {
+                (results, cursor) = try await database.records(continuingMatchFrom: next, desiredKeys: [])
+                ids += results.map(\.0)
+            }
+            // CloudKit caps a modify operation at 400 records.
+            for start in stride(from: 0, to: ids.count, by: 400) {
+                let batch = Array(ids[start..<min(start + 400, ids.count)])
+                _ = try await database.modifyRecords(saving: [], deleting: batch, atomically: false)
+            }
+        } catch {
+            log.error("deleteAll failed: \(error.localizedDescription, privacy: .public)")
+            return false
+        }
+        return true
+    }
+
     /// Fetches every remote entry. Called on launch to merge in anything
     /// created on another device, and once when sync is first turned on.
     func fetchAll() async -> [CheckInAnswers] {

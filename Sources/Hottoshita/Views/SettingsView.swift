@@ -22,6 +22,10 @@ struct SettingsView: View {
     @State private var showContactPicker = false
     @State private var showNotificationsDenied = false
     @State private var showiCloudSyncUnavailable = false
+    @State private var showEraseConfirm = false
+    @State private var showEraseFinal = false
+    @State private var showEraseFailed = false
+    @State private var isErasing = false
     // Background colour still applies live as swatches are tapped (so the
     // whole app previews the choice), but Cancel restores this so browsing
     // swatches isn't itself a commit.
@@ -125,9 +129,49 @@ struct SettingsView: View {
                 } footer: {
                     Text("sync.description")
                 }
+
+                Section {
+                    // Two steps before anything goes: a wrong tap here can't
+                    // be undone, and deleting the app alone doesn't remove
+                    // the iCloud copy.
+                    Button(role: .destructive) { showEraseConfirm = true } label: {
+                        Label("Erase All Data", systemImage: "trash")
+                            .font(.title3)
+                    }
+                    .disabled(isErasing)
+                    .alert("Erase all your data?", isPresented: $showEraseConfirm) {
+                        Button("erase.continue", role: .destructive) { showEraseFinal = true }
+                        Button("Cancel", role: .cancel) {}
+                    } message: {
+                        Text("erase.message")
+                    }
+                    .alert("This can't be undone", isPresented: $showEraseFinal) {
+                        Button("Erase Everything", role: .destructive, action: eraseEverything)
+                        Button("Cancel", role: .cancel) {}
+                    } message: {
+                        Text("erase.final")
+                    }
+                    .alert("Couldn't Reach iCloud", isPresented: $showEraseFailed) {
+                        Button("OK", role: .cancel) {}
+                    } message: {
+                        Text("erase.failed")
+                    }
+                } header: {
+                    Text("Your Data")
+                } footer: {
+                    Text("erase.footer")
+                }
             }
             .scrollContentBackground(.hidden)
             .background(appTheme.background)
+            .overlay {
+                if isErasing {
+                    ProgressView("Erasing…")
+                        .font(.title3)
+                        .padding(24)
+                        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+                }
+            }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.large)
             .background { VerticalBarsReader(isVertical: $barsVertical) }
@@ -268,6 +312,20 @@ struct SettingsView: View {
             field()
         }
         .padding(.vertical, 4)
+    }
+
+    private func eraseEverything() {
+        isErasing = true
+        Task {
+            let erased = await DataEraser.eraseEverything(store: store, appTheme: appTheme)
+            isErasing = false
+            if erased {
+                // Home falls back to onboarding once the name is gone.
+                dismiss()
+            } else {
+                showEraseFailed = true
+            }
+        }
     }
 
     /// Discards the session, including a theme previewed live.

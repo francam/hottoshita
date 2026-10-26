@@ -79,6 +79,18 @@ final class iCloudSettingsSync {
         }
     }
 
+    /// Erase All Data: removes the synced settings and the sync switch from
+    /// the key-value store. Call before clearing UserDefaults — with the
+    /// switch gone, `localChange` can't re-push the values being cleared.
+    /// Other devices keep their own local copies (a removed key isn't
+    /// applied there) and stop syncing.
+    func eraseCloudCopy() {
+        for key in syncedKeys + ["iCloudSyncEnabled"] {
+            store.removeObject(forKey: key)
+        }
+        store.synchronize()
+    }
+
     private func pushAllLocalToCloud() {
         for key in syncedKeys {
             guard let value = defaults.object(forKey: key) else { continue }

@@ -28,6 +28,22 @@ final class CheckInStoreTests: XCTestCase {
         XCTAssertFalse(store.submittedToday)
     }
 
+    // MARK: - Erase All Data
+
+    func testEraseLocalClearsEntriesAndFile() {
+        store.save(CheckInAnswers())
+        store.save(CheckInAnswers())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: tempURL.path))
+
+        store.eraseLocal()
+
+        XCTAssertTrue(store.entries.isEmpty)
+        XCTAssertFalse(store.submittedToday)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: tempURL.path))
+        // A fresh store on the same file starts empty too.
+        XCTAssertTrue(CheckInStore(fileURL: tempURL).entries.isEmpty)
+    }
+
     // MARK: - Saving
 
     func testSaveAddsEntry() {
