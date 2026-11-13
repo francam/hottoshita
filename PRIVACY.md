@@ -1,6 +1,6 @@
 # Hottoshita Privacy Policy / プライバシーポリシー
 
-**Effective date: July 14, 2026** · [English](#english) · [日本語](#日本語)
+**Effective date: November 13, 2026** · [English](#english) · [日本語](#日本語)
 
 ---
 
@@ -13,7 +13,7 @@ Hottoshita ("the app") is a daily wellness check-in app. This policy explains wh
 To work, the app keeps the following information **only on your device** (and in your own private iCloud account too, if you turn on iCloud sync):
 
 - Your name (used for the greeting and the email report)
-- Your trusted contact's name and email address
+- The names and email addresses of your trusted contacts (up to five)
 - Your daily check-in answers: sleep quality, how you're feeling, and — if you choose to enter it — your blood pressure
 - Your preferences: colour theme and daily reminder time
 
@@ -25,11 +25,11 @@ If you turn on iCloud sync in Settings, your check-in history and preferences ar
 
 ### How your check-in report is shared
 
-When you tap **Send Report**, the app prepares an email draft in the standard iOS Mail sheet, addressed to your trusted contact. Nothing is sent unless **you** tap Send. The email is delivered by your own email account, exactly like any email you write yourself.
+When you tap **Send Report**, the app prepares an email draft in the standard iOS Mail sheet, addressed to your trusted contacts. When there is more than one, they are added as BCC, so they don't see each other's addresses. Nothing is sent unless **you** tap Send. The email is delivered by your own email account, exactly like any email you write yourself.
 
 ### Contacts
 
-If you use "Choose from Contacts", the app shows Apple's system contact picker. The app never gains access to your contact list — it only receives the name and email address of the single contact you pick, and stores them on your device as your trusted contact. No contacts permission is requested.
+If you use "Choose from Contacts", the app shows Apple's system contact picker. The app never gains access to your contact list — it only receives the contact you pick: for a trusted contact, their name and email address; when filling in your own name during setup, only the name. These are stored on your device like anything you type in. No contacts permission is requested.
 
 ### Notifications
 
@@ -50,7 +50,7 @@ The app lets you record how you slept, how you feel, and optionally your blood p
 
 All app data lives on your device, and — if iCloud sync is on — in your own private iCloud account as well. Deleting the app from a device removes it from that device only: a copy kept in iCloud is restored if you install the app again.
 
-To remove everything, use **Settings ▸ Erase All Data** in the app. It deletes your name, your trusted contact, your settings and every check-in from that device and from your iCloud account, and the app starts again as if newly installed. Other devices signed in with the same Apple ID keep their own copy until you erase them there too. If iCloud can't be reached at that moment (for example, without an internet connection), nothing is erased and you can try again later.
+To remove everything, use **Settings ▸ Erase All Data** in the app. It deletes your name, your trusted contacts, your settings and every check-in from that device and from your iCloud account, and the app starts again as if newly installed. Other devices signed in with the same Apple ID keep their own copy until you erase them there too. If iCloud can't be reached at that moment (for example, without an internet connection), nothing is erased and you can try again later.
 
 You can also remove the iCloud copy yourself in Settings ▸ [your name] ▸ iCloud ▸ Manage Storage, and change or clear your details at any time in the app's Settings.
 
@@ -77,7 +77,7 @@ Questions? Email **sfrancam@icloud.com**.
 本アプリは、動作のために以下の情報を**お使いの端末内にのみ**保存します（iCloud 同期をオンにした場合は、お客様ご自身の iCloud アカウントにも保存されます）。
 
 - お名前（あいさつ表示とメールレポートに使用）
-- 見守り連絡先（信頼できる方）のお名前とメールアドレス
+- 見守り連絡先（信頼できる方、最大 5 名）のお名前とメールアドレス
 - 毎日のチェックインの回答：睡眠の質、今の気分、および入力を選択した場合の血圧
 - 設定内容：背景カラーテーマ、毎日のリマインダー時刻
 
@@ -89,11 +89,11 @@ Questions? Email **sfrancam@icloud.com**.
 
 ### レポートの共有方法
 
-「レポートを送信」をタップすると、本アプリは iOS 標準のメール作成画面に、見守り連絡先宛のメール下書きを用意します。**お客様ご自身が送信ボタンを押さない限り、何も送信されません。** メールはお客様ご自身のメールアカウントから、通常のメールと同じように送信されます。
+「レポートを送信」をタップすると、本アプリは iOS 標準のメール作成画面に、見守り連絡先宛のメール下書きを用意します。連絡先が複数の場合は、お互いのアドレスが見えないよう BCC で送信されます。**お客様ご自身が送信ボタンを押さない限り、何も送信されません。** メールはお客様ご自身のメールアカウントから、通常のメールと同じように送信されます。
 
 ### 連絡先について
 
-「連絡先から選ぶ」を使う場合、Apple のシステム標準の連絡先ピッカーが表示されます。本アプリが連絡先リストにアクセスすることはなく、お客様が選んだ 1 件の連絡先の名前とメールアドレスのみを受け取り、見守り連絡先として端末内に保存します。連絡先へのアクセス許可を求めることもありません。
+「連絡先から選ぶ」を使う場合、Apple のシステム標準の連絡先ピッカーが表示されます。本アプリが連絡先リストにアクセスすることはなく、お客様が選んだ 1 件の連絡先のみを受け取ります。見守り連絡先の場合は名前とメールアドレスを、初期設定でご自身のお名前を入力する場合は名前のみを受け取り、入力した情報と同じく端末内に保存します。連絡先へのアクセス許可を求めることもありません。
 
 ### 通知について
 
@@ -114,7 +114,7 @@ Questions? Email **sfrancam@icloud.com**.
 
 すべてのデータは端末内、および iCloud 同期をオンにしている場合はお客様ご自身の iCloud アカウントにも保存されます。ある端末で本アプリを削除しても、削除されるのはその端末のデータのみで、iCloud に保存された内容は本アプリを再インストールすると復元されます。
 
-すべてを削除するには、本アプリの「設定」▸「すべてのデータを消去」をご利用ください。お名前、見守る方の連絡先、設定、すべてのチェックインが、その端末とお客様の iCloud アカウントから削除され、本アプリは初めて開いたときの状態に戻ります。同じ Apple ID でサインインしている他の端末のデータは、その端末でも消去するまで残ります。消去の時点で iCloud に接続できない場合（インターネットに接続されていない場合など）は何も消去されませんので、後ほどもう一度お試しください。
+すべてを削除するには、本アプリの「設定」▸「すべてのデータを消去」をご利用ください。お名前、見守り連絡先、設定、すべてのチェックインが、その端末とお客様の iCloud アカウントから削除され、本アプリは初めて開いたときの状態に戻ります。同じ Apple ID でサインインしている他の端末のデータは、その端末でも消去するまで残ります。消去の時点で iCloud に接続できない場合（インターネットに接続されていない場合など）は何も消去されませんので、後ほどもう一度お試しください。
 
 「設定」▸「[お客様の名前]」▸「iCloud」▸「Appの容量を管理」から iCloud 上のデータをご自身で削除することもできます。また、本アプリの設定画面からいつでも内容の変更・修正が可能です。
 
