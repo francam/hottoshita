@@ -121,7 +121,7 @@
 "report.sleep" = "睡眠";
 "report.feeling" = "気分";
 "report.bp" = "血圧";
-"report.footer" = "Hottoshitaより送信";
+"report.footer" = "hottoshitaより送信";
 "report.subject" = "毎日の健康チェックイン – %@";
 
 // Background colour

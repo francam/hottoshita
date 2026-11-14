@@ -121,7 +121,7 @@
 "report.sleep" = "Sleep";
 "report.feeling" = "Feeling";
 "report.bp" = "Blood Pressure";
-"report.footer" = "Sent via Hottoshita";
+"report.footer" = "Sent via hottoshita";
 "report.subject" = "Daily Check-in – %@";
 
 // Background colour
