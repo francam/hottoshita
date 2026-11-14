@@ -25,9 +25,11 @@ enum ReportGenerator {
     private static let font = "-apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     private static let roundedFont = "ui-rounded, 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', \(font)"
 
-    static func generate(answers: CheckInAnswers, contactName: String, userName: String,
+    /// `contactName` nil: several recipients (in BCC), greeted generically.
+    static func generate(answers: CheckInAnswers, contactName: String?, userName: String,
                          previousUnsent: [CheckInAnswers] = []) -> String {
-        let greeting = String(format: NSLocalizedString("report.greeting", comment: ""), contactName)
+        let greeting = contactName.map { String(format: NSLocalizedString("report.greeting", comment: ""), $0) }
+            ?? NSLocalizedString("report.greeting.everyone", comment: "")
         let intro = String(format: NSLocalizedString("report.intro", comment: ""), userName)
         let footer = NSLocalizedString("report.footer", comment: "")
 

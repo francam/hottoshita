@@ -73,6 +73,12 @@ final class ReportGeneratorTests: XCTestCase {
         XCTAssertTrue(body.contains(ReportGenerator.escape(NSLocalizedString("report.footer", comment: ""))))
     }
 
+    func testSeveralRecipientsGetAGenericGreeting() {
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: nil, userName: "John")
+        XCTAssertTrue(body.contains(ReportGenerator.escape(NSLocalizedString("report.greeting.everyone", comment: ""))))
+        XCTAssertFalse(body.contains("Sarah"))
+    }
+
     func testNamesAreEscaped() {
         let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "<b>Tom</b> & Co", userName: "John")
         XCTAssertTrue(body.contains("&lt;b&gt;Tom&lt;/b&gt; &amp; Co"))

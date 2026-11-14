@@ -108,7 +108,6 @@
 
 // Settings
 "Settings" = "Settings";
-"Trusted Contact" = "Trusted Contact";
 "Name" = "Name";
 "Email" = "Email";
 "Contact name" = "Contact name";
@@ -164,3 +163,14 @@
 "sync.description" = "Your check-in history and settings sync privately between your own devices signed in with the same Apple ID.";
 "iCloud Sync Unavailable" = "iCloud Sync Unavailable";
 "Please sign in to iCloud in the Settings app to sync between your devices." = "Please sign in to iCloud in the Settings app to sync between your devices.";
+
+/* Several trusted contacts (1.0.1) */
+"report.greeting.everyone" = "Hello,";
+"Trusted Contacts" = "Trusted Contacts";
+"Add Contact" = "Add Contact";
+"Type a Contact" = "Type a Contact";
+"Edit Contact" = "Edit Contact";
+"Add" = "Add";
+"Remove %@" = "Remove %@";
+"contacts.footer" = "Everyone gets the same report. With more than one person, nobody sees who else it went to. Up to 5 people.";
+"Double-tap to edit." = "Double-tap to edit.";

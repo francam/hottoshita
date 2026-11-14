@@ -5,6 +5,7 @@ struct SettingsView: View {
     @AppStorage("userName") private var userName = ""
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
+    @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
     @EnvironmentObject private var appTheme: AppTheme
     @EnvironmentObject private var store: CheckInStore
 
@@ -12,8 +13,11 @@ struct SettingsView: View {
     @AppStorage("reminderMinutes") private var reminderMinutes = 9 * 60  // 09:00
 
     @State private var userNameInput = ""
-    @State private var contactNameInput = ""
-    @State private var emailInput = ""
+    /// Everyone who receives the report, staged until Save like the rest.
+    @State private var contactsInput: [TrustedContact] = []
+    @State private var showAddChoice = false
+    @State private var showAddSheet = false
+    @State private var editingContact: TrustedContact?
     @State private var reminderEnabledInput = false
     @State private var reminderMinutesInput = 9 * 60
     @State private var iCloudSyncInput = false
@@ -52,9 +56,7 @@ struct SettingsView: View {
     }
 
     private var canSave: Bool {
-        !userNameInput.trimmingCharacters(in: .whitespaces).isEmpty &&
-        !contactNameInput.trimmingCharacters(in: .whitespaces).isEmpty &&
-        emailInput.contains("@")
+        !userNameInput.trimmingCharacters(in: .whitespaces).isEmpty && !contactsInput.isEmpty
     }
 
     var body: some View {
@@ -68,31 +70,26 @@ struct SettingsView: View {
                     }
                 }
 
-                Section("Trusted Contact") {
-                    formRow(label: "Name") {
-                        TextField("Contact name", text: $contactNameInput)
-                            .font(.title3)
+                Section {
+                    ForEach(contactsInput) { contact in
+                        contactRow(contact)
                     }
-                    formRow(label: "Email") {
-                        TextField("Contact email", text: $emailInput)
-                            .font(.title3)
-                            .keyboardType(.emailAddress)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                    }
-                    Button {
-                        showContactPicker = true
-                    } label: {
-                        Label {
-                            Text("Choose from Contacts")
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.6)
-                        } icon: {
-                            Image(systemName: "person.crop.circle.badge.plus").accessibilityHidden(true)
+                    if contactsInput.count < TrustedContacts.maximum {
+                        Button { showAddChoice = true } label: {
+                            Label("Add Contact", systemImage: "plus.circle.fill")
+                                .font(.title3)
                         }
-                        .font(.title3)
+                        .foregroundStyle(appTheme.accent)
+                        .confirmationDialog(Text("Add Contact"), isPresented: $showAddChoice, titleVisibility: .visible) {
+                            Button("Choose from Contacts") { showContactPicker = true }
+                            Button("Type a Contact") { showAddSheet = true }
+                            Button("Cancel", role: .cancel) {}
+                        }
                     }
-                    .foregroundStyle(appTheme.accent)
+                } header: {
+                    Text("Trusted Contacts")
+                } footer: {
+                    Text("contacts.footer")
                 }
 
                 Section("Daily Reminder") {
@@ -157,8 +154,8 @@ struct SettingsView: View {
             }
             .onAppear {
                 userNameInput = userName
-                contactNameInput = contactName
-                emailInput = contactEmail
+                contactsInput = TrustedContacts.list(primaryName: contactName, primaryEmail: contactEmail,
+                                                     additionalJSON: additionalContactsJSON)
                 reminderEnabledInput = reminderEnabled
                 reminderMinutesInput = reminderMinutes
                 originalTheme = appTheme.theme
@@ -214,10 +211,20 @@ struct SettingsView: View {
             }
             .background(
                 ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
-                    contactNameInput = pickedName
-                    emailInput = pickedEmail
+                    addContact(TrustedContact(name: pickedName, email: pickedEmail))
                 }
             )
+            .sheet(isPresented: $showAddSheet) {
+                AddContactSheet(onAdd: addContact).environmentObject(appTheme)
+            }
+            .sheet(item: $editingContact) { contact in
+                AddContactSheet(editing: contact) { edited in
+                    if let i = contactsInput.firstIndex(where: { $0.id == edited.id }) {
+                        contactsInput[i] = edited
+                    }
+                }
+                .environmentObject(appTheme)
+            }
         }
         .background(appTheme.background.ignoresSafeArea())
     }
@@ -246,6 +253,44 @@ struct SettingsView: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
+    /// Tap to edit; an explicit remove button rather than swipe-to-delete,
+    /// which elderly users rarely discover. The last contact can't be
+    /// removed — Save needs at least one.
+    private func contactRow(_ contact: TrustedContact) -> some View {
+        HStack(spacing: 12) {
+            Button { editingContact = contact } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(contact.name).font(.title3).foregroundStyle(.primary)
+                    Text(contact.email).foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(Text("Double-tap to edit."))
+
+            if contactsInput.count > 1 {
+                Button(role: .destructive) {
+                    contactsInput.removeAll { $0.id == contact.id }
+                } label: {
+                    Image(systemName: "minus.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.red)
+                }
+                .buttonStyle(.borderless)
+                .accessibilityLabel(Text("Remove \(contact.name)"))
+            }
+        }
+    }
+
+    /// Someone already in the list (same email) isn't added twice.
+    private func addContact(_ contact: TrustedContact) {
+        let email = contact.email.lowercased()
+        guard contactsInput.count < TrustedContacts.maximum,
+              !contactsInput.contains(where: { $0.email.lowercased() == email }) else { return }
+        contactsInput.append(contact)
+    }
+
     private func formRow(label: LocalizedStringKey, @ViewBuilder field: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label).font(.caption).foregroundStyle(.secondary)
@@ -256,8 +301,10 @@ struct SettingsView: View {
 
     private func save() {
         userName = userNameInput.trimmingCharacters(in: .whitespaces)
-        contactName = contactNameInput.trimmingCharacters(in: .whitespaces)
-        contactEmail = emailInput.trimmingCharacters(in: .whitespaces)
+        let contacts = TrustedContacts.split(contactsInput)
+        contactName = contacts.name
+        contactEmail = contacts.email
+        additionalContactsJSON = contacts.additionalJSON
 
         reminderEnabled = reminderEnabledInput
         reminderMinutes = reminderMinutesInput

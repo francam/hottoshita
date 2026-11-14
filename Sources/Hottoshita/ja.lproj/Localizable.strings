@@ -108,7 +108,6 @@
 
 // Settings
 "Settings" = "設定";
-"Trusted Contact" = "信頼できる連絡先";
 "Name" = "名前";
 "Email" = "メール";
 "Contact name" = "連絡先の名前";
@@ -164,3 +163,14 @@
 "sync.description" = "チェックイン履歴と設定は、同じ Apple ID でサインインしたご自身の他の端末と非公開で同期されます。";
 "iCloud Sync Unavailable" = "iCloud 同期を利用できません";
 "Please sign in to iCloud in the Settings app to sync between your devices." = "端末間で同期するには、設定アプリで iCloud にサインインしてください。";
+
+/* Several trusted contacts (1.0.1) */
+"report.greeting.everyone" = "皆様、";
+"Trusted Contacts" = "見守る方の連絡先";
+"Add Contact" = "連絡先を追加";
+"Type a Contact" = "連絡先を入力";
+"Edit Contact" = "連絡先を編集";
+"Add" = "追加";
+"Remove %@" = "%@を削除";
+"contacts.footer" = "全員に同じレポートが届きます。2人以上の場合、ほかに誰に送られたかはわかりません。5人まで登録できます。";
+"Double-tap to edit." = "ダブルタップで編集できます。";
