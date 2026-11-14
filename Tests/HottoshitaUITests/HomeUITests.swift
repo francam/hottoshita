@@ -202,4 +202,33 @@ final class HomeUITests: XCTestCase {
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
     }
+
+    func testSomeoneCanBeLeftOutOfOneReport() {
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        typeContactInSettings(name: "Tom", email: "tom@example.com")
+        app.buttons["Save"].tap()
+
+        app.buttons["Start Today's Check-in"].tap()
+        app.buttons["Slept OK"].tap()
+        XCTAssertTrue(app.buttons["Good"].waitForExistence(timeout: 3))
+        app.buttons["Good"].tap()
+        app.buttons["Continue"].tap()
+        XCTAssertTrue(app.buttons["No"].waitForExistence(timeout: 3))
+        app.buttons["No"].tap()
+
+        let recipients = app.buttons["Will be sent to: Test Contact, Tom"]
+        XCTAssertTrue(recipients.waitForExistence(timeout: 3))
+        recipients.tap()
+        XCTAssertTrue(app.navigationBars["Who gets this report?"].waitForExistence(timeout: 3))
+        app.staticTexts["Tom"].tap()
+        app.navigationBars["Who gets this report?"].buttons["Done"].tap()
+        XCTAssertTrue(app.buttons["Will be sent to: Test Contact"].waitForExistence(timeout: 3))
+
+        // Settings still has both.
+        app.buttons["Done"].tap()
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Tom"].waitForExistence(timeout: 3))
+    }
 }
+

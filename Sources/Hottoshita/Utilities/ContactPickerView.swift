@@ -17,8 +17,9 @@ struct ContactPickerPresenter: UIViewControllerRepresentable {
     @Binding var isPresented: Bool
     var purpose: Purpose = .trustedContact
     /// `.yourself` passes an empty email and the name the app should
-    /// address the user by (see ContactName.addressName).
-    var onSelect: (_ name: String, _ email: String) -> Void
+    /// address the user by (see ContactName.addressName). `photo` is a
+    /// small JPEG of the contact's picture, if they have one.
+    var onSelect: (_ name: String, _ email: String, _ photo: Data?) -> Void
 
     func makeUIViewController(context: Context) -> UIViewController {
         UIViewController()
@@ -66,19 +67,20 @@ struct ContactPickerPresenter: UIViewControllerRepresentable {
             if parent.purpose == .yourself {
                 let full = CNContactFormatter.string(from: contact, style: .fullName) ?? ""
                 parent.onSelect(ContactName.addressName(given: contact.givenName, family: contact.familyName,
-                                                        full: full, japanese: ContactName.appIsJapanese), "")
+                                                        full: full, japanese: ContactName.appIsJapanese), "", nil)
                 finish()
                 return
             }
             if let email = contact.emailAddresses.first?.value as String? {
-                parent.onSelect(displayName(for: contact), email)
+                parent.onSelect(displayName(for: contact), email, ContactPhoto.thumbnail(of: contact))
             }
             finish()
         }
 
         func contactPicker(_ picker: CNContactPickerViewController, didSelect contactProperty: CNContactProperty) {
             if let email = contactProperty.value as? String {
-                parent.onSelect(displayName(for: contactProperty.contact), email)
+                parent.onSelect(displayName(for: contactProperty.contact), email,
+                                ContactPhoto.thumbnail(of: contactProperty.contact))
             }
             finish()
         }
@@ -92,6 +94,33 @@ struct ContactPickerPresenter: UIViewControllerRepresentable {
             CNContactFormatter.string(from: contact, style: .fullName)
                 ?? contact.givenName
         }
+    }
+}
+
+/// A contact's picture, made small enough to store and sync with the
+/// contact: a 160 px square JPEG (a few KB). The picker hands it over with
+/// the selection, so no Contacts permission is needed.
+enum ContactPhoto {
+    static let side: CGFloat = 160
+
+    static func thumbnail(of contact: CNContact) -> Data? {
+        guard contact.isKeyAvailable(CNContactThumbnailImageDataKey),
+              let data = contact.thumbnailImageData ?? (contact.isKeyAvailable(CNContactImageDataKey) ? contact.imageData : nil),
+              let image = UIImage(data: data) else { return nil }
+        return squared(image)
+    }
+
+    static func squared(_ image: UIImage) -> Data? {
+        let size = CGSize(width: side, height: side)
+        let scale = max(side / image.size.width, side / image.size.height)
+        let drawn = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = 1
+        let square = UIGraphicsImageRenderer(size: size, format: format).image { _ in
+            image.draw(in: CGRect(x: (side - drawn.width) / 2, y: (side - drawn.height) / 2,
+                                  width: drawn.width, height: drawn.height))
+        }
+        return square.jpegData(compressionQuality: 0.7)
     }
 }
 

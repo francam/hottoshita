@@ -17,7 +17,7 @@ final class iCloudSettingsSync {
     private let syncedKeys = [
         "userName", "contactName", "contactEmail",
         "colorTheme", "reminderEnabled", "reminderMinutes",
-        TrustedContacts.storageKey,
+        TrustedContacts.storageKey, TrustedContacts.primaryPhotoKey,
     ]
 
     /// Guards against the write-back loop: applying a remote value to

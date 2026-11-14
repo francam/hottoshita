@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 @testable import Hottoshita
 
@@ -49,5 +50,58 @@ final class TrustedContactTests: XCTestCase {
         let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: nil, userName: "John")
         XCTAssertTrue(body.contains("Hello,"))
         XCTAssertFalse(body.contains("Sarah"))
+    }
+
+    // MARK: - Photos (1.5)
+
+    func testContactsSavedBeforePhotosStillDecode() {
+        let old = #"[{"id":"7C9E6679-7425-40DE-944B-E07FC1F90AE7","name":"Tom","email":"tom@example.com"}]"#
+        let list = TrustedContacts.decode(old)
+        XCTAssertEqual(list.map(\.name), ["Tom"])
+        XCTAssertNil(list[0].photo)
+    }
+
+    func testFirstContactsPhotoSurvivesSplitAndList() {
+        let photo = Data([1, 2, 3])
+        let stored = TrustedContacts.split([TrustedContact(name: "Sarah", email: "s@example.com", photo: photo),
+                                            TrustedContact(name: "Tom", email: "t@example.com")])
+        XCTAssertEqual(stored.photo, photo)
+        let back = TrustedContacts.list(primaryName: stored.name, primaryEmail: stored.email,
+                                        primaryPhoto: stored.photo, additionalJSON: stored.additionalJSON)
+        XCTAssertEqual(back.first?.photo, photo)
+        XCTAssertEqual(back.count, 2)
+    }
+
+    func testLeavingSomeoneOutOfOneSend() {
+        let everyone = ReportRecipients(primaryName: "Sarah", primaryEmail: "Sarah@Example.com",
+                                        additional: [TrustedContact(name: "Tom", email: "tom@example.com"),
+                                                     TrustedContact(name: "Emily", email: "emily@example.com")])
+        let some = everyone.excluding(emails: ["sarah@example.com"])
+        XCTAssertEqual(some.names, ["Tom", "Emily"])
+        XCTAssertTrue(some.usesBCC)
+        let one = everyone.excluding(emails: ["sarah@example.com", "emily@example.com"])
+        XCTAssertEqual(one.emails, ["tom@example.com"])
+        // Down to one: greeted by name and sent To, not BCC.
+        XCTAssertEqual(one.greetingName, "Tom")
+        XCTAssertFalse(one.usesBCC)
+    }
+
+    func testInitials() {
+        XCTAssertEqual(ContactAvatar.initials(of: "Sarah Smith"), "SS")
+        XCTAssertEqual(ContactAvatar.initials(of: "tom"), "T")
+        XCTAssertEqual(ContactAvatar.initials(of: "由美"), "由")
+        XCTAssertEqual(ContactAvatar.initials(of: "  "), "?")
+    }
+
+    func testPhotosAreStoredSmall() throws {
+        let big = UIGraphicsImageRenderer(size: CGSize(width: 1200, height: 800)).image { context in
+            UIColor.systemTeal.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 1200, height: 800))
+        }
+        let data = try XCTUnwrap(ContactPhoto.squared(big))
+        let image = try XCTUnwrap(UIImage(data: data))
+        XCTAssertEqual(image.size.width * image.scale, ContactPhoto.side)
+        XCTAssertEqual(image.size.height * image.scale, ContactPhoto.side)
+        XCTAssertLessThan(data.count, 20_000)
     }
 }

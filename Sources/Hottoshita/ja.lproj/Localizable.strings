@@ -188,3 +188,7 @@
 "Trusted Contacts" = "見守る方の連絡先";
 "Double-tap to edit." = "ダブルタップで編集できます。";
 "Choose your name from Contacts" = "連絡先から自分の名前を選ぶ";
+"Will be sent to" = "送信先";
+"Double-tap to choose who receives it." = "ダブルタップで送信先を選べます。";
+"Who gets this report?" = "このレポートの送信先";
+"recipients.choice.footer" = "変更はこのレポートだけです。「設定」の見守る方の連絡先は変わりません。";

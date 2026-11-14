@@ -9,12 +9,14 @@ struct HistoryView: View {
     @Environment(\.dismiss) private var dismiss
 
     @AppStorage("userName") private var userName = ""
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
     @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
+    @AppStorage(TrustedContacts.primaryPhotoKey) private var contactPhoto: Data?
 
     private var recipients: ReportRecipients {
-        ReportRecipients(primaryName: contactName, primaryEmail: contactEmail,
+        ReportRecipients(primaryName: contactName, primaryEmail: contactEmail, primaryPhoto: contactPhoto,
                          additional: TrustedContacts.decode(additionalContactsJSON))
     }
 
@@ -48,6 +50,29 @@ struct HistoryView: View {
                         }
                         .padding()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                } else if horizontalSizeClass == .regular {
+                    // iPad: the days as cards, two to a row, instead of a
+                    // narrow list with most of each row empty. Cards don't
+                    // swipe, so deleting is in the long-press menu.
+                    ScrollView {
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)],
+                                  spacing: 16) {
+                            ForEach(store.entries.reversed()) { entry in
+                                HistoryRowView(entry: entry)
+                                    .padding(16)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    // Content layer: a solid card, like the summary rows.
+                                    .background(.quaternary, in: RoundedRectangle(cornerRadius: 18))
+                                    .contextMenu {
+                                        Button("Delete", systemImage: "trash", role: .destructive) {
+                                            entryToDelete = entry
+                                            showDeleteConfirm = true
+                                        }
+                                    }
+                            }
+                        }
+                        .padding(20)
                     }
                 } else {
                     List {

@@ -12,12 +12,15 @@ struct AddContactSheet: View {
     @Environment(\.keepSheetToolbarHorizontal) private var keepSheetToolbarHorizontal
     @State private var name: String
     @State private var email: String
+    /// Kept from the contact being edited, or from Contacts when picked.
+    @State private var photo: Data?
 
     init(editing: TrustedContact? = nil, onAdd: @escaping (TrustedContact) -> Void) {
         self.editing = editing
         self.onAdd = onAdd
         _name = State(initialValue: editing?.name ?? "")
         _email = State(initialValue: editing?.email ?? "")
+        _photo = State(initialValue: editing?.photo)
     }
     @State private var showContactPicker = false
 
@@ -73,7 +76,8 @@ struct AddContactSheet: View {
                     Button {
                         onAdd(TrustedContact(id: editing?.id ?? UUID(),
                                              name: name.trimmingCharacters(in: .whitespaces),
-                                             email: email.trimmingCharacters(in: .whitespaces)))
+                                             email: email.trimmingCharacters(in: .whitespaces),
+                                             photo: photo))
                         dismiss()
                     } label: {
                         Text(editing == nil ? "Add" : "Save")
@@ -85,9 +89,10 @@ struct AddContactSheet: View {
                 }
             }
             .background {
-                ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail in
+                ContactPickerPresenter(isPresented: $showContactPicker) { pickedName, pickedEmail, pickedPhoto in
                     name = pickedName
                     email = pickedEmail
+                    photo = pickedPhoto
                 }
             }
         }

@@ -9,15 +9,26 @@ struct SummaryView: View {
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
     @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
+    @AppStorage(TrustedContacts.primaryPhotoKey) private var contactPhoto: Data?
 
-    private var recipients: ReportRecipients {
-        ReportRecipients(primaryName: contactName, primaryEmail: contactEmail,
+    /// Everyone in the trusted contacts list.
+    private var everyone: ReportRecipients {
+        ReportRecipients(primaryName: contactName, primaryEmail: contactEmail, primaryPhoto: contactPhoto,
                          additional: TrustedContacts.decode(additionalContactsJSON))
     }
+    /// Who this report goes to: everyone, minus anyone left out of this one
+    /// send (by email, since the list is rebuilt on every read).
+    private var recipients: ReportRecipients { everyone.excluding(emails: leftOut) }
+    @State private var leftOut: Set<String> = []
+    @State private var showRecipientChoice = false
     @Environment(\.dismiss) private var dismiss
     @Environment(\.isCompactHeight) private var isCompactHeight
     @Environment(\.isDense) private var isDense
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    /// iPad-sized and upright: larger rows in a centred column, rather than
+    /// iPhone-sized rows stretched across the whole width.
+    private var isRoomy: Bool { horizontalSizeClass == .regular && fold == nil && !isCompactHeight }
     @Environment(\.colorSchemeContrast) private var contrast
     @EnvironmentObject private var store: CheckInStore
     @EnvironmentObject private var appTheme: AppTheme
@@ -72,9 +83,9 @@ struct SummaryView: View {
                         }
                         .padding(.horizontal, 24)
                     } else {
-                        VStack(spacing: isDense ? 20 : 36) {
+                        VStack(spacing: isDense ? 20 : isRoomy ? 48 : 36) {
                             headerBlock
-                                .padding(.top, 8)
+                                .padding(.top, isRoomy ? 32 : 8)
 
                             summaryRows
                                 .padding(.horizontal, 48)
@@ -85,6 +96,8 @@ struct SummaryView: View {
                                 .padding(.horizontal, 48)
                                 .padding(.bottom, isDense ? 16 : 40)
                         }
+                        .frame(maxWidth: isRoomy ? 680 : .infinity)
+                        .frame(maxWidth: .infinity)
                     }
                 }
                 .readsFold($fold)
@@ -151,7 +164,7 @@ struct SummaryView: View {
     private var headerBlock: some View {
         VStack(spacing: 8) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: isDense ? 40 : 64))
+                .font(.system(size: isDense ? 40 : isRoomy ? 88 : 64))
                 .foregroundStyle(appTheme.accent)
                 .accessibilityHidden(true)
             Text("Check-in Complete")
@@ -187,6 +200,35 @@ struct SummaryView: View {
         }
     }
 
+    /// "Will be sent to" and the recipients' pictures, overlapping like a
+    /// stack. With several contacts, tapping it chooses who gets this one.
+    private var recipientsButton: some View {
+        Button { showRecipientChoice = true } label: {
+            VStack(spacing: 8) {
+                Text("Will be sent to")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+                HStack(spacing: -14) {
+                    ForEach(recipients.contacts) { contact in
+                        ContactAvatar(contact: contact, accent: appTheme.accent, size: isDense ? 40 : 48)
+                            .overlay { Circle().stroke(appTheme.background, lineWidth: 3) }
+                    }
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(everyone.contacts.count < 2)
+        .accessibilityLabel(Text("Will be sent to: \(recipients.displayNames)"))
+        .accessibilityHint(everyone.contacts.count < 2 ? Text("") : Text("Double-tap to choose who receives it."))
+        .sheet(isPresented: $showRecipientChoice) {
+            RecipientChoiceSheet(everyone: everyone, leftOut: $leftOut)
+                .environmentObject(appTheme)
+                .cappedDynamicType()
+                .presentationDetents([.medium, .large])
+        }
+    }
+
     private var actionsBlock: some View {
         VStack(spacing: isDense ? 12 : 16) {
             if reportSent {
@@ -200,9 +242,7 @@ struct SummaryView: View {
                 .font(.title3.bold())
                 .foregroundStyle(appTheme.accent)
             } else {
-                Text("Will be sent to: \(recipients.displayNames)")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
+                recipientsButton
                 if !store.unsentEntries(excluding: answers.id).isEmpty {
                     Text("Some earlier check-ins have not been sent yet.")
                         .font(.subheadline)
@@ -314,17 +354,17 @@ struct SummaryView: View {
     private func summaryRow(icon: String, label: LocalizedStringKey, value: String, singleLine: Bool = false) -> some View {
         HStack {
             Image(systemName: icon)
-                .font(.title3)
+                .font(isRoomy ? .title2 : .title3)
                 // Increase Contrast darkens the grey row fill until the
                 // accent icon nearly vanishes (measured 1.5:1).
                 .foregroundStyle(contrast == .increased ? Color.primary : appTheme.accent)
                 .frame(width: 36)
                 .accessibilityHidden(true)
             Text(label)
-                .font(.title3)
+                .font(isRoomy ? .title2 : .title3)
             Spacer()
             Text(value)
-                .font(.title3.bold())
+                .font(isRoomy ? .title2.bold() : .title3.bold())
                 .multilineTextAlignment(.trailing)
                 // In the side-by-side layout each row gets half the width;
                 // even shrunk, "128/82 mmHg" truncated there (iPhone Duo
@@ -332,9 +372,62 @@ struct SummaryView: View {
                 .lineLimit(singleLine && !isCompactHeight ? 1 : nil)
                 .minimumScaleFactor(singleLine ? 0.7 : 1)
         }
-        .padding(.vertical, isDense ? 8 : 16)
-        .padding(.horizontal, 16)
+        .padding(.vertical, isDense ? 8 : isRoomy ? 22 : 16)
+        .padding(.horizontal, isRoomy ? 22 : 16)
         // Content layer: a solid surface, not glass.
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 14))
+    }
+}
+
+/// Who gets this one report: everyone is ticked; untick someone to leave
+/// them out this time. Settings' list doesn't change, and at least one
+/// person always stays ticked.
+private struct RecipientChoiceSheet: View {
+    let everyone: ReportRecipients
+    @Binding var leftOut: Set<String>
+    @EnvironmentObject private var appTheme: AppTheme
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(everyone.contacts) { contact in
+                        let key = contact.email.lowercased()
+                        let included = !leftOut.contains(key)
+                        let isLast = included && leftOut.count == everyone.contacts.count - 1
+                        Button {
+                            if included { leftOut.insert(key) } else { leftOut.remove(key) }
+                        } label: {
+                            HStack(spacing: 12) {
+                                ContactAvatar(contact: contact, accent: appTheme.accent)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(contact.name).font(.title3).foregroundStyle(.primary)
+                                    Text(contact.email).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: included ? "checkmark.circle.fill" : "circle")
+                                    .font(.title2)
+                                    .foregroundStyle(included ? appTheme.accent : Color.secondary)
+                            }
+                        }
+                        .disabled(isLast)
+                        .accessibilityAddTraits(included ? .isSelected : [])
+                    }
+                } footer: {
+                    Text("recipients.choice.footer")
+                }
+            }
+            .navigationTitle("Who gets this report?")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button { dismiss() } label: {
+                        Text("Done").font(.title3.weight(.semibold))
+                    }
+                    .toolbarSecondaryStyle(accent: appTheme.accent)
+                }
+            }
+        }
     }
 }

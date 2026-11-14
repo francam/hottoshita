@@ -25,9 +25,12 @@ struct TrustedContactsList: View {
         ForEach(contacts) { contact in
             HStack(spacing: 12) {
                 Button { state.editing = contact } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(contact.name).font(.title3)
-                        Text(contact.email).foregroundStyle(.secondary)
+                    HStack(spacing: 12) {
+                        ContactAvatar(contact: contact, accent: accent)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(contact.name).font(.title3)
+                            Text(contact.email).foregroundStyle(.secondary)
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .contentShape(Rectangle())
@@ -84,8 +87,8 @@ extension View {
             contacts.wrappedValue.append(contact)
         }
         return background {
-            ContactPickerPresenter(isPresented: state.showPicker) { name, email in
-                add(TrustedContact(name: name, email: email))
+            ContactPickerPresenter(isPresented: state.showPicker) { name, email, photo in
+                add(TrustedContact(name: name, email: email, photo: photo))
             }
         }
         .sheet(isPresented: state.showAddSheet) {

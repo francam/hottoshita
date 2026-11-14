@@ -6,6 +6,7 @@ struct OnboardingView: View {
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
     @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
+    @AppStorage(TrustedContacts.primaryPhotoKey) private var contactPhoto: Data?
 
     @Environment(\.isCompactHeight) private var isCompactHeight
 
@@ -118,6 +119,7 @@ struct OnboardingView: View {
                 let stored = TrustedContacts.split(contactsInput)
                 contactName = stored.name
                 contactEmail = stored.email
+                contactPhoto = stored.photo
                 additionalContactsJSON = stored.additionalJSON
             }
         }
@@ -170,7 +172,7 @@ private struct OnboardingNameStep: View {
             .padding(.horizontal, isCompactHeight ? 0 : 48)
         }
         .background {
-            ContactPickerPresenter(isPresented: $showContactPicker, purpose: .yourself) { name, _ in
+            ContactPickerPresenter(isPresented: $showContactPicker, purpose: .yourself) { name, _, _ in
                 value = name
             }
         }

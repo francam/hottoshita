@@ -8,6 +8,7 @@ struct SettingsView: View {
     @AppStorage("contactName") private var contactName = ""
     @AppStorage("contactEmail") private var contactEmail = ""
     @AppStorage(TrustedContacts.storageKey) private var additionalContactsJSON = ""
+    @AppStorage(TrustedContacts.primaryPhotoKey) private var contactPhoto: Data?
     @EnvironmentObject private var appTheme: AppTheme
     @EnvironmentObject private var store: CheckInStore
 
@@ -200,7 +201,7 @@ struct SettingsView: View {
             }
             .onAppear {
                 userNameInput = userName
-                contactsInput = TrustedContacts.list(primaryName: contactName, primaryEmail: contactEmail,
+                contactsInput = TrustedContacts.list(primaryName: contactName, primaryEmail: contactEmail, primaryPhoto: contactPhoto,
                                                      additionalJSON: additionalContactsJSON)
                 reminderEnabledInput = reminderEnabled
                 reminderMinutesInput = reminderMinutes
@@ -319,6 +320,7 @@ struct SettingsView: View {
         let stored = TrustedContacts.split(contactsInput)
         contactName = stored.name
         contactEmail = stored.email
+        contactPhoto = stored.photo
         additionalContactsJSON = stored.additionalJSON
 
         reminderEnabled = reminderEnabledInput
