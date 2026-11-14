@@ -97,6 +97,16 @@ final class ReportGeneratorTests: XCTestCase {
                                             previousUnsent: [earlier])
         XCTAssertTrue(body.contains(NSLocalizedString("report.previous", comment: "")))
         XCTAssertTrue(body.contains("Barely slept"))
+        // Condensed: a short date, the answers on one line.
+        XCTAssertTrue(body.contains(earlier.date.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())))
+    }
+
+    func testReadingNeverWraps() {
+        var answers = CheckInAnswers()
+        answers.tookBloodPressure = true
+        answers.bloodPressure = BloodPressure(systolic: "128", diastolic: "82")
+        let body = ReportGenerator.generate(answers: answers, contactName: "Sarah", userName: "John")
+        XCTAssertTrue(body.contains("white-space:nowrap\">128/82 mmHg"))
     }
 
     func testBodyContainsAllSections() {
