@@ -192,3 +192,6 @@
 "Double-tap to choose who receives it." = "ダブルタップで送信先を選べます。";
 "Who gets this report?" = "このレポートの送信先";
 "recipients.choice.footer" = "変更はこのレポートだけです。「設定」の見守る方の連絡先は変わりません。";
+"Add Photo" = "写真を追加";
+"Change Photo" = "写真を変更";
+"Remove Photo" = "写真を削除";

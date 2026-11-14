@@ -90,7 +90,7 @@ final class TrustedContactTests: XCTestCase {
         XCTAssertEqual(ContactAvatar.initials(of: "Sarah Smith"), "SS")
         XCTAssertEqual(ContactAvatar.initials(of: "tom"), "T")
         XCTAssertEqual(ContactAvatar.initials(of: "由美"), "由")
-        XCTAssertEqual(ContactAvatar.initials(of: "  "), "?")
+        XCTAssertEqual(ContactAvatar.initials(of: "  "), "")
     }
 
     func testPhotosAreStoredSmall() throws {

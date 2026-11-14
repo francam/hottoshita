@@ -13,6 +13,13 @@ struct ContactAvatar: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFill()
+            } else if Self.initials(of: contact.name).isEmpty {
+                // No name yet (a new contact being typed in).
+                Image(systemName: "person.fill")
+                    .font(.system(size: size * 0.42))
+                    .foregroundStyle(accent)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(accent.opacity(0.15))
             } else {
                 Text(Self.initials(of: contact.name))
                     .font(.system(size: size * 0.4, weight: .semibold, design: .rounded))
@@ -31,6 +38,6 @@ struct ContactAvatar: View {
     static func initials(of name: String) -> String {
         let words = name.split(separator: " ").filter { !$0.isEmpty }
         let letters = words.prefix(2).compactMap(\.first).map(String.init)
-        return letters.isEmpty ? "?" : letters.joined().uppercased()
+        return letters.joined().uppercased()
     }
 }

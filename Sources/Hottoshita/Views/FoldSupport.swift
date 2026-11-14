@@ -169,6 +169,11 @@ extension View {
     /// system would give a trailing sheet a vertical toolbar; the sheet
     /// keeps it horizontal instead (see keepSheetToolbarHorizontal). Elsewhere:
     /// system placement.
+    ///
+    /// Known system issue (iOS 27.1, reported to Apple): a trailing sheet is
+    /// first laid out in the middle of the display, so it rises diagonally
+    /// across the crease to the right page. Dismissal is straight. A
+    /// cross-fade doesn't help — the sideways move isn't the transition.
     @ViewBuilder
     func placedOffFold(_ fold: Fold?) -> some View {
         let bookPose = fold?.isActive == true && fold?.isVertical == true

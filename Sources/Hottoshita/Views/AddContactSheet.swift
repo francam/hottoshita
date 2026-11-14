@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 
 /// Adds a trusted contact by typing (or picking from Contacts), or edits one
@@ -14,6 +15,9 @@ struct AddContactSheet: View {
     @State private var email: String
     /// Kept from the contact being edited, or from Contacts when picked.
     @State private var photo: Data?
+    /// The photo library pick in progress (Apple's picker: no permission
+    /// needed, the app only receives the one photo chosen).
+    @State private var photoItem: PhotosPickerItem?
 
     init(editing: TrustedContact? = nil, onAdd: @escaping (TrustedContact) -> Void) {
         self.editing = editing
@@ -31,6 +35,37 @@ struct AddContactSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    // Their picture: from Contacts when picked there, or any
+                    // photo from the library — so a typed-in contact needn't
+                    // stay initials.
+                    VStack(spacing: 10) {
+                        ContactAvatar(contact: TrustedContact(name: name, email: email, photo: photo),
+                                      accent: appTheme.accent, size: 96)
+                        HStack(spacing: 20) {
+                            PhotosPicker(selection: $photoItem, matching: .images) {
+                                Text(photo == nil ? LocalizedStringKey("Add Photo") : "Change Photo")
+                                    .font(.title3.weight(.semibold))
+                            }
+                            if photo != nil {
+                                Button("Remove Photo", role: .destructive) { photo = nil }
+                                    .font(.title3)
+                            }
+                        }
+                        .buttonStyle(.borderless)
+                        .foregroundStyle(appTheme.accent)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .onChange(of: photoItem) { item in
+                        Task {
+                            guard let data = try? await item?.loadTransferable(type: Data.self),
+                                  let image = UIImage(data: data) else { return }
+                            photo = ContactPhoto.squared(image)
+                        }
+                    }
+                }
+
                 Section {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Name").font(.caption).foregroundStyle(.secondary)

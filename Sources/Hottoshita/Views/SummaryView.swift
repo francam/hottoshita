@@ -226,6 +226,9 @@ struct SummaryView: View {
                 .environmentObject(appTheme)
                 .cappedDynamicType()
                 .presentationDetents([.medium, .large])
+                // iPhone Duo folded like a book: on the right page, like
+                // History and Settings, not over the summary.
+                .placedOffFold(fold)
         }
     }
 
@@ -387,6 +390,7 @@ private struct RecipientChoiceSheet: View {
     @Binding var leftOut: Set<String>
     @EnvironmentObject private var appTheme: AppTheme
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.keepSheetToolbarHorizontal) private var keepSheetToolbarHorizontal
 
     var body: some View {
         NavigationStack {
@@ -410,7 +414,10 @@ private struct RecipientChoiceSheet: View {
                                     .font(.title2)
                                     .foregroundStyle(included ? appTheme.accent : Color.secondary)
                             }
+                            .contentShape(Rectangle())
                         }
+                        // Plain, so names read as text, not in the tint colour.
+                        .buttonStyle(.plain)
                         .disabled(isLast)
                         .accessibilityAddTraits(included ? .isSelected : [])
                     }
@@ -420,6 +427,7 @@ private struct RecipientChoiceSheet: View {
             }
             .navigationTitle("Who gets this report?")
             .navigationBarTitleDisplayMode(.inline)
+            .horizontalToolbars(keepSheetToolbarHorizontal)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button { dismiss() } label: {

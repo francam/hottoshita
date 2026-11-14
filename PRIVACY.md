@@ -13,7 +13,7 @@ Hottoshita ("the app") is a daily wellness check-in app. This policy explains wh
 To work, the app keeps the following information **only on your device** (and in your own private iCloud account too, if you turn on iCloud sync):
 
 - Your name (used for the greeting and the email report)
-- The names and email addresses of your trusted contacts (up to five), and a small copy of the photo of any you pick from Contacts
+- The names and email addresses of your trusted contacts (up to five), and, if you add one, a small copy of their photo (from Contacts or from your photo library)
 - Your daily check-in answers: sleep quality, how you're feeling, and — if you choose to enter it — your blood pressure
 - Your preferences: colour theme and daily reminder time
 
@@ -30,6 +30,8 @@ When you tap **Send Report**, the app prepares an email draft in the standard iO
 ### Contacts
 
 If you use "Choose from Contacts", the app shows Apple's system contact picker. The app never gains access to your contact list — it only receives the contact you pick: for a trusted contact, their name, email address and, if they have one, a small copy of their photo (shown next to their name in the app); when filling in your own name during setup, only the name. These are stored on your device like anything you type in. No contacts permission is requested.
+
+If you add a photo for a contact, Apple's system photo picker is shown. The app only receives the one photo you choose, keeps a small copy of it with that contact, and never sees the rest of your photo library. No photo library permission is requested.
 
 ### Notifications
 
@@ -77,7 +79,7 @@ Questions? Email **sfrancam@icloud.com**.
 本アプリは、動作のために以下の情報を**お使いの端末内にのみ**保存します（iCloud 同期をオンにした場合は、お客様ご自身の iCloud アカウントにも保存されます）。
 
 - お名前（あいさつ表示とメールレポートに使用）
-- 見守り連絡先（信頼できる方、最大 5 名）のお名前とメールアドレス、および連絡先から選んだ方の写真の小さなコピー
+- 見守り連絡先（信頼できる方、最大 5 名）のお名前とメールアドレス、および写真を追加した場合はその小さなコピー（連絡先またはフォトライブラリから）
 - 毎日のチェックインの回答：睡眠の質、今の気分、および入力を選択した場合の血圧
 - 設定内容：背景カラーテーマ、毎日のリマインダー時刻
 
@@ -94,6 +96,8 @@ Questions? Email **sfrancam@icloud.com**.
 ### 連絡先について
 
 「連絡先から選ぶ」を使う場合、Apple のシステム標準の連絡先ピッカーが表示されます。本アプリが連絡先リストにアクセスすることはなく、お客様が選んだ 1 件の連絡先のみを受け取ります。見守り連絡先の場合は名前・メールアドレスと、写真があればその小さなコピー（アプリ内で名前の横に表示）を、初期設定でご自身のお名前を入力する場合は名前のみを受け取り、入力した情報と同じく端末内に保存します。連絡先へのアクセス許可を求めることもありません。
+
+見守り連絡先に写真を追加する場合は、Apple のシステム標準の写真ピッカーが表示されます。本アプリはお客様が選んだ 1 枚の写真のみを受け取り、その小さなコピーを連絡先と一緒に保存します。フォトライブラリのほかの写真を見ることはなく、フォトライブラリへのアクセス許可を求めることもありません。
 
 ### 通知について
 
