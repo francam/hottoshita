@@ -2369,6 +2369,23 @@
         }
       }
     },
+    "report.title" : {
+      "comment" : "Email report: the title in the card under the check seal. %@ is the user's name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ checked in"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@様がチェックインしました"
+          }
+        }
+      }
+    },
     "save.failed" : {
       "localizations" : {
         "en" : {

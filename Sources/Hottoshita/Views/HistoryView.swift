@@ -164,7 +164,8 @@ struct HistoryView: View {
                         bcc: recipients.usesBCC,
                         subject: ReportGenerator.subject(for: primary),
                         body: ReportGenerator.generate(answers: primary, contactName: recipients.greetingName, userName: userName,
-                                                       previousUnsent: Array(unsent.dropLast()))
+                                                       previousUnsent: Array(unsent.dropLast()),
+                                                       theme: appTheme.theme.rawValue)
                     ) { result in
                         if result == .sent {
                             store.markAllUnsentAsSent()

@@ -111,7 +111,8 @@ struct SummaryView: View {
                 bcc: recipients.usesBCC,
                 subject: ReportGenerator.subject(for: answers),
                 body: ReportGenerator.generate(answers: answers, contactName: recipients.greetingName, userName: userName,
-                                               previousUnsent: includeBacklog ? store.unsentEntries(excluding: answers.id) : [])
+                                               previousUnsent: includeBacklog ? store.unsentEntries(excluding: answers.id) : [],
+                                               theme: appTheme.theme.rawValue)
             ) { result in
                 if result == .sent {
                     reportSent = true

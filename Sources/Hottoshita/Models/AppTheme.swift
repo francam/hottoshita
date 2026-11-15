@@ -4,7 +4,7 @@ import UIKit
 enum ColorTheme: String, CaseIterable {
     case `default`, pink, lavender, mint, sky, peach, lemon
 
-    /// The pastel used for the light-mode background and the settings swatch.
+    /// The pastel used for the settings swatch and the dark-mode tint.
     private var pastel: UIColor? {
         switch self {
         case .default:  return nil
@@ -51,19 +51,23 @@ enum ColorTheme: String, CaseIterable {
         return Color(uiColor: pastel)
     }
 
-    /// Screen background: pastel in light mode, near-black tinted with the
-    /// theme hue in dark mode.
+    /// Screen background under the theme gradient (ThemeBackdrop): white in
+    /// light mode for every theme — the colour comes from the gradient, which
+    /// fades from the theme colour at the top into this — and near-black
+    /// tinted with the theme hue in dark mode.
     var background: Color {
         guard let pastel else { return Color(.systemBackground) }
         let dark = pastel.mixed(with: .black, amount: 0.85)
-        return Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? dark : pastel })
+        return Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? dark : .systemBackground })
     }
 
-    /// Behind grouped lists (Settings): the default theme's plain white
-    /// would hide the white section cards, so it uses the system's grouped
-    /// grey; pastel themes already contrast with the cards.
+    /// Behind grouped lists (Settings): the system's grouped grey in light
+    /// mode, so the white section cards stand out; the tinted near-black in
+    /// dark mode.
     var groupedBackground: Color {
-        pastel == nil ? Color(.systemGroupedBackground) : background
+        guard let pastel else { return Color(.systemGroupedBackground) }
+        let dark = pastel.mixed(with: .black, amount: 0.85)
+        return Color(uiColor: UIColor { $0.userInterfaceStyle == .dark ? dark : .systemGroupedBackground })
     }
 
     var accentColor: Color {
@@ -128,8 +132,8 @@ private extension UIColor {
 }
 
 /// The background of the main screens (onboarding, Home, check-in, summary):
-/// the theme colour fades down from the top into the usual background, as on
-/// the Watch, so even the default white theme carries its colour. It's gone
+/// the theme colour fades down from the top into white (light mode) or the
+/// tinted near-black (dark mode), as on the Watch and in the emailed report. It's gone
 /// by mid-screen, so buttons and tiles sit on the plain background. Lists in
 /// sheets (Settings, History) keep `groupedBackground`.
 struct ThemeBackdrop: View {

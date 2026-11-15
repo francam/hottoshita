@@ -116,4 +116,29 @@ final class ReportGeneratorTests: XCTestCase {
         XCTAssertTrue(body.contains("Feeling") || body.contains("気分"))
         XCTAssertTrue(body.contains("Blood Pressure") || body.contains("血圧"))
     }
+
+    func testUsesTheSendersThemeColour() {
+        let teal = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John")
+        let pink = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John", theme: "pink")
+        XCTAssertTrue(teal.contains("#00808f"), "default theme: the app's teal")
+        XCTAssertTrue(pink.contains("#c2406b"), "pink theme: the pink accent")
+        XCTAssertFalse(pink.contains("#00808f"))
+    }
+
+    func testBackgroundFadesFromTheThemeColourToWhite() {
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John", theme: "mint")
+        XCTAssertTrue(body.contains("linear-gradient(180deg,"))
+        XCTAssertTrue(body.contains(",#ffffff 380px)"), "fades into white")
+        XCTAssertTrue(body.contains("bgcolor=\"#ffffff\""), "plain white where gradients aren't drawn")
+    }
+
+    func testUnknownThemeFallsBackToTeal() {
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John", theme: "nonsense")
+        XCTAssertTrue(body.contains("#00808f"))
+    }
+
+    func testCardTitleNamesTheUser() {
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John")
+        XCTAssertTrue(body.contains(String(format: NSLocalizedString("report.title", comment: ""), "John")))
+    }
 }
