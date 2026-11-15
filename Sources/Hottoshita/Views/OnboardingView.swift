@@ -83,7 +83,7 @@ struct OnboardingView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(appTheme.background.ignoresSafeArea())
+        .background { ThemeBackdrop() }
         .onAppear {
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("--debug-contact-picker") { step = 2 }
@@ -230,6 +230,9 @@ private struct OnboardingContactStep: View {
     @State private var editor = ContactsEditorState()
     @State private var fold: Fold?
 
+    /// Room for Continue (and a gap) at the bottom of the iPhone Duo page.
+    private static let foldButtonInset: CGFloat = 80
+
     private var autoOpenPickerForDebug: Bool {
         #if DEBUG
         return ProcessInfo.processInfo.arguments.contains("--debug-contact-picker")
@@ -249,12 +252,25 @@ private struct OnboardingContactStep: View {
                 // list and Continue on the other — nothing on the hinge.
                 FoldSplitLayout(fold: fold) {
                     header
-                    VStack(spacing: 12) {
+                    // The list is centred on the whole page, so it sits
+                    // level with the question on the other page (centred in
+                    // the space above Continue, it sat higher). Continue
+                    // floats at the bottom; the same inset above and below
+                    // the list keeps it centred and clear of the button.
+                    GeometryReader { geo in
                         ScrollView {
                             list
-                                .padding(.vertical, 4)
+                                .padding(.vertical, Self.foldButtonInset)
+                                .frame(maxWidth: .infinity, minHeight: geo.size.height)
                         }
+                    }
+                    .overlay(alignment: .bottom) {
+                        // A solid strip, so contacts scrolled under it
+                        // don't show around the button.
                         continueButton
+                            .padding(.top, 12)
+                            .frame(maxWidth: .infinity)
+                            .background(appTheme.background)
                     }
                     .padding(.horizontal, 24)
                     .padding(.vertical, 8)
@@ -276,15 +292,39 @@ private struct OnboardingContactStep: View {
                 .padding(.vertical, 8)
             } else {
                 VStack(spacing: 0) {
-                    GeometryReader { geo in
-                        ScrollView {
-                            VStack(spacing: 16) {
-                                header
+                    // While everything fits, the question and the list are
+                    // centred together. Once they don't (five contacts on a
+                    // short screen, like the iPhone Duo closed), the question
+                    // stays put at the top and only the list scrolls below
+                    // it, rather than everything sliding up out of view.
+                    ViewThatFits(in: .vertical) {
+                        VStack(spacing: 16) {
+                            header
+                            list
+                                .padding(.horizontal, 48)
+                        }
+                        .padding(.vertical, 8)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                        VStack(spacing: 12) {
+                            header
+                                .padding(.top, 8)
+                            ScrollView {
                                 list
                                     .padding(.horizontal, 48)
+                                    .padding(.vertical, 12)
                             }
-                            .padding(.vertical, 8)
-                            .frame(maxWidth: .infinity, minHeight: geo.size.height)
+                            // Contacts fade out at the edges instead of
+                            // being cut by a hard line under the question
+                            // and above Continue.
+                            .mask {
+                                LinearGradient(stops: [
+                                    .init(color: .clear, location: 0),
+                                    .init(color: .black, location: 0.06),
+                                    .init(color: .black, location: 0.94),
+                                    .init(color: .clear, location: 1),
+                                ], startPoint: .top, endPoint: .bottom)
+                            }
                         }
                     }
                     continueButton
@@ -318,6 +358,8 @@ private struct OnboardingContactStep: View {
             Text("contacts.footer")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+                // Never cut short: if it doesn't fit, the list scrolls.
+                .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         // Same width as Continue on iPad, instead of edge to edge.

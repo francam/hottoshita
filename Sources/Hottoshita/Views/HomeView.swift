@@ -97,9 +97,9 @@ struct HomeView: View {
                     .frame(maxWidth: .infinity, minHeight: geo.size.height)
                 }
             }
-            .background(appTheme.background)
+            .background { ThemeBackdrop() }
         }
-        .background(appTheme.background.ignoresSafeArea())
+        .background { ThemeBackdrop() }
         .fullScreenCover(isPresented: $showCheckIn) {
             CheckInFlowView().environmentObject(appTheme).environmentObject(store)
                 .cappedDynamicType()
@@ -133,25 +133,44 @@ struct HomeView: View {
 
     private var startButton: some View {
         Button { showCheckIn = true } label: {
-            VStack(spacing: 16) {
-                Image(systemName: "heart.text.clipboard.fill")
-                    .font(.system(size: isDense ? 40 : 56))
-                    .accessibilityHidden(true)
-                Text("Start Today's Check-in")
-                    .font(.title.bold())
-                    .minimumScaleFactor(0.7)
+            Group {
+                if fold != nil {
+                    // iPhone Duo inner display: icon beside the words, so the
+                    // button is no taller than the greeting on the other
+                    // page — stacked, it towered over it.
+                    HStack(spacing: 14) {
+                        Image(systemName: "heart.text.clipboard.fill")
+                            .font(.system(size: 36))
+                            .accessibilityHidden(true)
+                        Text("Start Today's Check-in")
+                            .font(.title2.bold())
+                            .multilineTextAlignment(.leading)
+                            .minimumScaleFactor(0.7)
+                    }
+                    .padding(.vertical, 24)
+                } else {
+                    VStack(spacing: 16) {
+                        Image(systemName: "heart.text.clipboard.fill")
+                            .font(.system(size: isDense ? 40 : 56))
+                            .accessibilityHidden(true)
+                        Text("Start Today's Check-in")
+                            .font(.title.bold())
+                            .minimumScaleFactor(0.7)
+                    }
+                    .padding(.vertical, isDense ? 20 : 32)
+                }
             }
             .foregroundStyle(appTheme.onAccent)
             .frame(maxWidth: 420)
-            .padding(.vertical, isDense ? 20 : 32)
             .padding(.horizontal)
         }
         .primaryActionStyle(accent: appTheme.accent)
-        // Squircle in phone-sized layouts; the default capsule-like shape
-        // suits iPad-sized ones better. By size class, not device idiom: the
-        // iPhone Duo's inner display is iPad-sized but still an "iPhone".
-        .buttonBorderShape(horizontalSizeClass == .compact || verticalSizeClass == .compact
-                           ? .roundedRectangle(radius: 36) : .automatic)
+        // Squircle in phone-sized layouts and on the iPhone Duo's inner
+        // display (where a pill didn't match the rest of the screen); the
+        // capsule-like default suits iPad. By size class and fold, not device
+        // idiom: the Duo's inner display is iPad-sized but still an "iPhone".
+        .buttonBorderShape(horizontalSizeClass == .compact || verticalSizeClass == .compact || fold != nil
+                           ? .roundedRectangle(radius: fold != nil ? 28 : 36) : .automatic)
         .padding(.horizontal, isCompactHeight ? 16 : 32)
     }
 
@@ -204,8 +223,8 @@ struct HomeView: View {
                 .padding(16)
                 .frame(maxWidth: 640)
             } else {
-                VStack(spacing: isDense ? 12 : 16) {
-                    submittedSeal(size: isDense ? 44 : 64)
+                VStack(spacing: isDense || fold != nil ? 10 : 16) {
+                    submittedSeal(size: isDense || fold != nil ? 44 : 64)
                     submittedTitle
                         .multilineTextAlignment(.center)
                     submittedSubtitle
@@ -213,7 +232,7 @@ struct HomeView: View {
                     submitAgainButton
                         .padding(.top, 8)
                 }
-                .padding(isDense ? 16 : 24)
+                .padding(isDense || fold != nil ? 18 : 24)
                 .frame(maxWidth: 420)
             }
         }
@@ -240,6 +259,10 @@ struct HomeView: View {
         Text("Come back tomorrow.")
             .font(.title3)
             .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .minimumScaleFactor(0.85)
+            // Wraps rather than ending in "…" (Japanese on the iPhone mini).
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var submitAgainButton: some View {

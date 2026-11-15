@@ -86,3 +86,16 @@ struct GlassGroup<Content: View>: View {
         }
     }
 }
+
+extension View {
+    /// An opaque sheet background (iOS 16.4+), for sheets whose content
+    /// must stay easy to read rather than show the screen behind it.
+    @ViewBuilder
+    func solidPresentationBackground(_ color: Color) -> some View {
+        if #available(iOS 16.4, *) {
+            presentationBackground(color)
+        } else {
+            self
+        }
+    }
+}

@@ -131,6 +131,6 @@ struct AddContactSheet: View {
                 }
             }
         }
-        .background(appTheme.background.ignoresSafeArea())
+        .background { ThemeBackdrop() }
     }
 }

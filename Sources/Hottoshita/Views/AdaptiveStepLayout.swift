@@ -31,9 +31,10 @@ extension View {
 }
 
 private struct ShortHeightReader: ViewModifier {
-    /// Safe-area height: SE ≈ 647pt; the shortest notched iPhone (mini)
-    /// ≈ 728pt, which already fits the roomy layout.
-    private static let threshold: CGFloat = 700
+    /// Safe-area height: SE ≈ 647pt; iPhone mini and X/XS/11 Pro ≈ 728pt,
+    /// which overflowed in the roomy layout (Home with the Watch card pushed
+    /// History and Settings off the bottom); iPhone 14/15/16 ≈ 763pt fit.
+    private static let threshold: CGFloat = 750
     @State private var isShort = false
 
     func body(content: Content) -> some View {

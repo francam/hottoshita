@@ -20,6 +20,7 @@ struct TrustedContactsList: View {
     @Binding var state: ContactsEditorState
     let accent: Color
     var cards = false
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
 
     var body: some View {
         ForEach(contacts) { contact in
@@ -28,8 +29,16 @@ struct TrustedContactsList: View {
                     HStack(spacing: 12) {
                         ContactAvatar(contact: contact, accent: accent)
                         VStack(alignment: .leading, spacing: 2) {
+                            // One line each, so every card is the same
+                            // height: a long address wrapped to a second line
+                            // on the iPhone mini. Shortened in the middle,
+                            // keeping both the name part and the domain.
                             Text(contact.name).font(.title3)
+                                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                             Text(contact.email).foregroundStyle(.secondary)
+                                .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
+                                .minimumScaleFactor(0.85)
+                                .truncationMode(.middle)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

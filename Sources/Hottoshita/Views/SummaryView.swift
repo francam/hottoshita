@@ -104,7 +104,7 @@ struct SummaryView: View {
                 .frame(maxWidth: .infinity, minHeight: isCompactHeight || fold != nil ? geo.size.height : 0)
             }
         }
-        .background(appTheme.background.ignoresSafeArea())
+        .background { ThemeBackdrop() }
         .sheet(isPresented: $showMail) {
             MailComposeView(
                 recipients: recipients.emails,
@@ -177,8 +177,10 @@ struct SummaryView: View {
         }
     }
 
+    /// The same height for every card, set by the tallest: on small
+    /// screens a wrapped answer made one card taller than the others.
     private var summaryRows: some View {
-        VStack(spacing: isDense ? 10 : 14) {
+        EqualHeightVStack(spacing: isDense ? 10 : 14) {
             summaryRow(
                 icon: "moon.zzz.fill",
                 label: "Sleep",
@@ -225,7 +227,11 @@ struct SummaryView: View {
             RecipientChoiceSheet(everyone: everyone, leftOut: $leftOut)
                 .environmentObject(appTheme)
                 .cappedDynamicType()
-                .presentationDetents([.medium, .large])
+                // Book pose: full height only. With a medium detent the
+                // system ignored the trailing placement and put the sheet
+                // on the left page, over the summary.
+                .presentationDetents(fold?.isActive == true && fold?.isVertical == true ? [.large] : [.medium, .large])
+                .solidPresentationBackground(appTheme.groupedBackground)
                 // iPhone Duo folded like a book: on the right page, like
                 // History and Settings, not over the summary.
                 .placedOffFold(fold)
@@ -377,6 +383,7 @@ struct SummaryView: View {
         }
         .padding(.vertical, isDense ? 8 : isRoomy ? 22 : 16)
         .padding(.horizontal, isRoomy ? 22 : 16)
+        .frame(maxHeight: .infinity)
         // Content layer: a solid surface, not glass.
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 14))
     }
@@ -425,6 +432,10 @@ private struct RecipientChoiceSheet: View {
                     Text("recipients.choice.footer")
                 }
             }
+            // A solid sheet: over glass the names and addresses were hard
+            // to read.
+            .scrollContentBackground(.hidden)
+            .background(appTheme.groupedBackground)
             .navigationTitle("Who gets this report?")
             .navigationBarTitleDisplayMode(.inline)
             .horizontalToolbars(keepSheetToolbarHorizontal)

@@ -38,7 +38,9 @@ struct CheckInFlowView: View {
     private var flowContent: some View {
         VStack(spacing: 0) {
             if step < summaryStep {
-                let verticalHinge = fold?.isVertical == true ? fold : nil
+                // Folded like a book, the bar stays on the question's page;
+                // open flat it runs the full width, like everywhere else.
+                let verticalHinge = fold?.isVertical == true && fold?.isActive == true ? fold : nil
                 VStack(spacing: 6) {
                     ProgressView(value: Double(step + 1), total: Double(totalSteps))
                         .tint(appTheme.accent)
@@ -91,7 +93,7 @@ struct CheckInFlowView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(appTheme.background.ignoresSafeArea())
+        .background { ThemeBackdrop() }
     }
 
     @ViewBuilder
@@ -219,6 +221,7 @@ private struct SingleChoiceStepView: View {
 
 private struct MultiSelectStepView: View {
     @Environment(\.isCompactHeight) private var isCompactHeight
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.isDense) private var isDense
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @EnvironmentObject private var appTheme: AppTheme
@@ -279,6 +282,11 @@ private struct MultiSelectStepView: View {
                                 Text(LocalizedStringKey(option))
                             }
                             .font(.title3.bold())
+                            // One line, shrinking a little if needed, so every
+                            // tile is the same size ("落ち着いている" wrapped and
+                            // made its tile taller). At accessibility text
+                            // sizes words wrap rather than shrink.
+                            .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 1)
                             .minimumScaleFactor(0.7)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, isDense ? 12 : 26)

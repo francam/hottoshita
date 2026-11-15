@@ -126,3 +126,23 @@ private extension UIColor {
         )
     }
 }
+
+/// The background of the main screens (onboarding, Home, check-in, summary):
+/// the theme colour fades down from the top into the usual background, as on
+/// the Watch, so even the default white theme carries its colour. It's gone
+/// by mid-screen, so buttons and tiles sit on the plain background. Lists in
+/// sheets (Settings, History) keep `groupedBackground`.
+struct ThemeBackdrop: View {
+    @EnvironmentObject private var appTheme: AppTheme
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        appTheme.background
+            .overlay {
+                // Stronger in dark mode, where the same tint barely shows.
+                LinearGradient(colors: [appTheme.accent.opacity(colorScheme == .dark ? 0.45 : 0.30), .clear],
+                               startPoint: .top, endPoint: UnitPoint(x: 0.5, y: 0.6))
+            }
+            .ignoresSafeArea()
+    }
+}

@@ -46,6 +46,10 @@ struct HottoshitaApp: App {
                 .environmentObject(appTheme)
                 .cappedDynamicType()
                 .detectsShortHeight()
+                // Capsule buttons on every iOS, as iOS 26+ draws them by
+                // default; iOS 16–18 would otherwise draw squarer rounded
+                // rectangles. Screens that want another shape set their own.
+                .buttonBorderShape(.capsule)
         }
     }
 }
