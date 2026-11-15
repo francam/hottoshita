@@ -70,7 +70,7 @@ private struct AnswerTileBackground: ViewModifier {
     func body(content: Content) -> some View {
         let shape = RoundedRectangle(cornerRadius: cornerRadius)
         content
-            .background(selected ? accent : Color(.systemGroupedBackground), in: shape)
+            .background(selected ? accent : Color.tileFill, in: shape)
             .overlay {
                 if !selected && contrast == .increased {
                     shape.strokeBorder(accent, lineWidth: 2)
@@ -80,6 +80,14 @@ private struct AnswerTileBackground: ViewModifier {
 }
 
 extension Color {
+    /// Unselected answer tiles and reading fields: light grey in light
+    /// mode; a lifted grey in dark mode, where systemGroupedBackground is
+    /// black and, without an outline, the tiles vanished into the dark
+    /// gradient.
+    static let tileFill = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark ? .tertiarySystemGroupedBackground : .systemGroupedBackground
+    })
+
     /// This colour as text on the toolbar's glass: unchanged in light mode,
     /// 35% brighter in dark mode, where the theme colour read dim (Back,
     /// Cancel).

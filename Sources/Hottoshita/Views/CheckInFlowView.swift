@@ -436,7 +436,7 @@ private struct BPField: View {
                     if cleaned != newValue { value = cleaned }
                 }
                 .padding()
-                .background(Color(.systemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
+                .background(Color.tileFill, in: RoundedRectangle(cornerRadius: 16))
             Text(label)
                 .font(.caption.bold())
                 .foregroundStyle(.secondary)
