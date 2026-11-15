@@ -27,6 +27,8 @@ If you turn on iCloud sync in Settings, your check-in history and preferences ar
 
 When you tap **Send Report**, the app prepares an email draft in the standard iOS Mail sheet, addressed to your trusted contacts. When there is more than one, they are added as BCC, so they don't see each other's addresses. Nothing is sent unless **you** tap Send. The email is delivered by your own email account, exactly like any email you write yourself.
 
+The report includes the small Hottoshita logo, which the recipient's mail app loads from GitHub (where this policy is also published) when the email is opened. That request contains no information about you or your check-in; many mail apps, including Apple Mail and Gmail, load images through their own privacy proxies.
+
 ### Contacts
 
 If you use "Choose from Contacts", the app shows Apple's system contact picker. The app never gains access to your contact list — it only receives the contact you pick: for a trusted contact, their name, email address and, if they have one, a small copy of their photo (shown next to their name in the app); when filling in your own name during setup, only the name. These are stored on your device like anything you type in. No contacts permission is requested.
@@ -92,6 +94,8 @@ Questions? Email **sfrancam@icloud.com**.
 ### レポートの共有方法
 
 「レポートを送信」をタップすると、本アプリは iOS 標準のメール作成画面に、見守り連絡先宛のメール下書きを用意します。連絡先が複数の場合は、お互いのアドレスが見えないよう BCC で送信されます。**お客様ご自身が送信ボタンを押さない限り、何も送信されません。** メールはお客様ご自身のメールアカウントから、通常のメールと同じように送信されます。
+
+レポートには Hottoshita の小さなロゴが含まれており、受信者がメールを開いたときに、受信者のメールアプリが GitHub（本ポリシーの公開先）から読み込みます。この読み込みには、お客様やチェックインに関する情報は一切含まれません。Apple Mail や Gmail など多くのメールアプリは、独自のプライバシー保護の仕組みを通じて画像を読み込みます。
 
 ### 連絡先について
 

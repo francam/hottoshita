@@ -2262,13 +2262,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sent via Hottoshita"
+            "value" : "Sent via hottoshita"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hottoshitaより送信"
+            "value" : "hottoshitaより送信"
           }
         }
       }

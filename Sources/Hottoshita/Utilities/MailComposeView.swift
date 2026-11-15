@@ -22,7 +22,7 @@ struct MailComposeView: UIViewControllerRepresentable {
             vc.setToRecipients(recipients)
         }
         vc.setSubject(subject)
-        vc.setMessageBody(body, isHTML: false)
+        vc.setMessageBody(body, isHTML: true)
         return vc
     }
 
