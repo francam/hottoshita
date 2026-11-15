@@ -31,8 +31,8 @@ targets:
         CFBundleDisplayName: hottoshita
         # Version/build and export compliance live here, not in Info.plist:
         # `xcodegen generate` rewrites Info.plist from these properties.
-        CFBundleShortVersionString: "1.5"
-        CFBundleVersion: "10"
+        CFBundleShortVersionString: "1.2"
+        CFBundleVersion: "12"
         ITSAppUsesNonExemptEncryption: false
         CFBundleLocalizations:
           - en
