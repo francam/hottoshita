@@ -115,7 +115,7 @@ final class AppTheme: ObservableObject {
     }
 }
 
-private extension UIColor {
+extension UIColor {
     /// Linear blend towards `other` in RGB space; `amount` 0 = self, 1 = other.
     func mixed(with other: UIColor, amount: CGFloat) -> UIColor {
         var r1: CGFloat = 0, g1: CGFloat = 0, b1: CGFloat = 0, a1: CGFloat = 0

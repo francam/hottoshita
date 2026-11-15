@@ -1,31 +1,31 @@
 import SwiftUI
 
-// Liquid Glass on iOS 26+, the pre-26 look below it. The deployment target
-// stays at iOS 16, so every custom glass call goes through one of these —
-// one #available gate per style instead of branches spread across views.
-// System chrome (bars, sheets, alerts) gets glass on 26+ by itself.
+// The app's button and tile styles, in one place.
+//
+// Flat pastel inside screens (decided 2026-11-15), the same on every iOS
+// version: tinted capsules and filled primary buttons, as in 1.0.1, and as an
+// Android version would draw them with Material 3. Liquid Glass is left to
+// the system: bars, sheets, alerts and the toolbar buttons (Back, Cancel,
+// Save, Done), which have to stay toolbar items so the iPhone Duo can move
+// them into its side bar. The deployment target stays at iOS 16, so the
+// toolbar styles still branch on iOS 26.
 
 extension View {
-    /// The screen's one primary action: tinted prominent glass.
-    @ViewBuilder
+    /// The screen's one primary action: a filled capsule in the theme colour.
     func primaryActionStyle(accent: Color) -> some View {
-        if #available(iOS 26.0, *) {
-            buttonStyle(.glassProminent).tint(accent)
-        } else {
-            buttonStyle(.borderedProminent).tint(accent)
-        }
+        buttonStyle(.borderedProminent).tint(accent)
     }
 
-    /// Secondary actions. On glass the material stays untinted — tint is
-    /// reserved for the primary action — and the theme colour moves to the
-    /// label instead.
-    @ViewBuilder
+    /// Secondary actions: a capsule lightly tinted with the theme colour. The
+    /// label is a deeper tone of it in light mode and a brighter one in dark
+    /// mode, so it stays easy to read on the tint (≥ 4.5:1 in every theme;
+    /// the plain accent measured 3.8–4.0:1 in light mode and was dim in dark).
     func secondaryActionStyle(accent: Color) -> some View {
-        if #available(iOS 26.0, *) {
-            buttonStyle(.glass).foregroundStyle(accent)
-        } else {
-            buttonStyle(.bordered).tint(accent)
-        }
+        buttonStyle(.bordered)
+            .tint(accent)
+            // On the whole label, icon included: the bordered style alone
+            // left some icons (Add Contact's "+") in the system blue.
+            .foregroundStyle(accent.readableOnTint)
     }
 
     /// A toolbar button that isn't the confirming action (e.g. Cancel).
@@ -35,7 +35,7 @@ extension View {
     @ViewBuilder
     func toolbarSecondaryStyle(accent: Color) -> some View {
         if #available(iOS 26.0, *) {
-            foregroundStyle(accent)
+            foregroundStyle(accent.readableOnDark)
         } else {
             buttonStyle(.borderedProminent).tint(accent)
         }
@@ -46,44 +46,61 @@ extension View {
     @ViewBuilder
     func toolbarNavigationStyle(accent: Color) -> some View {
         if #available(iOS 26.0, *) {
-            foregroundStyle(accent)
+            foregroundStyle(accent.readableOnDark)
         } else {
-            buttonStyle(.bordered).tint(accent)
+            buttonStyle(.bordered).tint(accent).foregroundStyle(accent.readableOnTint)
         }
     }
 
-    /// Background for a tappable answer tile. Selected tiles are filled
-    /// with the accent; unselected ones get an accent outline so the tile's
-    /// edge clears 3:1 against the background (the glass rim and the old
-    /// grouped fill alone measured 1.1–1.7:1).
-    @ViewBuilder
+    /// Background for a tappable answer tile: filled with the accent when
+    /// selected, a soft grey otherwise, as in 1.0.1 — no outline. With
+    /// Increase Contrast on, unselected tiles get an accent outline, since
+    /// the grey alone is a faint edge (about 1.1:1 against the background).
     func answerTileBackground(selected: Bool, accent: Color, cornerRadius: CGFloat) -> some View {
-        let shape = RoundedRectangle(cornerRadius: cornerRadius)
-        if #available(iOS 26.0, *) {
-            // Outline before the glass: it becomes part of the glass's content,
-            // drawn on top of the material. Applied after, the glass rim
-            // covered most of it (measured ~0.7pt, 2.6:1).
-            overlay { shape.strokeBorder(accent, lineWidth: selected ? 0 : 2) }
-                .glassEffect(selected ? .regular.tint(accent).interactive() : .regular.interactive(), in: shape)
-        } else {
-            background(selected ? accent : Color(.systemGroupedBackground), in: shape)
-                .overlay { shape.strokeBorder(accent, lineWidth: selected ? 0 : 2) }
-        }
+        modifier(AnswerTileBackground(selected: selected, accent: accent, cornerRadius: cornerRadius))
     }
 }
 
-/// Groups nearby glass so it renders together (glass can't sample other
-/// glass). `spacing` 0 keeps shapes from blending across the layout gaps.
-/// A plain pass-through before iOS 26.
-struct GlassGroup<Content: View>: View {
-    @ViewBuilder var content: Content
+private struct AnswerTileBackground: ViewModifier {
+    let selected: Bool
+    let accent: Color
+    let cornerRadius: CGFloat
+    @Environment(\.colorSchemeContrast) private var contrast
 
-    var body: some View {
-        if #available(iOS 26.0, *) {
-            GlassEffectContainer(spacing: 0) { content }
-        } else {
-            content
-        }
+    func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: cornerRadius)
+        content
+            .background(selected ? accent : Color(.systemGroupedBackground), in: shape)
+            .overlay {
+                if !selected && contrast == .increased {
+                    shape.strokeBorder(accent, lineWidth: 2)
+                }
+            }
+    }
+}
+
+extension Color {
+    /// This colour as text on the toolbar's glass: unchanged in light mode,
+    /// 35% brighter in dark mode, where the theme colour read dim (Back,
+    /// Cancel).
+    var readableOnDark: Color {
+        let base = UIColor(self)
+        return Color(uiColor: UIColor { traits in
+            let resolved = base.resolvedColor(with: traits)
+            return traits.userInterfaceStyle == .dark ? resolved.mixed(with: .white, amount: 0.35) : resolved
+        })
+    }
+
+    /// This colour as text on a light tint of itself (secondary buttons):
+    /// 20% deeper in light mode, 35% brighter in dark mode.
+    var readableOnTint: Color {
+        let base = UIColor(self)
+        return Color(uiColor: UIColor { traits in
+            let resolved = base.resolvedColor(with: traits)
+            return traits.userInterfaceStyle == .dark
+                ? resolved.mixed(with: .white, amount: 0.35)
+                : resolved.mixed(with: .black, amount: 0.20)
+        })
     }
 }
 

@@ -184,7 +184,7 @@ private struct SingleChoiceStepView: View {
         AdaptiveStepLayout(spacing: 48) {
             StepHeader(icon: icon, question: question)
         } controls: {
-            GlassGroup {
+            Group {
                 VStack(spacing: isDense ? 12 : 18) {
                     ForEach(choices, id: \.self) { choice in
                         Button {
@@ -265,7 +265,7 @@ private struct MultiSelectStepView: View {
 
     private var optionsGrid: some View {
         FoldSplitReader { foldSplit in
-            GlassGroup {
+            Group {
                 LazyVGrid(columns: gridColumns(foldSplit: foldSplit), spacing: isDense ? 10 : 16) {
                     ForEach(options, id: \.self) { option in
                         Button {
@@ -328,7 +328,7 @@ private struct YesNoStepView: View {
         AdaptiveStepLayout(spacing: 48) {
             StepHeader(icon: icon, question: question)
         } controls: {
-            GlassGroup {
+            Group {
                 HStack(spacing: 16) {
                     yesNoButton(key: "Yes", answer: true)
                     yesNoButton(key: "No", answer: false)
