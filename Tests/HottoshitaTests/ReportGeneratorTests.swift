@@ -59,6 +59,56 @@ final class ReportGeneratorTests: XCTestCase {
         XCTAssertTrue(body.contains("Not specified"))
     }
 
+    func testBodyIsAnHTMLEmailWithTheLogo() {
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John")
+        XCTAssertTrue(body.hasPrefix("<!doctype html>"))
+        XCTAssertTrue(body.contains(ReportGenerator.logoURL))
+        // The header's name is text, so it shows even with images blocked.
+        XCTAssertTrue(body.contains(">hottoshita</td>"))
+    }
+
+    func testFooterLinksToTheAppStore() {
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John")
+        XCTAssertTrue(body.contains("href=\"\(ReportGenerator.appStoreURL)\""))
+        XCTAssertTrue(body.contains(ReportGenerator.escape(NSLocalizedString("report.footer", comment: ""))))
+    }
+
+    func testSeveralRecipientsGetAGenericGreeting() {
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: nil, userName: "John")
+        XCTAssertTrue(body.contains(ReportGenerator.escape(NSLocalizedString("report.greeting.everyone", comment: ""))))
+        XCTAssertFalse(body.contains("Sarah"))
+    }
+
+    func testNamesAreEscaped() {
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "<b>Tom</b> & Co", userName: "John")
+        XCTAssertTrue(body.contains("&lt;b&gt;Tom&lt;/b&gt; &amp; Co"))
+        XCTAssertFalse(body.contains("<b>Tom</b>"))
+    }
+
+    func testEscapeCoversQuotes() {
+        XCTAssertEqual(ReportGenerator.escape(#"O'Brien "Jr""#), "O&#39;Brien &quot;Jr&quot;")
+    }
+
+    func testEarlierUnsentCheckInsAreIncluded() {
+        var earlier = CheckInAnswers()
+        earlier.date = Date().addingTimeInterval(-86_400)
+        earlier.sleep = .barely
+        let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John",
+                                            previousUnsent: [earlier])
+        XCTAssertTrue(body.contains(NSLocalizedString("report.previous", comment: "")))
+        XCTAssertTrue(body.contains("Barely slept"))
+        // Condensed: a short date, the answers on one line.
+        XCTAssertTrue(body.contains(earlier.date.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())))
+    }
+
+    func testReadingNeverWraps() {
+        var answers = CheckInAnswers()
+        answers.tookBloodPressure = true
+        answers.bloodPressure = BloodPressure(systolic: "128", diastolic: "82")
+        let body = ReportGenerator.generate(answers: answers, contactName: "Sarah", userName: "John")
+        XCTAssertTrue(body.contains("white-space:nowrap\">128/82 mmHg"))
+    }
+
     func testBodyContainsAllSections() {
         let body = ReportGenerator.generate(answers: CheckInAnswers(), contactName: "Sarah", userName: "John")
         // All three data sections must be present

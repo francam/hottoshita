@@ -1,6 +1,6 @@
 # Hottoshita Privacy Policy / プライバシーポリシー
 
-**Effective date: July 14, 2026** · [English](#english) · [日本語](#日本語)
+**Effective date: November 14, 2026** · [English](#english) · [日本語](#日本語)
 
 ---
 
@@ -13,7 +13,7 @@ Hottoshita ("the app") is a daily wellness check-in app. This policy explains wh
 To work, the app keeps the following information **only on your device** (and in your own private iCloud account too, if you turn on iCloud sync):
 
 - Your name (used for the greeting and the email report)
-- Your trusted contact's name and email address
+- The names and email addresses of your trusted contacts (up to five)
 - Your daily check-in answers: sleep quality, how you're feeling, and — if you choose to enter it — your blood pressure
 - Your preferences: colour theme and daily reminder time
 
@@ -25,11 +25,13 @@ If you turn on iCloud sync in Settings, your check-in history and preferences ar
 
 ### How your check-in report is shared
 
-When you tap **Send Report**, the app prepares an email draft in the standard iOS Mail sheet, addressed to your trusted contact. Nothing is sent unless **you** tap Send. The email is delivered by your own email account, exactly like any email you write yourself.
+When you tap **Send Report**, the app prepares an email draft in the standard iOS Mail sheet, addressed to your trusted contacts. When there is more than one, they are added as BCC, so they don't see each other's addresses. Nothing is sent unless **you** tap Send. The email is delivered by your own email account, exactly like any email you write yourself.
+
+The report includes the small Hottoshita logo, which the recipient's mail app loads from GitHub (where this policy is also published) when the email is opened. That request contains no information about you or your check-in; many mail apps, including Apple Mail and Gmail, load images through their own privacy proxies.
 
 ### Contacts
 
-If you use "Choose from Contacts", the app shows Apple's system contact picker. The app never gains access to your contact list — it only receives the name and email address of the single contact you pick, and stores them on your device as your trusted contact. No contacts permission is requested.
+If you use "Choose from Contacts", the app shows Apple's system contact picker. The app never gains access to your contact list — it only receives the name and email address of the single contact you pick, and stores them on your device as one of your trusted contacts. No contacts permission is requested.
 
 ### Notifications
 
@@ -73,7 +75,7 @@ Questions? Email **sfrancam@icloud.com**.
 本アプリは、動作のために以下の情報を**お使いの端末内にのみ**保存します（iCloud 同期をオンにした場合は、お客様ご自身の iCloud アカウントにも保存されます）。
 
 - お名前（あいさつ表示とメールレポートに使用）
-- 見守り連絡先（信頼できる方）のお名前とメールアドレス
+- 見守り連絡先（信頼できる方、最大 5 名）のお名前とメールアドレス
 - 毎日のチェックインの回答：睡眠の質、今の気分、および入力を選択した場合の血圧
 - 設定内容：背景カラーテーマ、毎日のリマインダー時刻
 
@@ -85,11 +87,13 @@ Questions? Email **sfrancam@icloud.com**.
 
 ### レポートの共有方法
 
-「レポートを送信」をタップすると、本アプリは iOS 標準のメール作成画面に、見守り連絡先宛のメール下書きを用意します。**お客様ご自身が送信ボタンを押さない限り、何も送信されません。** メールはお客様ご自身のメールアカウントから、通常のメールと同じように送信されます。
+「レポートを送信」をタップすると、本アプリは iOS 標準のメール作成画面に、見守り連絡先宛のメール下書きを用意します。連絡先が複数の場合は、お互いのアドレスが見えないよう BCC で送信されます。**お客様ご自身が送信ボタンを押さない限り、何も送信されません。** メールはお客様ご自身のメールアカウントから、通常のメールと同じように送信されます。
+
+レポートには Hottoshita の小さなロゴが含まれており、受信者がメールを開いたときに、受信者のメールアプリが GitHub（本ポリシーの公開先）から読み込みます。この読み込みには、お客様やチェックインに関する情報は一切含まれません。Apple Mail や Gmail など多くのメールアプリは、独自のプライバシー保護の仕組みを通じて画像を読み込みます。
 
 ### 連絡先について
 
-「連絡先から選ぶ」を使う場合、Apple のシステム標準の連絡先ピッカーが表示されます。本アプリが連絡先リストにアクセスすることはなく、お客様が選んだ 1 件の連絡先の名前とメールアドレスのみを受け取り、見守り連絡先として端末内に保存します。連絡先へのアクセス許可を求めることもありません。
+「連絡先から選ぶ」を使う場合、Apple のシステム標準の連絡先ピッカーが表示されます。本アプリが連絡先リストにアクセスすることはなく、お客様が選んだ 1 件の連絡先の名前とメールアドレスのみを受け取り、見守り連絡先の一人として端末内に保存します。連絡先へのアクセス許可を求めることもありません。
 
 ### 通知について
 

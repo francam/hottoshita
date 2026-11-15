@@ -96,4 +96,64 @@ final class HomeUITests: XCTestCase {
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
     }
+
+    private func typeContactInSettings(name: String, email: String) {
+        let add = app.buttons["Add Contact"]
+        var swipes = 0
+        while !(add.exists && add.isHittable) && swipes < 6 { app.swipeUp(); swipes += 1 }
+        add.tap()
+        XCTAssertTrue(app.buttons["Type a Contact"].waitForExistence(timeout: 3))
+        app.buttons["Type a Contact"].tap()
+        XCTAssertTrue(app.textFields["addContact.name"].waitForExistence(timeout: 3))
+        app.textFields["addContact.name"].tap()
+        app.textFields["addContact.name"].typeText(name)
+        app.textFields["addContact.email"].tap()
+        app.textFields["addContact.email"].typeText(email)
+        app.buttons["Add"].tap()
+        XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 3))
+    }
+
+    func testSeveralContactsAreSavedAndShownOnTheSummary() {
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        typeContactInSettings(name: "Tom", email: "tom@example.com")
+        app.buttons["Save"].tap()
+
+        // Reopening shows both, so the list was saved.
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Test Contact"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["Tom"].exists)
+        app.buttons["Cancel"].tap()
+
+        app.buttons["Start Today's Check-in"].tap()
+        app.buttons["Slept OK"].tap()
+        XCTAssertTrue(app.buttons["Good"].waitForExistence(timeout: 3))
+        app.buttons["Good"].tap()
+        app.buttons["Continue"].tap()
+        XCTAssertTrue(app.buttons["No"].waitForExistence(timeout: 3))
+        app.buttons["No"].tap()
+        XCTAssertTrue(app.staticTexts["Will be sent to: Test Contact, Tom"].waitForExistence(timeout: 3))
+    }
+
+    func testAddingContactsStopsAtFive() {
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        // Test Contact is already there: four more makes five.
+        for n in 1...4 { typeContactInSettings(name: "Person \(n)", email: "p\(n)@example.com") }
+        XCTAssertFalse(app.buttons["Add Contact"].exists)
+    }
+
+    func testRemovingTheFirstContactPromotesTheNext() {
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.navigationBars["Settings"].waitForExistence(timeout: 3))
+        // With one contact there's no remove button: Save needs at least one.
+        XCTAssertFalse(app.buttons["Remove Test Contact"].exists)
+        typeContactInSettings(name: "Tom", email: "tom@example.com")
+        app.buttons["Remove Test Contact"].tap()
+        app.buttons["Save"].tap()
+
+        app.buttons["Settings"].tap()
+        XCTAssertTrue(app.staticTexts["Tom"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.staticTexts["Test Contact"].exists)
+    }
 }
